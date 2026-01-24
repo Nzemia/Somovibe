@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import ApprovalActions from "@/app/(dashboard)/admin/approvals/ApprovalActions";
+import { AdminNav } from "@/components/AdminNav";
 
 export default async function AdminApprovalsPage() {
     const user = await getCurrentUser();
@@ -24,6 +25,7 @@ export default async function AdminApprovalsPage() {
 
     return (
         <div className="min-h-screen bg-background">
+            <AdminNav />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-foreground mb-2">Pending Approvals</h1>
