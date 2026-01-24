@@ -1,20 +1,44 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
-import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from "react";
+import PdfCard from "@/app/marketplace/PdfCard";
 
 export default async function Marketplace() {
     const user = await getCurrentUser();
+
     const pdfs = await prisma.pdf.findMany({
         where: { status: "APPROVED" },
+        include: {
+            teacher: {
+                select: {
+                    email: true,
+                },
+            },
+        },
+        orderBy: { createdAt: "desc" },
     });
+
+    // Get user's purchases if logged in
+    const userPurchases = user
+        ? await prisma.purchase.findMany({
+            where: { userId: user.id },
+            select: { pdfId: true },
+        })
+        : [];
+
+    const purchasedPdfIds = new Set(userPurchases.map((p) => p.pdfId));
 
     return (
         <>
             <Navbar user={user ? { email: user.email, role: user.role } : null} />
             <div className="min-h-screen bg-background">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <h1 className="text-3xl font-bold text-foreground mb-8">Marketplace</h1>
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-foreground mb-2">Marketplace</h1>
+                        <p className="text-muted-foreground">
+                            Quality CBC learning materials from verified teachers
+                        </p>
+                    </div>
 
                     {pdfs.length === 0 ? (
                         <div className="text-center py-16">
@@ -26,17 +50,13 @@ export default async function Marketplace() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {pdfs.map((pdf: { id: Key | null | undefined; title: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; subject: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; grade: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; price: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; }) => (
-                                <div key={pdf.id} className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow">
-                                    <h3 className="text-xl font-bold text-foreground mb-2">{pdf.title}</h3>
-                                    <p className="text-muted-foreground mb-4">{pdf.subject} - Grade {pdf.grade}</p>
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-2xl font-bold text-primary">KES {pdf.price}</p>
-                                        <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity">
-                                            Buy Now
-                                        </button>
-                                    </div>
-                                </div>
+                            {pdfs.map((pdf) => (
+                                <PdfCard
+                                    key={pdf.id}
+                                    pdf={pdf}
+                                    isPurchased={purchasedPdfIds.has(pdf.id)}
+                                    user={user}
+                                />
                             ))}
                         </div>
                     )}

@@ -1,35 +1,52 @@
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/apiAuth";
 
 export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const pdfId = searchParams.get("pdfId");
+    try {
+        const user = await requireAuth();
+        const { searchParams } = new URL(req.url);
+        const pdfId = searchParams.get("pdfId");
 
-    const supabase = await createSupabaseServer();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+        if (!pdfId) {
+            return NextResponse.json({ error: "PDF ID required" }, { status: 400 });
+        }
 
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const purchase = await prisma.purchase.findUnique({
-        where: {
-            userId_pdfId: {
-                userId: user.id,
-                pdfId: pdfId!,
+        // Check if user has purchased this PDF
+        const purchase = await prisma.purchase.findUnique({
+            where: {
+                userId_pdfId: { userId: user.id, pdfId },
             },
-        },
-    });
+            include: {
+                pdf: true,
+            },
+        });
 
-    if (!purchase)
-        return NextResponse.json({ error: "Not purchased" }, { status: 403 });
+        if (!purchase) {
+            return NextResponse.json({ error: "You haven't purchased this material" }, { status: 403 });
+        }
 
-    const pdf = await prisma.pdf.findUnique({ where: { id: pdfId! } });
+        // Get file from Supabase Storage
+        const supabase = await createSupabaseServer();
+        const { data, error } = await supabase.storage
+            .from("pdfs")
+            .download(purchase.pdf.fileUrl);
 
-    const { data } = await supabase.storage
-        .from("pdfs")
-        .createSignedUrl(pdf!.fileUrl, 60);
+        if (error || !data) {
+            console.error("Download error:", error);
+            return NextResponse.json({ error: "Failed to download file" }, { status: 500 });
+        }
 
-    return NextResponse.json({ url: data?.signedUrl });
+        // Return the PDF file
+        return new NextResponse(data, {
+            headers: {
+                "Content-Type": "application/pdf",
+                "Content-Disposition": `attachment; filename="${purchase.pdf.title}.pdf"`,
+            },
+        });
+    } catch (error: any) {
+        console.error("Download error:", error);
+        return NextResponse.json({ error: "Failed to download" }, { status: 500 });
+    }
 }

@@ -3,6 +3,8 @@ import axios from "axios";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
+import { creditWallet } from "@/lib/wallet";
+import { getPlatformAdminId } from "@/lib/platformAdmin";
 
 export async function POST(req: Request) {
     const { phone, pdfId, userId } = await req.json();
@@ -48,6 +50,46 @@ export async function POST(req: Request) {
         },
     });
 
+    // DEV MODE: Auto-complete purchase
+    if (process.env.DEV_MODE === "true") {
+        // Calculate shares
+        const teacherShare = Math.floor(pdf.price * 0.75);
+        const platformShare = pdf.price - teacherShare;
+
+        // Create purchase record
+        await prisma.purchase.create({
+            data: {
+                userId,
+                pdfId,
+            },
+        });
+
+        // Credit teacher wallet
+        await creditWallet(pdf.teacherId, teacherShare);
+
+        // Credit platform admin wallet
+        const platformAdminId = await getPlatformAdminId();
+        if (platformAdminId) {
+            await creditWallet(platformAdminId, platformShare);
+        }
+
+        // Update payment status
+        await prisma.pendingPayment.updateMany({
+            where: { referenceCode },
+            data: {
+                status: "COMPLETED",
+                completedAt: new Date(),
+            },
+        });
+
+        return NextResponse.json({
+            message: "DEV MODE: Purchase completed",
+            devMode: true,
+            referenceCode
+        });
+    }
+
+    // PRODUCTION: Real M-Pesa
     const token = await getMpesaToken();
 
     const timestamp = new Date()
