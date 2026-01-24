@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { createSupabaseServer } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
 
@@ -16,6 +15,8 @@ export async function POST(req: Request) {
         const grade = formData.get("grade") as string;
         const price = Number(formData.get("price"));
 
+        console.log("Upload request from user:", user.email, { title, subject, grade, price });
+
         if (!file || !title || !description || !subject || !grade || !price) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
@@ -24,16 +25,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Only PDFs allowed" }, { status: 400 });
         }
 
-        const supabase = await createSupabaseServer();
-        const filePath = `${user.id}/${Date.now()}.pdf`;
-
-        const { error } = await supabase.storage
-            .from("pdfs")
-            .upload(filePath, file);
-
-        if (error) {
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
+        // For now, store placeholder URL (we'll add real storage later)
+        const fileUrl = `placeholder-${user.id}-${Date.now()}.pdf`;
 
         const pdf = await prisma.pdf.create({
             data: {
@@ -42,13 +35,16 @@ export async function POST(req: Request) {
                 subject,
                 grade,
                 price,
-                fileUrl: filePath,
+                fileUrl,
                 teacherId: user.id,
             },
         });
 
+        console.log("PDF created successfully:", pdf.id);
+
         return NextResponse.json(pdf);
-    } catch (error) {
+    } catch (error: any) {
+        console.error("Upload error:", error.message || error);
         return handleAuthError(error);
     }
 }

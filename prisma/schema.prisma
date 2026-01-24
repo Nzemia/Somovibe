@@ -23,10 +23,11 @@ model User {
   role      Role     @default(STUDENT)
   createdAt DateTime @default(now())
 
-  teacherProfile TeacherProfile?
-  pdfs           Pdf[]
-  wallets        Wallet[]
-  purchases      Purchase[]
+  teacherProfile  TeacherProfile?
+  pdfs            Pdf[]
+  wallets         Wallet[]
+  purchases       Purchase[]
+  pendingPayments PendingPayment[]
 }
 
 model TeacherProfile {
@@ -34,6 +35,32 @@ model TeacherProfile {
   userId    String   @unique
   isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum PaymentType {
+  TEACHER_VERIFICATION
+  PDF_PURCHASE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model PendingPayment {
+  id            String        @id @default(uuid())
+  userId        String
+  phone         String
+  amount        Int
+  type          PaymentType
+  status        PaymentStatus @default(PENDING)
+  referenceCode String        @unique
+  metadata      String?       // JSON string for additional data like pdfId
+  createdAt     DateTime      @default(now())
+  completedAt   DateTime?
 
   user User @relation(fields: [userId], references: [id])
 }

@@ -4,25 +4,58 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     const payload = await req.json();
 
-    const result =
-        payload.Body.stkCallback.CallbackMetadata?.Item || [];
+    console.log("Teacher payment callback:", JSON.stringify(payload, null, 2));
 
-    const amount = result.find((i: any) => i.Name === "Amount")?.Value;
-    const phone = result.find((i: any) => i.Name === "PhoneNumber")?.Value;
+    const stkCallback = payload.Body?.stkCallback;
 
-    if (amount === 100) {
-        // Activate latest unpaid teacher (simple MVP logic)
-        const teacher = await prisma.teacherProfile.findFirst({
-            where: { isActive: false },
-            orderBy: { createdAt: "desc" },
-        });
+    if (!stkCallback) {
+        return NextResponse.json({ ok: false });
+    }
 
-        if (teacher) {
+    const resultCode = stkCallback.ResultCode;
+    const referenceCode = stkCallback.AccountReference;
+
+    // Find pending payment
+    const payment = await prisma.pendingPayment.findUnique({
+        where: { referenceCode },
+    });
+
+    if (!payment) {
+        console.error("Payment not found for reference:", referenceCode);
+        return NextResponse.json({ ok: false });
+    }
+
+    // Payment successful
+    if (resultCode === 0) {
+        const meta = stkCallback.CallbackMetadata?.Item || [];
+        const amount = meta.find((i: any) => i.Name === "Amount")?.Value;
+
+        if (amount === payment.amount) {
+            // Update payment status
+            await prisma.pendingPayment.update({
+                where: { id: payment.id },
+                data: {
+                    status: "COMPLETED",
+                    completedAt: new Date(),
+                },
+            });
+
+            // Activate teacher profile
             await prisma.teacherProfile.update({
-                where: { id: teacher.id },
+                where: { userId: payment.userId },
                 data: { isActive: true },
             });
+
+            console.log("Teacher activated:", payment.userId);
         }
+    } else {
+        // Payment failed
+        await prisma.pendingPayment.update({
+            where: { id: payment.id },
+            data: { status: "FAILED" },
+        });
+
+        console.log("Payment failed for:", referenceCode);
     }
 
     return NextResponse.json({ ok: true });
