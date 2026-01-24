@@ -8,12 +8,7 @@ export default {
     ],
     darkMode: "class",
     theme: {
-        extend: {
-            colors: {
-                background: "var(--background)",
-                foreground: "var(--foreground)",
-            },
-        },
+        extend: {},
     },
     plugins: [],
 } satisfies Config;

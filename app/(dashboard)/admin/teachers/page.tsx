@@ -17,7 +17,7 @@ export default async function ManageTeachersPage() {
     const user = await getCurrentUser();
 
     if (!user || user.role !== "ADMIN") {
-        redirect("/");
+        redirect("/admin/unauthorized");
     }
 
     const teachers = await prisma.user.findMany({

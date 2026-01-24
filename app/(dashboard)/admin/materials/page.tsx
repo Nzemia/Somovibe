@@ -23,7 +23,7 @@ export default async function AllMaterialsPage({
     const user = await getCurrentUser();
 
     if (!user || user.role !== "ADMIN") {
-        redirect("/");
+        redirect("/admin/unauthorized");
     }
 
     const statusFilter = params.status;

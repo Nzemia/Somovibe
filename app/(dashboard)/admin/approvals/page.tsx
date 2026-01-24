@@ -8,7 +8,7 @@ export default async function AdminApprovalsPage() {
     const user = await getCurrentUser();
 
     if (!user || user.role !== "ADMIN") {
-        redirect("/");
+        redirect("/admin/unauthorized");
     }
 
     const pendingPdfs = await prisma.pdf.findMany({

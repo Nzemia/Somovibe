@@ -8,7 +8,7 @@ export default async function AdminDashboard() {
     const user = await getCurrentUser();
 
     if (!user || user.role !== "ADMIN") {
-        redirect("/");
+        redirect("/admin/unauthorized");
     }
 
     // Get stats
