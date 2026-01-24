@@ -32,7 +32,15 @@ export async function POST(req: Request) {
     });
 
     await creditWallet(pdf.teacherId, teacherShare);
-    await creditWallet("PLATFORM_ADMIN_ID", platformShare);
+
+    // Credit platform admin wallet
+    const platformAdmin = await prisma.user.findUnique({
+        where: { email: process.env.PLATFORM_ADMIN_ID! },
+    });
+
+    if (platformAdmin) {
+        await creditWallet(platformAdmin.id, platformShare);
+    }
 
     return NextResponse.json({ ok: true });
 }

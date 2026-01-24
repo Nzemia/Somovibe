@@ -1,2 +1,47 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: rgb(255 255 255);
+  --color-foreground: rgb(15 23 42);
+  --color-card: rgb(255 255 255);
+  --color-card-foreground: rgb(15 23 42);
+  --color-primary: rgb(59 130 246);
+  --color-primary-foreground: rgb(255 255 255);
+  --color-secondary: rgb(241 245 249);
+  --color-secondary-foreground: rgb(15 23 42);
+  --color-muted: rgb(241 245 249);
+  --color-muted-foreground: rgb(100 116 139);
+  --color-accent: rgb(241 245 249);
+  --color-accent-foreground: rgb(15 23 42);
+  --color-destructive: rgb(239 68 68);
+  --color-destructive-foreground: rgb(255 255 255);
+  --color-border: rgb(226 232 240);
+  --color-input: rgb(226 232 240);
+  --color-ring: rgb(59 130 246);
+}
+
+.dark {
+  --color-background: rgb(15 23 42);
+  --color-foreground: rgb(241 245 249);
+  --color-card: rgb(30 41 59);
+  --color-card-foreground: rgb(241 245 249);
+  --color-primary: rgb(59 130 246);
+  --color-primary-foreground: rgb(255 255 255);
+  --color-secondary: rgb(51 65 85);
+  --color-secondary-foreground: rgb(241 245 249);
+  --color-muted: rgb(51 65 85);
+  --color-muted-foreground: rgb(148 163 184);
+  --color-accent: rgb(51 65 85);
+  --color-accent-foreground: rgb(241 245 249);
+  --color-destructive: rgb(239 68 68);
+  --color-destructive-foreground: rgb(255 255 255);
+  --color-border: rgb(51 65 85);
+  --color-input: rgb(51 65 85);
+  --color-ring: rgb(59 130 246);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
