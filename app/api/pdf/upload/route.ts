@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
 
@@ -25,9 +26,29 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Only PDFs allowed" }, { status: 400 });
         }
 
-        // For now, store placeholder URL (we'll add real storage later)
-        const fileUrl = `placeholder-${user.id}-${Date.now()}.pdf`;
+        // Upload to Supabase Storage
+        const supabase = await createSupabaseServer();
+        const filePath = `${user.id}/${Date.now()}-${file.name}`;
 
+        // Convert File to ArrayBuffer for Supabase
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        const { error: uploadError } = await supabase.storage
+            .from("pdfs")
+            .upload(filePath, buffer, {
+                contentType: "application/pdf",
+                upsert: false,
+            });
+
+        if (uploadError) {
+            console.error("Supabase upload error:", uploadError);
+            return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+        }
+
+        console.log("File uploaded to Supabase:", filePath);
+
+        // Create PDF record in database
         const pdf = await prisma.pdf.create({
             data: {
                 title,
@@ -35,7 +56,7 @@ export async function POST(req: Request) {
                 subject,
                 grade,
                 price,
-                fileUrl,
+                fileUrl: filePath,
                 teacherId: user.id,
             },
         });

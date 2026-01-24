@@ -1,13 +1,31 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireRole, handleAuthError } from "@/lib/apiAuth";
 
 export async function POST(req: Request) {
-    const { pdfId, status } = await req.json();
+    try {
+        // Only admins can approve/reject PDFs
+        await requireRole("ADMIN");
 
-    await prisma.pdf.update({
-        where: { id: pdfId },
-        data: { status },
-    });
+        const { pdfId, status } = await req.json();
 
-    return NextResponse.json({ ok: true });
+        if (!pdfId || !status) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        if (status !== "APPROVED" && status !== "REJECTED") {
+            return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+        }
+
+        await prisma.pdf.update({
+            where: { id: pdfId },
+            data: { status },
+        });
+
+        console.log(`PDF ${pdfId} ${status.toLowerCase()} by admin`);
+
+        return NextResponse.json({ ok: true, status });
+    } catch (error) {
+        return handleAuthError(error);
+    }
 }
