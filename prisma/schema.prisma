@@ -19,10 +19,14 @@ enum Role {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
+  phone     String?  @unique
   role      Role     @default(STUDENT)
   createdAt DateTime @default(now())
 
   teacherProfile TeacherProfile?
+  pdfs           Pdf[]
+  wallets        Wallet[]
+  purchases      Purchase[]
 }
 
 model TeacherProfile {
@@ -32,4 +36,60 @@ model TeacherProfile {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+enum PdfStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Pdf {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  subject     String
+  grade       String
+  price       Int
+  fileUrl     String
+  status      PdfStatus  @default(PENDING)
+  teacherId   String
+  createdAt   DateTime   @default(now())
+
+  teacher User @relation(fields: [teacherId], references: [id])
+
+  purchases Purchase[]
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  walletTransactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id        String   @id @default(uuid())
+  walletId  String
+  amount    Int
+  type      String   // credit | debit
+  createdAt DateTime @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+}
+
+model Purchase {
+  id        String   @id @default(uuid())
+  userId    String
+  pdfId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  pdf  Pdf  @relation(fields: [pdfId], references: [id])
+
+  @@unique([userId, pdfId])
 }
