@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { createSupabaseServer } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
     try {
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         const grade = formData.get("grade") as string;
         const price = Number(formData.get("price"));
 
-        console.log("Upload request from user:", user.email, { title, subject, grade, price });
+        console.log("Upload request from user:", user.email, { title, subject, grade, price, fileName: file?.name });
 
         if (!file || !title || !description || !subject || !grade || !price) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -26,15 +26,27 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Only PDFs allowed" }, { status: 400 });
         }
 
-        // Upload to Supabase Storage
-        const supabase = await createSupabaseServer();
-        const filePath = `${user.id}/${Date.now()}-${file.name}`;
+        // Use service role key for upload permissions
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false,
+                },
+            }
+        );
+
+        const filePath = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
 
         // Convert File to ArrayBuffer for Supabase
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        const { error: uploadError } = await supabase.storage
+        console.log("Attempting upload to Supabase:", { filePath, size: buffer.length });
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
             .from("pdfs")
             .upload(filePath, buffer, {
                 contentType: "application/pdf",
@@ -43,10 +55,12 @@ export async function POST(req: Request) {
 
         if (uploadError) {
             console.error("Supabase upload error:", uploadError);
-            return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+            return NextResponse.json({
+                error: `Failed to upload file: ${uploadError.message}`
+            }, { status: 500 });
         }
 
-        console.log("File uploaded to Supabase:", filePath);
+        console.log("File uploaded to Supabase successfully:", uploadData);
 
         // Create PDF record in database
         const pdf = await prisma.pdf.create({

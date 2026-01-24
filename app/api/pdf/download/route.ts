@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { createSupabaseServer } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/apiAuth";
+import { createClient } from "@supabase/supabase-js";
 
 export async function GET(req: Request) {
     try {
@@ -27,16 +27,39 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "You haven't purchased this material" }, { status: 403 });
         }
 
-        // Get file from Supabase Storage
-        const supabase = await createSupabaseServer();
+        // Check if it's a placeholder file
+        if (purchase.pdf.fileUrl.startsWith("placeholder-")) {
+            return NextResponse.json({
+                error: "This material is not available for download yet. The teacher needs to re-upload the file."
+            }, { status: 404 });
+        }
+
+        // Use service role key for download (same as upload)
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false,
+                },
+            }
+        );
+
+        console.log("Downloading file:", purchase.pdf.fileUrl);
+
         const { data, error } = await supabase.storage
             .from("pdfs")
             .download(purchase.pdf.fileUrl);
 
         if (error || !data) {
             console.error("Download error:", error);
-            return NextResponse.json({ error: "Failed to download file" }, { status: 500 });
+            return NextResponse.json({
+                error: "Failed to download file. Please contact support."
+            }, { status: 500 });
         }
+
+        console.log("File downloaded successfully, size:", data.size);
 
         // Return the PDF file
         return new NextResponse(data, {
