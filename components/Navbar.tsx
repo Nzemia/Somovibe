@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTheme } from "./ThemeProvider";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 export function Navbar({ user }: { user: { email: string; role: string } | null }) {
   const { theme, toggleTheme } = useTheme();
@@ -16,7 +17,16 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
   const handleSignOut = async () => {
     setSigningOut(true);
     try {
-      await fetch("/api/auth/signout", { method: "POST" });
+      // Sign out from Supabase client-side
+      await supabase.auth.signOut();
+
+      // Also call server-side signout to clear cookies
+      await fetch("/api/auth/signout", {
+        method: "POST",
+        credentials: "include"
+      });
+
+      // Redirect to login
       router.push("/login");
       router.refresh();
     } catch (error) {
@@ -33,54 +43,50 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
             <Link href="/" className="text-2xl font-bold text-primary">
               Questy
             </Link>
-            
+
             {user && (
               <div className="hidden md:flex space-x-4">
                 <Link
                   href="/marketplace"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive("/marketplace")
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/marketplace")
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  }`}
+                    }`}
                 >
                   Marketplace
                 </Link>
-                
+
                 {user.role === "ADMIN" && (
                   <Link
                     href="/admin"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      pathname.startsWith("/admin")
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname.startsWith("/admin")
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    }`}
+                      }`}
                   >
                     Admin
                   </Link>
                 )}
-                
+
                 {user.role === "TEACHER" && (
                   <Link
                     href="/teacher"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      pathname.startsWith("/teacher")
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname.startsWith("/teacher")
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    }`}
+                      }`}
                   >
                     Dashboard
                   </Link>
                 )}
-                
+
                 {user.role === "STUDENT" && (
                   <Link
                     href="/student"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      pathname.startsWith("/student")
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname.startsWith("/student")
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    }`}
+                      }`}
                   >
                     Dashboard
                   </Link>

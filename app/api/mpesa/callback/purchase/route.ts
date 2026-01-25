@@ -4,35 +4,79 @@ import { NextResponse } from "next/server";
 import { getPlatformAdminId } from "@/lib/platformAdmin";
 
 export async function POST(req: Request) {
-    const payload = await req.json();
+    try {
+        const payload = await req.json();
 
-    console.log("Purchase callback:", JSON.stringify(payload, null, 2));
+        console.log("Purchase callback:", JSON.stringify(payload, null, 2));
 
-    const stkCallback = payload.Body?.stkCallback;
+        const stkCallback = payload.Body?.stkCallback;
 
-    if (!stkCallback) {
-        return NextResponse.json({ ok: false });
-    }
+        if (!stkCallback) {
+            console.error("No stkCallback in payload");
+            return NextResponse.json({ ok: false });
+        }
 
-    const resultCode = stkCallback.ResultCode;
-    const referenceCode = stkCallback.AccountReference;
+        const resultCode = stkCallback.ResultCode;
 
-    // Find pending payment
-    const payment = await prisma.pendingPayment.findUnique({
-        where: { referenceCode },
-    });
+        // Try multiple possible locations for reference code
+        let referenceCode = stkCallback.AccountReference;
 
-    if (!payment) {
-        console.error("Payment not found for reference:", referenceCode);
-        return NextResponse.json({ ok: false });
-    }
+        // If not in AccountReference, try CallbackMetadata
+        if (!referenceCode) {
+            const meta = stkCallback.CallbackMetadata?.Item || [];
+            const accountRef = meta.find((i: any) => i.Name === "AccountReference");
+            referenceCode = accountRef?.Value;
+        }
 
-    // Payment successful
-    if (resultCode === 0) {
-        const meta = stkCallback.CallbackMetadata?.Item || [];
-        const amount = meta.find((i: any) => i.Name === "Amount")?.Value;
+        console.log("Extracted reference code:", referenceCode);
 
-        if (amount === payment.amount) {
+        if (!referenceCode) {
+            console.error("No reference code found in callback");
+            // Try to find by phone number as fallback
+            const meta = stkCallback.CallbackMetadata?.Item || [];
+            const phoneItem = meta.find((i: any) => i.Name === "PhoneNumber");
+            const phone = phoneItem?.Value?.toString();
+
+            if (phone) {
+                console.log("Trying to find payment by phone:", phone);
+                const payment = await prisma.pendingPayment.findFirst({
+                    where: {
+                        phone: phone.startsWith('254') ? phone : `254${phone}`,
+                        status: "PENDING",
+                        type: "PDF_PURCHASE",
+                    },
+                    orderBy: { createdAt: "desc" },
+                });
+
+                if (payment) {
+                    console.log("Found payment by phone:", payment.referenceCode);
+                    referenceCode = payment.referenceCode;
+                } else {
+                    console.error("No pending payment found for phone:", phone);
+                    return NextResponse.json({ ok: false });
+                }
+            } else {
+                return NextResponse.json({ ok: false });
+            }
+        }
+
+        // Find pending payment
+        const payment = await prisma.pendingPayment.findUnique({
+            where: { referenceCode },
+        });
+
+        if (!payment) {
+            console.error("Payment not found for reference:", referenceCode);
+            return NextResponse.json({ ok: false });
+        }
+
+        // Payment successful
+        if (resultCode === 0) {
+            const meta = stkCallback.CallbackMetadata?.Item || [];
+            const amount = meta.find((i: any) => i.Name === "Amount")?.Value;
+
+            console.log("Payment successful. Amount:", amount, "Expected:", payment.amount);
+
             const metadata = JSON.parse(payment.metadata || "{}");
             const pdfId = metadata.pdfId;
 
@@ -48,9 +92,12 @@ export async function POST(req: Request) {
                 return NextResponse.json({ ok: false });
             }
 
-            // Calculate shares
-            const teacherShare = Math.floor(amount * 0.75);
-            const platformShare = amount - teacherShare;
+            // Use the actual amount paid (from callback) or expected amount
+            const actualAmount = amount || payment.amount;
+
+            // Calculate shares based on actual amount
+            const teacherShare = Math.floor(actualAmount * 0.75);
+            const platformShare = actualAmount - teacherShare;
 
             // Create purchase record
             await prisma.purchase.create({
@@ -78,22 +125,26 @@ export async function POST(req: Request) {
                 },
             });
 
-            console.log("Purchase completed:", {
+            console.log("✅ Purchase completed:", {
                 userId: payment.userId,
                 pdfId,
+                actualAmount,
                 teacherShare,
                 platformShare,
             });
+        } else {
+            // Payment failed
+            await prisma.pendingPayment.update({
+                where: { id: payment.id },
+                data: { status: "FAILED" },
+            });
+
+            console.log("❌ Payment failed for:", referenceCode, "Result code:", resultCode);
         }
-    } else {
-        // Payment failed
-        await prisma.pendingPayment.update({
-            where: { id: payment.id },
-            data: { status: "FAILED" },
-        });
 
-        console.log("Payment failed for:", referenceCode);
+        return NextResponse.json({ ok: true });
+    } catch (error: any) {
+        console.error("❌ Purchase callback error:", error);
+        return NextResponse.json({ ok: false, error: error.message });
     }
-
-    return NextResponse.json({ ok: true });
 }
