@@ -37,7 +37,7 @@ export default function LoginPage() {
     return (
         <Card className="w-full max-w-md">
             <CardHeader className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mx-auto">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-primary to-primary/80 rounded-2xl mx-auto">
                     <svg
                         className="w-8 h-8 text-primary-foreground"
                         fill="none"
