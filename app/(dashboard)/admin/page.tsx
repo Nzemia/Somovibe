@@ -12,7 +12,17 @@ export default async function AdminDashboard() {
     }
 
     // Get stats
-    const [totalTeachers, activeTeachers, totalPdfs, pendingPdfs, totalStudents, platformWallet] = await Promise.all([
+    const [
+        totalTeachers,
+        activeTeachers,
+        totalPdfs,
+        pendingPdfs,
+        totalStudents,
+        platformWallet,
+        totalPurchases,
+        totalSalesRevenue,
+        teacherVerifications
+    ] = await Promise.all([
         prisma.teacherProfile.count(),
         prisma.teacherProfile.count({ where: { isActive: true } }),
         prisma.pdf.count(),
@@ -22,7 +32,32 @@ export default async function AdminDashboard() {
             where: { userId: user.id },
             select: { balance: true }
         }),
+        prisma.purchase.count(),
+        // Calculate total revenue from all purchases
+        prisma.purchase.findMany({
+            include: {
+                pdf: {
+                    select: { price: true }
+                }
+            }
+        }),
+        // Count completed teacher verifications
+        prisma.pendingPayment.count({
+            where: {
+                type: "TEACHER_VERIFICATION",
+                status: "COMPLETED"
+            }
+        })
     ]);
+
+    // Calculate total sales revenue
+    const totalRevenue = totalSalesRevenue.reduce((sum, purchase) => sum + purchase.pdf.price, 0);
+
+    // Calculate expected platform earnings (25% of sales + teacher verifications)
+    const expectedPlatformEarnings = Math.floor(totalRevenue * 0.25) + (teacherVerifications * 100);
+
+    // Calculate teacher earnings (75% of sales)
+    const totalTeacherEarnings = Math.floor(totalRevenue * 0.75);
 
     return (
         <div className="min-h-screen bg-background">
@@ -83,13 +118,51 @@ export default async function AdminDashboard() {
 
                     <div className="bg-card border border-border rounded-lg p-6">
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-muted-foreground text-sm font-medium">Platform Earnings</h3>
+                            <h3 className="text-muted-foreground text-sm font-medium">Platform Wallet</h3>
                             <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                         <p className="text-3xl font-bold text-primary">KES {platformWallet?.balance || 0}</p>
-                        <p className="text-xs text-muted-foreground mt-1">25% commission</p>
+                        <p className="text-xs text-muted-foreground mt-1">Current balance</p>
+                    </div>
+                </div>
+
+                {/* Revenue Breakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-card border border-border rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-muted-foreground text-sm font-medium">Total Sales</h3>
+                            <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                        </div>
+                        <p className="text-2xl font-bold text-foreground">KES {totalRevenue.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{totalPurchases} purchases</p>
+                    </div>
+
+                    <div className="bg-card border border-border rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-muted-foreground text-sm font-medium">Platform Earnings (25%)</h3>
+                            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <p className="text-2xl font-bold text-primary">KES {expectedPlatformEarnings.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Sales: KES {Math.floor(totalRevenue * 0.25)} + Verifications: KES {teacherVerifications * 100}
+                        </p>
+                    </div>
+
+                    <div className="bg-card border border-border rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-muted-foreground text-sm font-medium">Teacher Earnings (75%)</h3>
+                            <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <p className="text-2xl font-bold text-foreground">KES {totalTeacherEarnings.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Distributed to teachers</p>
                     </div>
                 </div>
 
@@ -157,19 +230,57 @@ export default async function AdminDashboard() {
                     </div>
 
                     <div className="bg-card border border-border rounded-lg p-6">
-                        <h2 className="text-xl font-bold text-foreground mb-4">Platform Overview</h2>
+                        <h2 className="text-xl font-bold text-foreground mb-4">Revenue Breakdown</h2>
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Revenue Split</p>
-                                    <p className="text-lg font-bold text-foreground">Teachers: 75% | Platform: 25%</p>
+                            <div className="p-4 bg-accent/50 rounded-lg">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Revenue Split</p>
+                                        <p className="text-lg font-bold text-foreground">Teachers: 75% | Platform: 25%</p>
+                                    </div>
+                                </div>
+                                <div className="w-full bg-background rounded-full h-3 overflow-hidden">
+                                    <div className="flex h-full">
+                                        <div className="bg-green-600" style={{ width: '75%' }}></div>
+                                        <div className="bg-primary" style={{ width: '25%' }}></div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="space-y-2 text-sm text-muted-foreground">
-                                <p>• Teachers earn KES 75 from every KES 100 sale</p>
-                                <p>• Platform earns KES 25 commission</p>
-                                <p>• One-time teacher verification: KES 100</p>
-                                <p>• All payments processed via M-Pesa</p>
+
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-3 h-3 bg-primary rounded-full"></div>
+                                        <span className="text-sm font-medium text-foreground">Platform Commission</span>
+                                    </div>
+                                    <span className="text-sm font-bold text-primary">KES {Math.floor(totalRevenue * 0.25)}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-3 h-3 bg-primary rounded-full"></div>
+                                        <span className="text-sm font-medium text-foreground">Teacher Verifications</span>
+                                    </div>
+                                    <span className="text-sm font-bold text-primary">KES {teacherVerifications * 100}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border-2 border-primary">
+                                    <div className="flex items-center space-x-3">
+                                        <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span className="text-sm font-bold text-foreground">Total Platform Earnings</span>
+                                    </div>
+                                    <span className="text-lg font-bold text-primary">KES {expectedPlatformEarnings}</span>
+                                </div>
+                            </div>
+
+                            <div className="pt-3 border-t border-border">
+                                <div className="text-xs text-muted-foreground space-y-1">
+                                    <p>• {totalPurchases} total purchases completed</p>
+                                    <p>• {teacherVerifications} teachers verified</p>
+                                    <p>• Current wallet balance: KES {platformWallet?.balance || 0}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
