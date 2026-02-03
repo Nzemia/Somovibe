@@ -71,17 +71,28 @@ enum PdfStatus {
   REJECTED
 }
 
+enum MaterialType {
+  PDF
+  PDF_SLIDES
+  POWERPOINT
+  CLASS_INSTRUCTIONS
+  SCHEME_OF_WORK
+  LESSON_PLAN
+  EXAM_QUIZ
+}
+
 model Pdf {
-  id          String     @id @default(uuid())
-  title       String
-  description String
-  subject     String
-  grade       String
-  price       Int
-  fileUrl     String
-  status      PdfStatus  @default(PENDING)
-  teacherId   String
-  createdAt   DateTime   @default(now())
+  id           String       @id @default(uuid())
+  title        String
+  description  String
+  subject      String
+  grade        String
+  price        Int
+  fileUrl      String
+  materialType MaterialType @default(PDF)
+  status       PdfStatus    @default(PENDING)
+  teacherId    String
+  createdAt    DateTime     @default(now())
 
   teacher User @relation(fields: [teacherId], references: [id])
 
