@@ -55,11 +55,11 @@ export default function MarketplaceClient({ materials, purchasedIds, user }: Pro
     const [selectedGrade, setSelectedGrade] = useState("All Grades");
 
     const filteredMaterials = useMemo(() => {
-        console.log("Filtering materials:", {
-            total: materials.length,
-            selectedType,
-            sampleMaterialType: materials[0]?.materialType
-        });
+        // console.log("Filtering materials:", {
+        //     total: materials.length,
+        //     selectedType,
+        //     sampleMaterialType: materials[0]?.materialType
+        // });
 
         return materials.filter((material) => {
             // Search filter

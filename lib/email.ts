@@ -41,7 +41,7 @@ export async function sendMaterialApprovedEmail(
                 </div>
             `,
         });
-        console.log("✅ Material approved email sent to:", teacherEmail);
+        //console.log("✅ Material approved email sent to:", teacherEmail);
     } catch (error) {
         console.error("❌ Failed to send material approved email:", error);
     }
@@ -89,7 +89,7 @@ export async function sendMaterialRejectedEmail(
                 </div>
             `,
         });
-        console.log("✅ Material rejected email sent to:", teacherEmail);
+        //console.log("✅ Material rejected email sent to:", teacherEmail);
     } catch (error) {
         console.error("❌ Failed to send material rejected email:", error);
     }
@@ -131,7 +131,7 @@ export async function sendNewSaleEmail(
                 </div>
             `,
         });
-        console.log("✅ New sale email sent to:", teacherEmail);
+        //console.log("✅ New sale email sent to:", teacherEmail);
     } catch (error) {
         console.error("❌ Failed to send new sale email:", error);
     }
@@ -171,7 +171,7 @@ export async function sendTeacherVerificationCompleteEmail(
                 </div>
             `,
         });
-        console.log("✅ Teacher verification email sent to:", teacherEmail);
+        //console.log("✅ Teacher verification email sent to:", teacherEmail);
     } catch (error) {
         console.error("❌ Failed to send teacher verification email:", error);
     }
@@ -212,7 +212,7 @@ export async function sendPurchaseConfirmationEmail(
                 </div>
             `,
         });
-        console.log("✅ Purchase confirmation email sent to:", studentEmail);
+        //console.log("✅ Purchase confirmation email sent to:", studentEmail);
     } catch (error) {
         console.error("❌ Failed to send purchase confirmation email:", error);
     }
@@ -252,7 +252,7 @@ export async function sendNewMaterialPendingEmail(
                 </div>
             `,
         });
-        console.log("✅ New material pending email sent to admin");
+        //console.log("✅ New material pending email sent to admin");
     } catch (error) {
         console.error("❌ Failed to send new material pending email:", error);
     }
@@ -286,7 +286,7 @@ export async function sendNewTeacherRegistrationEmail(
                 </div>
             `,
         });
-        console.log("✅ New teacher registration email sent to admin");
+        //console.log("✅ New teacher registration email sent to admin");
     } catch (error) {
         console.error("❌ Failed to send new teacher registration email:", error);
     }

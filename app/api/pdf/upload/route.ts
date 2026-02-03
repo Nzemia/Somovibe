@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         const price = Number(formData.get("price"));
         const materialType = formData.get("materialType") as string;
 
-        console.log("Upload request from user:", user.email, { title, subject, grade, price, materialType, fileName: file?.name });
+        //console.log("Upload request from user:", user.email, { title, subject, grade, price, materialType, fileName: file?.name });
 
         if (!file || !title || !description || !subject || !grade || !price || !materialType) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        console.log("Attempting upload to Supabase:", { filePath, size: buffer.length, type: file.type });
+        //console.log("Attempting upload to Supabase:", { filePath, size: buffer.length, type: file.type });
 
         const { data: uploadData, error: uploadError } = await supabase.storage
             .from("pdfs")
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
             }, { status: 500 });
         }
 
-        console.log("File uploaded to Supabase successfully:", uploadData);
+        //console.log("File uploaded to Supabase successfully:", uploadData);
 
         // Create PDF record in database
         const pdf = await prisma.pdf.create({
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
             },
         });
 
-        console.log("PDF created successfully:", pdf.id);
+        //console.log("PDF created successfully:", pdf.id);
 
         // Notify admin of new material
         const adminId = await getPlatformAdminId();

@@ -34,7 +34,7 @@ export async function POST(req: Request) {
         }, { status: 400 });
     }
 
-    console.log("Purchase request - Phone:", formattedPhone, "PDF:", pdfId, "User:", userId);
+    //console.log("Purchase request - Phone:", formattedPhone, "PDF:", pdfId, "User:", userId);
 
     // Get PDF details
     const pdf = await prisma.pdf.findUnique({ where: { id: pdfId } });
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
 
     // DEV MODE: Auto-complete purchase
     if (process.env.DEV_MODE === "true") {
-        console.log("DEV MODE: Auto-completing purchase");
+        //console.log("DEV MODE: Auto-completing purchase");
 
         // Calculate shares
         const teacherShare = Math.floor(pdf.price * 0.75);
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
             },
         });
 
-        console.log("✅ Purchase completed in DEV MODE");
+        //console.log("✅ Purchase completed in DEV MODE");
 
         // Send email notifications in DEV MODE
         const [student, teacher] = await Promise.all([
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
     ).toString("base64");
 
     try {
-        console.log("Sending STK push to:", formattedPhone, "Amount:", pdf.price);
+        //console.log("Sending STK push to:", formattedPhone, "Amount:", pdf.price);
 
         await axios.post(
             "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
@@ -170,7 +170,7 @@ export async function POST(req: Request) {
             }
         );
 
-        console.log("✅ STK push sent successfully");
+        //console.log("✅ STK push sent successfully");
 
         return NextResponse.json({ message: "STK push sent to your phone", referenceCode });
     } catch (error: any) {
