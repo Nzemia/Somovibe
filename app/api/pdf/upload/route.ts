@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
 import { createClient } from "@supabase/supabase-js";
+import { sendNewMaterialPendingEmail } from "@/lib/email";
+import { getPlatformAdminId } from "@/lib/platformAdmin";
 
 export async function POST(req: Request) {
     try {
@@ -87,6 +89,18 @@ export async function POST(req: Request) {
         });
 
         console.log("PDF created successfully:", pdf.id);
+
+        // Notify admin of new material
+        const adminId = await getPlatformAdminId();
+        if (adminId) {
+            const admin = await prisma.user.findUnique({
+                where: { id: adminId },
+                select: { email: true },
+            });
+            if (admin) {
+                sendNewMaterialPendingEmail(admin.email, pdf.title, user.email, pdf.id);
+            }
+        }
 
         return NextResponse.json(pdf);
     } catch (error: any) {

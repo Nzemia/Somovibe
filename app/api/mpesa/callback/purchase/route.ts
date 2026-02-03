@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { creditWallet } from "@/lib/wallet";
 import { NextResponse } from "next/server";
 import { getPlatformAdminId } from "@/lib/platformAdmin";
+import { sendNewSaleEmail, sendPurchaseConfirmationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
     try {
@@ -132,6 +133,25 @@ export async function POST(req: Request) {
                 teacherShare,
                 platformShare,
             });
+
+            // Send email notifications
+            const [student, teacher] = await Promise.all([
+                prisma.user.findUnique({
+                    where: { id: payment.userId },
+                    select: { email: true },
+                }),
+                prisma.user.findUnique({
+                    where: { id: pdf.teacherId },
+                    select: { email: true },
+                }),
+            ]);
+
+            if (student) {
+                sendPurchaseConfirmationEmail(student.email, pdf.title, actualAmount, pdfId);
+            }
+            if (teacher) {
+                sendNewSaleEmail(teacher.email, pdf.title, actualAmount, teacherShare, payment.userId);
+            }
         } else {
             // Payment failed
             await prisma.pendingPayment.update({

@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { sendTeacherVerificationCompleteEmail, sendNewTeacherRegistrationEmail } from "@/lib/email";
+import { getPlatformAdminId } from "@/lib/platformAdmin";
 
 export async function POST(req: Request) {
     try {
@@ -91,6 +93,30 @@ export async function POST(req: Request) {
             });
 
             console.log("✅ Teacher activated:", payment.userId);
+
+            // Send email notifications
+            const [teacher, adminId] = await Promise.all([
+                prisma.user.findUnique({
+                    where: { id: payment.userId },
+                    select: { email: true, phone: true },
+                }),
+                getPlatformAdminId(),
+            ]);
+
+            if (teacher) {
+                sendTeacherVerificationCompleteEmail(teacher.email);
+
+                // Notify admin
+                if (adminId) {
+                    const admin = await prisma.user.findUnique({
+                        where: { id: adminId },
+                        select: { email: true },
+                    });
+                    if (admin) {
+                        sendNewTeacherRegistrationEmail(admin.email, teacher.email, teacher.phone || "N/A");
+                    }
+                }
+            }
         } else {
             // Payment failed
             await prisma.pendingPayment.update({

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
 import { creditWallet } from "@/lib/wallet";
 import { getPlatformAdminId } from "@/lib/platformAdmin";
+import { sendNewSaleEmail, sendPurchaseConfirmationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
     const { phone, pdfId, userId } = await req.json();
@@ -107,6 +108,25 @@ export async function POST(req: Request) {
         });
 
         console.log("✅ Purchase completed in DEV MODE");
+
+        // Send email notifications in DEV MODE
+        const [student, teacher] = await Promise.all([
+            prisma.user.findUnique({
+                where: { id: userId },
+                select: { email: true },
+            }),
+            prisma.user.findUnique({
+                where: { id: pdf.teacherId },
+                select: { email: true },
+            }),
+        ]);
+
+        if (student) {
+            sendPurchaseConfirmationEmail(student.email, pdf.title, pdf.price, pdfId);
+        }
+        if (teacher) {
+            sendNewSaleEmail(teacher.email, pdf.title, pdf.price, teacherShare, userId);
+        }
 
         return NextResponse.json({
             message: "DEV MODE: Purchase completed",
