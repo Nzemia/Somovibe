@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -112,6 +113,7 @@ export default async function Home() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

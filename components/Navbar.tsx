@@ -51,8 +51,40 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
             </Link>
 
             {/* Desktop Navigation */}
-            {user && (
-              <div className="hidden md:flex space-x-4">
+            <div className="hidden md:flex space-x-4">
+              {!user && (
+                <>
+                  <Link
+                    href="/"
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/")
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      }`}
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    href="/about"
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/about")
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      }`}
+                  >
+                    About Us
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/contact")
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      }`}
+                  >
+                    Contact Us
+                  </Link>
+                </>
+              )}
+
+              {user && (
                 <Link
                   href="/marketplace"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/marketplace")
@@ -62,7 +94,12 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
                 >
                   Marketplace
                 </Link>
+              )}
+            </div>
 
+            {/* User-specific navigation */}
+            {user && (
+              <div className="hidden md:flex space-x-4">
                 {user.role === "ADMIN" && (
                   <>
                     <Link
@@ -195,6 +232,50 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
                   <SheetTitle className="text-left">Menu</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col space-y-4 mt-6">
+                  {!user && (
+                    <>
+                      <Link
+                        href="/"
+                        onClick={closeMobileMenu}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/")
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-accent"
+                          }`}
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span>Home</span>
+                      </Link>
+                      <Link
+                        href="/about"
+                        onClick={closeMobileMenu}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/about")
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-accent"
+                          }`}
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>About Us</span>
+                      </Link>
+                      <Link
+                        href="/contact"
+                        onClick={closeMobileMenu}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/contact")
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-accent"
+                          }`}
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span>Contact Us</span>
+                      </Link>
+                    </>
+                  )}
+
                   {user ? (
                     <>
                       {/* User Info */}
