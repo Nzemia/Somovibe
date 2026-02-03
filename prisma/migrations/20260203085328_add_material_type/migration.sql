@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "MaterialType" AS ENUM ('PDF', 'PDF_SLIDES', 'POWERPOINT', 'CLASS_INSTRUCTIONS', 'SCHEME_OF_WORK', 'LESSON_PLAN', 'EXAM_QUIZ');
+
+-- AlterTable
+ALTER TABLE "Pdf" ADD COLUMN     "materialType" "MaterialType" NOT NULL DEFAULT 'PDF';

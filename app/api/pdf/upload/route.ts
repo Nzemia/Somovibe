@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
 import { createClient } from "@supabase/supabase-js";
+import { sendNewMaterialPendingEmail } from "@/lib/email";
+import { getPlatformAdminId } from "@/lib/platformAdmin";
 
 export async function POST(req: Request) {
     try {
@@ -15,15 +17,25 @@ export async function POST(req: Request) {
         const subject = formData.get("subject") as string;
         const grade = formData.get("grade") as string;
         const price = Number(formData.get("price"));
+        const materialType = formData.get("materialType") as string;
 
-        console.log("Upload request from user:", user.email, { title, subject, grade, price, fileName: file?.name });
+        //console.log("Upload request from user:", user.email, { title, subject, grade, price, materialType, fileName: file?.name });
 
-        if (!file || !title || !description || !subject || !grade || !price) {
+        if (!file || !title || !description || !subject || !grade || !price || !materialType) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        if (file.type !== "application/pdf") {
-            return NextResponse.json({ error: "Only PDFs allowed" }, { status: 400 });
+        // Validate material type
+        const validMaterialTypes = ["PDF", "PDF_SLIDES", "POWERPOINT", "CLASS_INSTRUCTIONS", "SCHEME_OF_WORK", "LESSON_PLAN", "EXAM_QUIZ"];
+        if (!validMaterialTypes.includes(materialType)) {
+            console.error("Invalid material type:", materialType);
+            return NextResponse.json({ error: "Invalid material type" }, { status: 400 });
+        }
+
+        // Validate file type based on material type
+        const allowedTypes = ["application/pdf", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"];
+        if (!allowedTypes.includes(file.type)) {
+            return NextResponse.json({ error: "Only PDF and PowerPoint files allowed" }, { status: 400 });
         }
 
         // Use service role key for upload permissions
@@ -44,12 +56,12 @@ export async function POST(req: Request) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        console.log("Attempting upload to Supabase:", { filePath, size: buffer.length });
+        //console.log("Attempting upload to Supabase:", { filePath, size: buffer.length, type: file.type });
 
         const { data: uploadData, error: uploadError } = await supabase.storage
             .from("pdfs")
             .upload(filePath, buffer, {
-                contentType: "application/pdf",
+                contentType: file.type,
                 upsert: false,
             });
 
@@ -60,7 +72,7 @@ export async function POST(req: Request) {
             }, { status: 500 });
         }
 
-        console.log("File uploaded to Supabase successfully:", uploadData);
+        //console.log("File uploaded to Supabase successfully:", uploadData);
 
         // Create PDF record in database
         const pdf = await prisma.pdf.create({
@@ -71,11 +83,24 @@ export async function POST(req: Request) {
                 grade,
                 price,
                 fileUrl: filePath,
+                materialType: materialType as "PDF" | "PDF_SLIDES" | "POWERPOINT" | "CLASS_INSTRUCTIONS" | "SCHEME_OF_WORK" | "LESSON_PLAN" | "EXAM_QUIZ",
                 teacherId: user.id,
             },
         });
 
-        console.log("PDF created successfully:", pdf.id);
+        //console.log("PDF created successfully:", pdf.id);
+
+        // Notify admin of new material
+        const adminId = await getPlatformAdminId();
+        if (adminId) {
+            const admin = await prisma.user.findUnique({
+                where: { id: adminId },
+                select: { email: true },
+            });
+            if (admin) {
+                sendNewMaterialPendingEmail(admin.email, pdf.title, user.email, pdf.id);
+            }
+        }
 
         return NextResponse.json(pdf);
     } catch (error: any) {

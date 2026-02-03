@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
-import PdfCard from "@/app/marketplace/PdfCard";
+import MarketplaceClient from "./MarketplaceClient";
 
 export default async function Marketplace() {
     const user = await getCurrentUser();
@@ -49,16 +49,11 @@ export default async function Marketplace() {
                             <p className="text-muted-foreground">Check back soon for quality learning materials!</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {pdfs.map((pdf) => (
-                                <PdfCard
-                                    key={pdf.id}
-                                    pdf={pdf}
-                                    isPurchased={purchasedPdfIds.has(pdf.id)}
-                                    user={user}
-                                />
-                            ))}
-                        </div>
+                        <MarketplaceClient
+                            materials={pdfs}
+                            purchasedIds={purchasedPdfIds}
+                            user={user ? { id: user.id, email: user.email, role: user.role, phone: user.phone } : null}
+                        />
                     )}
                 </div>
             </div>
