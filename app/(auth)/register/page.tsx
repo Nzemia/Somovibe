@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function RegisterPage() {
@@ -48,7 +47,6 @@ export default function RegisterPage() {
             return;
         }
 
-        // Check if email is already registered
         if (data?.user?.identities?.length === 0) {
             setError("This email is already registered. Please login instead.");
             setLoading(false);
@@ -56,7 +54,6 @@ export default function RegisterPage() {
             return;
         }
 
-        // Sync user to database
         try {
             await fetch("/api/auth/sync", {
                 method: "POST",
@@ -67,7 +64,6 @@ export default function RegisterPage() {
             setSuccess(true);
             setLoading(false);
 
-            // Redirect based on role
             if (role === "TEACHER") {
                 setTimeout(() => router.push("/teacher-register"), 1500);
             } else {
@@ -80,8 +76,8 @@ export default function RegisterPage() {
     }
 
     return (
-        <Card className="w-full max-w-md">
-            <CardHeader className="text-center space-y-4">
+        <div className="p-8">
+            <div className="text-center space-y-4 mb-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mx-auto">
                     <svg
                         className="w-8 h-8 text-primary-foreground"
@@ -97,11 +93,11 @@ export default function RegisterPage() {
                         />
                     </svg>
                 </div>
-                <CardTitle className="text-3xl">Join Questy</CardTitle>
-                <CardDescription>Start your learning journey today</CardDescription>
-            </CardHeader>
+                <h1 className="text-3xl font-bold text-foreground">Join Questy</h1>
+                <p className="text-muted-foreground">Start your learning journey today</p>
+            </div>
 
-            <CardContent className="space-y-6">
+            <div className="space-y-6">
                 {error && (
                     <Alert variant="destructive">
                         <AlertDescription>{error}</AlertDescription>
@@ -109,7 +105,7 @@ export default function RegisterPage() {
                 )}
 
                 {success && (
-                    <Alert className="bg-green-50 border-green-200 text-green-700">
+                    <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300">
                         <AlertDescription>
                             Account created successfully! Redirecting...
                         </AlertDescription>
@@ -118,7 +114,7 @@ export default function RegisterPage() {
 
                 <form onSubmit={handleRegister} className="space-y-4">
                     <div className="space-y-2">
-                        <label htmlFor="email" className="text-sm font-medium">
+                        <label htmlFor="email" className="text-sm font-medium text-foreground">
                             Email Address
                         </label>
                         <Input
@@ -132,14 +128,14 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">I am a...</label>
+                        <label className="text-sm font-medium text-foreground">I am a...</label>
                         <div className="grid grid-cols-2 gap-3">
                             <button
                                 type="button"
                                 onClick={() => setRole("STUDENT")}
                                 className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${role === "STUDENT"
-                                        ? "border-primary bg-primary/10 text-primary"
-                                        : "border-border hover:border-primary/50"
+                                    ? "border-primary bg-primary/10 text-primary"
+                                    : "border-border hover:border-primary/50"
                                     }`}
                             >
                                 <svg className="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,8 +148,8 @@ export default function RegisterPage() {
                                 type="button"
                                 onClick={() => setRole("TEACHER")}
                                 className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${role === "TEACHER"
-                                        ? "border-primary bg-primary/10 text-primary"
-                                        : "border-border hover:border-primary/50"
+                                    ? "border-primary bg-primary/10 text-primary"
+                                    : "border-border hover:border-primary/50"
                                     }`}
                             >
                                 <svg className="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -171,7 +167,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="password" className="text-sm font-medium">
+                        <label htmlFor="password" className="text-sm font-medium text-foreground">
                             Password
                         </label>
                         <Input
@@ -185,7 +181,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="confirmPassword" className="text-sm font-medium">
+                        <label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
                             Confirm Password
                         </label>
                         <Input
@@ -213,7 +209,7 @@ export default function RegisterPage() {
                         <div className="w-full border-t border-border"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-card text-muted-foreground">
+                        <span className="px-2 bg-card/80 text-muted-foreground">
                             Already have an account?
                         </span>
                     </div>
@@ -224,7 +220,7 @@ export default function RegisterPage() {
                         Sign In
                     </Button>
                 </Link>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }
