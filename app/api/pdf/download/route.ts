@@ -46,7 +46,7 @@ export async function GET(req: Request) {
             }
         );
 
-        console.log("Downloading file:", purchase.pdf.fileUrl);
+        //console.log("Downloading file:", purchase.pdf.fileUrl);
 
         const { data, error } = await supabase.storage
             .from("pdfs")
@@ -59,7 +59,15 @@ export async function GET(req: Request) {
             }, { status: 500 });
         }
 
-        console.log("File downloaded successfully, size:", data.size);
+        //console.log("File downloaded successfully, size:", data.size);
+
+        // Track download
+        await prisma.download.create({
+            data: {
+                userId: user.id,
+                pdfId,
+            },
+        }).catch(() => { }); // Ignore errors for download tracking
 
         // Return the PDF file
         return new NextResponse(data, {

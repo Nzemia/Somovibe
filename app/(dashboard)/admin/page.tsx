@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { AdminNav } from "@/components/AdminNav";
 
 export default async function AdminDashboard() {
     const user = await getCurrentUser();
@@ -61,7 +60,6 @@ export default async function AdminDashboard() {
 
     return (
         <div className="min-h-screen bg-background">
-            <AdminNav />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex items-center justify-between mb-8">
                     <div>

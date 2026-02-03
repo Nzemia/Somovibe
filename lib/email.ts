@@ -1,0 +1,293 @@
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+
+// Email Templates
+
+// Teacher Emails
+export async function sendMaterialApprovedEmail(
+    teacherEmail: string,
+    materialTitle: string,
+    materialId: string
+) {
+    try {
+        await resend.emails.send({
+            from: fromEmail,
+            to: teacherEmail,
+            subject: "🎉 Your Material Has Been Approved!",
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #10b981;">Material Approved!</h1>
+                    <p>Great news! Your material "<strong>${materialTitle}</strong>" has been approved and is now live on the marketplace.</p>
+                    
+                    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <p style="margin: 0;"><strong>What's next?</strong></p>
+                        <ul style="margin-top: 10px;">
+                            <li>Students can now discover and purchase your material</li>
+                            <li>You'll earn 75% from every sale</li>
+                            <li>Track your sales in the analytics dashboard</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL}/marketplace/${materialId}" 
+                       style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                        View Your Material
+                    </a>
+                    
+                    <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                        Keep creating quality content and watch your earnings grow!
+                    </p>
+                </div>
+            `,
+        });
+        //console.log("✅ Material approved email sent to:", teacherEmail);
+    } catch (error) {
+        console.error("❌ Failed to send material approved email:", error);
+    }
+}
+
+export async function sendMaterialRejectedEmail(
+    teacherEmail: string,
+    materialTitle: string,
+    reason?: string
+) {
+    try {
+        await resend.emails.send({
+            from: fromEmail,
+            to: teacherEmail,
+            subject: "Material Review Update",
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #ef4444;">Material Not Approved</h1>
+                    <p>Unfortunately, your material "<strong>${materialTitle}</strong>" was not approved for the marketplace.</p>
+                    
+                    ${reason ? `
+                        <div style="background-color: #fef2f2; padding: 20px; border-left: 4px solid #ef4444; margin: 20px 0;">
+                            <p style="margin: 0; color: #991b1b;"><strong>Reason:</strong></p>
+                            <p style="margin-top: 10px; color: #991b1b;">${reason}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <p style="margin: 0;"><strong>What you can do:</strong></p>
+                        <ul style="margin-top: 10px;">
+                            <li>Review our content guidelines</li>
+                            <li>Make necessary improvements</li>
+                            <li>Upload a revised version</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL}/teacher/upload" 
+                       style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                        Upload New Material
+                    </a>
+                    
+                    <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                        We appreciate your effort and look forward to your next submission!
+                    </p>
+                </div>
+            `,
+        });
+        //console.log("✅ Material rejected email sent to:", teacherEmail);
+    } catch (error) {
+        console.error("❌ Failed to send material rejected email:", error);
+    }
+}
+
+export async function sendNewSaleEmail(
+    teacherEmail: string,
+    materialTitle: string,
+    price: number,
+    earnings: number,
+    buyerEmail: string
+) {
+    try {
+        await resend.emails.send({
+            from: fromEmail,
+            to: teacherEmail,
+            subject: "💰 New Sale - You Earned KES " + earnings,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #10b981;">🎉 You Made a Sale!</h1>
+                    <p>Congratulations! Someone just purchased your material.</p>
+                    
+                    <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #10b981;">
+                        <h2 style="margin-top: 0; color: #059669;">Sale Details</h2>
+                        <p><strong>Material:</strong> ${materialTitle}</p>
+                        <p><strong>Sale Price:</strong> KES ${price}</p>
+                        <p><strong>Your Earnings (75%):</strong> <span style="color: #10b981; font-size: 24px; font-weight: bold;">KES ${earnings}</span></p>
+                        <p style="font-size: 14px; color: #6b7280;">Buyer: ${buyerEmail.split('@')[0]}***</p>
+                    </div>
+                    
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL}/teacher/analytics" 
+                       style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                        View Analytics
+                    </a>
+                    
+                    <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                        Your earnings have been credited to your wallet. You can withdraw anytime!
+                    </p>
+                </div>
+            `,
+        });
+        //console.log("✅ New sale email sent to:", teacherEmail);
+    } catch (error) {
+        console.error("❌ Failed to send new sale email:", error);
+    }
+}
+
+export async function sendTeacherVerificationCompleteEmail(
+    teacherEmail: string
+) {
+    try {
+        await resend.emails.send({
+            from: fromEmail,
+            to: teacherEmail,
+            subject: "✅ Teacher Verification Complete - Start Earning!",
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #10b981;">Welcome to Questy Teachers! 🎓</h1>
+                    <p>Your teacher verification payment has been confirmed. You're now ready to start earning!</p>
+                    
+                    <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h2 style="margin-top: 0; color: #059669;">What You Can Do Now:</h2>
+                        <ul>
+                            <li>Upload your teaching materials</li>
+                            <li>Earn 75% from every sale</li>
+                            <li>Track your earnings in real-time</li>
+                            <li>Withdraw to M-Pesa anytime</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL}/teacher/upload" 
+                       style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                        Upload Your First Material
+                    </a>
+                    
+                    <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                        Start sharing your knowledge and earning today!
+                    </p>
+                </div>
+            `,
+        });
+        //console.log("✅ Teacher verification email sent to:", teacherEmail);
+    } catch (error) {
+        console.error("❌ Failed to send teacher verification email:", error);
+    }
+}
+
+// Student Emails
+export async function sendPurchaseConfirmationEmail(
+    studentEmail: string,
+    materialTitle: string,
+    price: number,
+    materialId: string
+) {
+    try {
+        await resend.emails.send({
+            from: fromEmail,
+            to: studentEmail,
+            subject: "✅ Purchase Confirmed - " + materialTitle,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #10b981;">Purchase Successful! 🎉</h1>
+                    <p>Thank you for your purchase. Your learning material is ready to download.</p>
+                    
+                    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h2 style="margin-top: 0;">Order Details</h2>
+                        <p><strong>Material:</strong> ${materialTitle}</p>
+                        <p><strong>Amount Paid:</strong> KES ${price}</p>
+                        <p><strong>Payment Method:</strong> M-Pesa</p>
+                    </div>
+                    
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL}/marketplace/${materialId}" 
+                       style="display: inline-block; background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                        Download Now
+                    </a>
+                    
+                    <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                        You can download this material anytime from your dashboard.
+                    </p>
+                </div>
+            `,
+        });
+        //console.log("✅ Purchase confirmation email sent to:", studentEmail);
+    } catch (error) {
+        console.error("❌ Failed to send purchase confirmation email:", error);
+    }
+}
+
+// Admin Emails
+export async function sendNewMaterialPendingEmail(
+    adminEmail: string,
+    materialTitle: string,
+    teacherEmail: string,
+    materialId: string
+) {
+    try {
+        await resend.emails.send({
+            from: fromEmail,
+            to: adminEmail,
+            subject: "📝 New Material Pending Review",
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #f59e0b;">New Material Awaiting Approval</h1>
+                    <p>A teacher has uploaded new material that requires your review.</p>
+                    
+                    <div style="background-color: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                        <p><strong>Material:</strong> ${materialTitle}</p>
+                        <p><strong>Teacher:</strong> ${teacherEmail}</p>
+                        <p><strong>Uploaded:</strong> ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL}/admin/approvals" 
+                       style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                        Review Material
+                    </a>
+                    
+                    <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                        Please review and approve/reject as soon as possible.
+                    </p>
+                </div>
+            `,
+        });
+        //console.log("✅ New material pending email sent to admin");
+    } catch (error) {
+        console.error("❌ Failed to send new material pending email:", error);
+    }
+}
+
+export async function sendNewTeacherRegistrationEmail(
+    adminEmail: string,
+    teacherEmail: string,
+    teacherPhone: string
+) {
+    try {
+        await resend.emails.send({
+            from: fromEmail,
+            to: adminEmail,
+            subject: "👨‍🏫 New Teacher Registration",
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #3b82f6;">New Teacher Registered</h1>
+                    <p>A new teacher has completed verification and joined the platform.</p>
+                    
+                    <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+                        <p><strong>Email:</strong> ${teacherEmail}</p>
+                        <p><strong>Phone:</strong> ${teacherPhone}</p>
+                        <p><strong>Registered:</strong> ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL}/admin/teachers" 
+                       style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                        View All Teachers
+                    </a>
+                </div>
+            `,
+        });
+        //console.log("✅ New teacher registration email sent to admin");
+    } catch (error) {
+        console.error("❌ Failed to send new teacher registration email:", error);
+    }
+}

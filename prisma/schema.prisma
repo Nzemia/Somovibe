@@ -28,6 +28,8 @@ model User {
   wallets         Wallet[]
   purchases       Purchase[]
   pendingPayments PendingPayment[]
+  downloads       Download[]
+  materialViews   MaterialView[]
 }
 
 model TeacherProfile {
@@ -71,21 +73,34 @@ enum PdfStatus {
   REJECTED
 }
 
+enum MaterialType {
+  PDF
+  PDF_SLIDES
+  POWERPOINT
+  CLASS_INSTRUCTIONS
+  SCHEME_OF_WORK
+  LESSON_PLAN
+  EXAM_QUIZ
+}
+
 model Pdf {
-  id          String     @id @default(uuid())
-  title       String
-  description String
-  subject     String
-  grade       String
-  price       Int
-  fileUrl     String
-  status      PdfStatus  @default(PENDING)
-  teacherId   String
-  createdAt   DateTime   @default(now())
+  id           String       @id @default(uuid())
+  title        String
+  description  String
+  subject      String
+  grade        String
+  price        Int
+  fileUrl      String
+  materialType MaterialType @default(PDF)
+  status       PdfStatus    @default(PENDING)
+  teacherId    String
+  createdAt    DateTime     @default(now())
 
   teacher User @relation(fields: [teacherId], references: [id])
 
-  purchases Purchase[]
+  purchases     Purchase[]
+  downloads     Download[]
+  materialViews MaterialView[]
 }
 
 model Wallet {
@@ -119,4 +134,30 @@ model Purchase {
   pdf  Pdf  @relation(fields: [pdfId], references: [id])
 
   @@unique([userId, pdfId])
+}
+
+model Download {
+  id        String   @id @default(uuid())
+  userId    String
+  pdfId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  pdf  Pdf  @relation(fields: [pdfId], references: [id])
+
+  @@index([userId, pdfId])
+  @@index([pdfId])
+}
+
+model MaterialView {
+  id        String   @id @default(uuid())
+  userId    String?  // Nullable for anonymous views
+  pdfId     String
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+  pdf  Pdf   @relation(fields: [pdfId], references: [id])
+
+  @@index([pdfId])
+  @@index([userId])
 }

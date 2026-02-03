@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function LoginPage() {
@@ -35,9 +34,9 @@ export default function LoginPage() {
     }
 
     return (
-        <Card className="w-full max-w-md">
-            <CardHeader className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-primary to-primary/80 rounded-2xl mx-auto">
+        <div className="p-8">
+            <div className="text-center space-y-4 mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mx-auto">
                     <svg
                         className="w-8 h-8 text-primary-foreground"
                         fill="none"
@@ -52,11 +51,11 @@ export default function LoginPage() {
                         />
                     </svg>
                 </div>
-                <CardTitle className="text-3xl">Welcome to Questy</CardTitle>
-                <CardDescription>CBC Learning Management System</CardDescription>
-            </CardHeader>
+                <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
+                <p className="text-muted-foreground">Sign in to continue to Questy</p>
+            </div>
 
-            <CardContent className="space-y-6">
+            <div className="space-y-6">
                 {error && (
                     <Alert variant="destructive">
                         <AlertDescription>{error}</AlertDescription>
@@ -65,7 +64,7 @@ export default function LoginPage() {
 
                 <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
-                        <label htmlFor="email" className="text-sm font-medium">
+                        <label htmlFor="email" className="text-sm font-medium text-foreground">
                             Email Address
                         </label>
                         <Input
@@ -79,7 +78,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="password" className="text-sm font-medium">
+                        <label htmlFor="password" className="text-sm font-medium text-foreground">
                             Password
                         </label>
                         <Input
@@ -102,7 +101,7 @@ export default function LoginPage() {
                         <div className="w-full border-t border-border"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-card text-muted-foreground">
+                        <span className="px-2 bg-card/80 text-muted-foreground">
                             New to Questy?
                         </span>
                     </div>
@@ -113,7 +112,7 @@ export default function LoginPage() {
                         Create an Account
                     </Button>
                 </Link>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

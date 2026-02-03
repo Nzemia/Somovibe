@@ -142,6 +142,36 @@ export default async function StudentPage() {
                                 </div>
                             </Link>
                             <Link
+                                href="/student/downloads"
+                                className="block p-4 border border-border rounded-lg hover:bg-accent transition-colors group"
+                            >
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                        <svg
+                                            className="w-6 h-6 text-primary"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-foreground mb-1">
+                                            Download History
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            View all your downloads
+                                        </p>
+                                    </div>
+                                </div>
+                            </Link>
+                            <Link
                                 href="/student/profile"
                                 className="block p-4 border border-border rounded-lg hover:bg-accent transition-colors group"
                             >
