@@ -28,6 +28,8 @@ model User {
   wallets         Wallet[]
   purchases       Purchase[]
   pendingPayments PendingPayment[]
+  downloads       Download[]
+  materialViews   MaterialView[]
 }
 
 model TeacherProfile {
@@ -96,7 +98,9 @@ model Pdf {
 
   teacher User @relation(fields: [teacherId], references: [id])
 
-  purchases Purchase[]
+  purchases     Purchase[]
+  downloads     Download[]
+  materialViews MaterialView[]
 }
 
 model Wallet {
@@ -130,4 +134,30 @@ model Purchase {
   pdf  Pdf  @relation(fields: [pdfId], references: [id])
 
   @@unique([userId, pdfId])
+}
+
+model Download {
+  id        String   @id @default(uuid())
+  userId    String
+  pdfId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  pdf  Pdf  @relation(fields: [pdfId], references: [id])
+
+  @@index([userId, pdfId])
+  @@index([pdfId])
+}
+
+model MaterialView {
+  id        String   @id @default(uuid())
+  userId    String?  // Nullable for anonymous views
+  pdfId     String
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+  pdf  Pdf   @relation(fields: [pdfId], references: [id])
+
+  @@index([pdfId])
+  @@index([userId])
 }

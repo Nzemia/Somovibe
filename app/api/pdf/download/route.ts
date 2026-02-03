@@ -61,6 +61,14 @@ export async function GET(req: Request) {
 
         console.log("File downloaded successfully, size:", data.size);
 
+        // Track download
+        await prisma.download.create({
+            data: {
+                userId: user.id,
+                pdfId,
+            },
+        }).catch(() => { }); // Ignore errors for download tracking
+
         // Return the PDF file
         return new NextResponse(data, {
             headers: {
