@@ -14,6 +14,7 @@ export default function RegisterPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [role, setRole] = useState<"STUDENT" | "TEACHER">("STUDENT");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
@@ -60,12 +61,18 @@ export default function RegisterPage() {
             await fetch("/api/auth/sync", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email, role }),
             });
 
             setSuccess(true);
             setLoading(false);
-            setTimeout(() => router.push("/"), 1500);
+
+            // Redirect based on role
+            if (role === "TEACHER") {
+                setTimeout(() => router.push("/teacher-register"), 1500);
+            } else {
+                setTimeout(() => router.push("/"), 1500);
+            }
         } catch (err) {
             setError("Account created but sync failed. Please contact support.");
             setLoading(false);
@@ -122,6 +129,45 @@ export default function RegisterPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">I am a...</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setRole("STUDENT")}
+                                className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${role === "STUDENT"
+                                        ? "border-primary bg-primary/10 text-primary"
+                                        : "border-border hover:border-primary/50"
+                                    }`}
+                            >
+                                <svg className="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                <span className="font-medium">Student</span>
+                                <span className="text-xs text-muted-foreground mt-1">Learn & Purchase</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setRole("TEACHER")}
+                                className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${role === "TEACHER"
+                                        ? "border-primary bg-primary/10 text-primary"
+                                        : "border-border hover:border-primary/50"
+                                    }`}
+                            >
+                                <svg className="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                <span className="font-medium">Teacher</span>
+                                <span className="text-xs text-muted-foreground mt-1">Teach & Earn</span>
+                            </button>
+                        </div>
+                        {role === "TEACHER" && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                                Note: Teachers require a one-time KES 100 verification fee
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-2">

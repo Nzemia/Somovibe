@@ -31,7 +31,7 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
         method: "POST",
         credentials: "include"
       });
-      router.push("/login");
+      router.push("/");
       router.refresh();
     } catch (error) {
       console.error("Sign out error:", error);
