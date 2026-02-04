@@ -1,6 +1,10 @@
 import axios from "axios";
 
-const MPESA_BASE_URL = "https://sandbox.safaricom.co.ke";
+// Use production URL if MPESA_ENVIRONMENT is "production", otherwise sandbox
+const MPESA_BASE_URL =
+    process.env.MPESA_ENVIRONMENT === "production"
+        ? "https://api.safaricom.co.ke"
+        : "https://sandbox.safaricom.co.ke";
 
 export async function getMpesaToken() {
     const auth = Buffer.from(
@@ -17,4 +21,9 @@ export async function getMpesaToken() {
     );
 
     return res.data.access_token;
+}
+
+// Helper to get the correct M-Pesa base URL
+export function getMpesaBaseUrl() {
+    return MPESA_BASE_URL;
 }
