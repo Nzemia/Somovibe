@@ -1,42 +1,19 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { signIn } from "next-auth/react";
 
-function LoginForm() {
+export default function LoginPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
-    useEffect(() => {
-        const errorParam = searchParams.get("error");
-        if (errorParam) {
-            switch (errorParam) {
-                case "OAuthAccountNotLinked":
-                    setError("This email is already registered with a password. Please sign in with your email and password, then link your Google/GitHub account from your profile.");
-                    break;
-                case "OAuthSignin":
-                    setError("Error signing in with OAuth provider. Please try again.");
-                    break;
-                case "OAuthCallback":
-                    setError("Error during OAuth callback. Please try again.");
-                    break;
-                case "CredentialsSignin":
-                    setError("Invalid email or password.");
-                    break;
-                default:
-                    setError("An error occurred during sign in. Please try again.");
-            }
-        }
-    }, [searchParams]);
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
@@ -67,7 +44,7 @@ function LoginForm() {
     return (
         <div className="p-8">
             <div className="text-center space-y-4 mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mx-auto">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-primary to-primary/80 rounded-2xl mx-auto">
                     <svg
                         className="w-8 h-8 text-primary-foreground"
                         fill="none"
@@ -197,20 +174,5 @@ function LoginForm() {
                 </Link>
             </div>
         </div>
-    );
-}
-
-export default function LoginPage() {
-    return (
-        <Suspense fallback={
-            <div className="p-8 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-4 text-muted-foreground">Loading...</p>
-                </div>
-            </div>
-        }>
-            <LoginForm />
-        </Suspense>
     );
 }
