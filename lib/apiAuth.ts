@@ -1,19 +1,19 @@
 import { prisma } from "@/lib/prisma";
-import { createSupabaseServer } from "@/lib/supabase/server";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 export async function requireAuth() {
-    const supabase = await createSupabaseServer();
-    const {
-        data: { user: authUser },
-    } = await supabase.auth.getUser();
+    const session = await auth();
 
-    if (!authUser) {
+    if (!session?.user?.email) {
         throw new Error("UNAUTHORIZED");
     }
 
     const user = await prisma.user.findUnique({
-        where: { email: authUser.email! },
+        where: { email: session.user.email },
+        include: {
+            teacherProfile: true,
+        },
     });
 
     if (!user) {
