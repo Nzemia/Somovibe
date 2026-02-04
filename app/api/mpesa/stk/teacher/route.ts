@@ -1,4 +1,4 @@
-import { getMpesaToken } from "@/lib/mpesa";
+import { getMpesaToken, getMpesaBaseUrl } from "@/lib/mpesa";
 import { NextResponse } from "next/server";
 import axios from "axios";
 import { prisma } from "@/lib/prisma";
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
     try {
         await axios.post(
-            "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+            `${getMpesaBaseUrl()}/mpesa/stkpush/v1/processrequest`,
             {
                 BusinessShortCode: process.env.MPESA_SHORTCODE,
                 Password: password,

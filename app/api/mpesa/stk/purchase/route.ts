@@ -1,4 +1,4 @@
-import { getMpesaToken } from "@/lib/mpesa";
+import { getMpesaToken, getMpesaBaseUrl } from "@/lib/mpesa";
 import axios from "axios";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -151,7 +151,7 @@ export async function POST(req: Request) {
         //console.log("Sending STK push to:", formattedPhone, "Amount:", pdf.price);
 
         await axios.post(
-            "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+            `${getMpesaBaseUrl()}/mpesa/stkpush/v1/processrequest`,
             {
                 BusinessShortCode: process.env.MPESA_SHORTCODE,
                 Password: password,
