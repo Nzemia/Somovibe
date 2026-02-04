@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTheme } from "./ThemeProvider";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { signOut } from "next-auth/react";
 import {
   Sheet,
   SheetContent,
@@ -26,13 +26,7 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
     setSigningOut(true);
     setMobileMenuOpen(false);
     try {
-      await supabase.auth.signOut();
-      await fetch("/api/auth/signout", {
-        method: "POST",
-        credentials: "include"
-      });
-      router.push("/");
-      router.refresh();
+      await signOut({ callbackUrl: "/" });
     } catch (error) {
       console.error("Sign out error:", error);
       setSigningOut(false);
