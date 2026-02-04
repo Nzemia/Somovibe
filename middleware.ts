@@ -1,51 +1,25 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
-    const res = NextResponse.next();
+export function middleware(req: NextRequest) {
+    const { pathname } = req.nextUrl;
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() {
-                    return req.cookies.getAll();
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) =>
-                        req.cookies.set(name, value)
-                    );
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        res.cookies.set(name, value, options)
-                    );
-                },
-            },
-        }
-    );
+    // Get session token from cookies
+    const sessionToken = req.cookies.get("authjs.session-token")?.value ||
+        req.cookies.get("__Secure-authjs.session-token")?.value;
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    const isLoggedIn = !!sessionToken;
 
-    const path = req.nextUrl.pathname;
+    const isDashboard = pathname.startsWith("/admin") ||
+        pathname.startsWith("/teacher") ||
+        pathname.startsWith("/student");
 
-    // Protect dashboard routes
-    if (
-        path.startsWith("/admin") ||
-        path.startsWith("/teacher") ||
-        path.startsWith("/student")
-    ) {
-        if (!user) {
-            return NextResponse.redirect(new URL("/login", req.url));
-        }
+    // Redirect to login if accessing dashboard without auth
+    if (isDashboard && !isLoggedIn) {
+        return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    // Note: API routes are protected individually in their handlers
-    // because we need to check roles from the database
-
-    return res;
+    return NextResponse.next();
 }
 
 export const config = {
