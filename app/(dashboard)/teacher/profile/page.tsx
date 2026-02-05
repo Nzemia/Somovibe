@@ -7,28 +7,34 @@ import { Badge } from "@/components/ui/badge";
 import ProfileForm from "./ProfileForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 
-export default async function StudentProfilePage() {
+export default async function TeacherProfilePage() {
     const user = await getCurrentUser();
 
-    if (!user || user.role !== "STUDENT") {
+    if (!user || user.role !== "TEACHER") {
         redirect("/");
     }
 
-    // Get user stats
-    const purchases = await prisma.purchase.findMany({
-        where: { userId: user.id },
-        include: {
-            pdf: {
-                select: {
-                    price: true,
-                    subject: true,
+    // Get teacher stats
+    const [materials, wallet, teacherProfile] = await Promise.all([
+        prisma.pdf.findMany({
+            where: { teacherId: user.id },
+            include: {
+                purchases: {
+                    select: { id: true },
                 },
             },
-        },
-    });
+        }),
+        prisma.wallet.findUnique({
+            where: { userId: user.id },
+            select: { balance: true },
+        }),
+        prisma.teacherProfile.findUnique({
+            where: { userId: user.id },
+        }),
+    ]);
 
-    const totalSpent = purchases.reduce((sum, p) => sum + p.pdf.price, 0);
-    const uniqueSubjects = new Set(purchases.map((p) => p.pdf.subject));
+    const totalSales = materials.reduce((sum, m) => sum + m.purchases.length, 0);
+    const approvedMaterials = materials.filter((m) => m.status === "APPROVED").length;
 
     return (
         <div className="min-h-screen bg-background">
@@ -42,7 +48,7 @@ export default async function StudentProfilePage() {
                         </p>
                     </div>
                     <Link
-                        href="/student"
+                        href="/teacher"
                         className="px-6 py-3 bg-secondary text-secondary-foreground rounded-md font-medium hover:bg-secondary/80 transition-colors inline-flex items-center justify-center space-x-2"
                     >
                         <svg
@@ -106,7 +112,23 @@ export default async function StudentProfilePage() {
                                             Your current role
                                         </p>
                                     </div>
-                                    <Badge variant="secondary">Student</Badge>
+                                    <Badge variant="default">Teacher</Badge>
+                                </div>
+
+                                <div className="flex items-center justify-between py-3 border-b border-border">
+                                    <div>
+                                        <p className="text-sm font-medium text-foreground">
+                                            Verification Status
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Teacher verification
+                                        </p>
+                                    </div>
+                                    {teacherProfile?.isActive ? (
+                                        <Badge variant="default">Verified</Badge>
+                                    ) : (
+                                        <Badge variant="secondary">Pending</Badge>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center justify-between py-3 border-b border-border">
@@ -146,8 +168,8 @@ export default async function StudentProfilePage() {
                     <div className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Learning Stats</CardTitle>
-                                <CardDescription>Your progress overview</CardDescription>
+                                <CardTitle>Teaching Stats</CardTitle>
+                                <CardDescription>Your performance overview</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
@@ -156,7 +178,7 @@ export default async function StudentProfilePage() {
                                             Materials
                                         </p>
                                         <p className="text-2xl font-bold text-foreground">
-                                            {purchases.length}
+                                            {materials.length}
                                         </p>
                                     </div>
                                     <svg
@@ -177,10 +199,58 @@ export default async function StudentProfilePage() {
                                 <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
                                     <div>
                                         <p className="text-xs text-muted-foreground mb-1">
-                                            Total Spent
+                                            Approved
+                                        </p>
+                                        <p className="text-2xl font-bold text-green-600">
+                                            {approvedMaterials}
+                                        </p>
+                                    </div>
+                                    <svg
+                                        className="w-8 h-8 text-green-600"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
+                                    <div>
+                                        <p className="text-xs text-muted-foreground mb-1">
+                                            Total Sales
+                                        </p>
+                                        <p className="text-2xl font-bold text-foreground">
+                                            {totalSales}
+                                        </p>
+                                    </div>
+                                    <svg
+                                        className="w-8 h-8 text-primary"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                        />
+                                    </svg>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 bg-primary/10 rounded-lg border-2 border-primary">
+                                    <div>
+                                        <p className="text-xs text-muted-foreground mb-1">
+                                            Wallet Balance
                                         </p>
                                         <p className="text-2xl font-bold text-primary">
-                                            KES {totalSpent}
+                                            KES {wallet?.balance || 0}
                                         </p>
                                     </div>
                                     <svg
@@ -194,30 +264,6 @@ export default async function StudentProfilePage() {
                                             strokeLinejoin="round"
                                             strokeWidth={2}
                                             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                    </svg>
-                                </div>
-
-                                <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
-                                    <div>
-                                        <p className="text-xs text-muted-foreground mb-1">
-                                            Subjects
-                                        </p>
-                                        <p className="text-2xl font-bold text-foreground">
-                                            {uniqueSubjects.size}
-                                        </p>
-                                    </div>
-                                    <svg
-                                        className="w-8 h-8 text-primary"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                                         />
                                     </svg>
                                 </div>
@@ -237,20 +283,20 @@ export default async function StudentProfilePage() {
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
                                             strokeWidth={2}
-                                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                                         />
                                     </svg>
                                     <h3 className="font-bold text-foreground mb-2">
-                                        Become a Teacher
+                                        Track Your Performance
                                     </h3>
                                     <p className="text-sm text-muted-foreground mb-4">
-                                        Share your knowledge and earn 75% from every sale
+                                        View detailed analytics of your materials
                                     </p>
                                     <Link
-                                        href="/teacher-register"
+                                        href="/teacher/analytics"
                                         className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity text-sm"
                                     >
-                                        Get Started
+                                        View Analytics
                                     </Link>
                                 </div>
                             </CardContent>

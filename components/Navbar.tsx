@@ -404,6 +404,19 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
                             </svg>
                             <span>Wallet</span>
                           </Link>
+                          <Link
+                            href="/teacher/profile"
+                            onClick={closeMobileMenu}
+                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/teacher/profile")
+                              ? "bg-primary text-primary-foreground"
+                              : "text-foreground hover:bg-accent"
+                              }`}
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span>Profile</span>
+                          </Link>
                         </>
                       )}
 
