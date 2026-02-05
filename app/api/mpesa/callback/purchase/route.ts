@@ -134,23 +134,28 @@ export async function POST(req: Request) {
             //     platformShare,
             // });
 
-            // Send email notifications
-            const [student, teacher] = await Promise.all([
-                prisma.user.findUnique({
-                    where: { id: payment.userId },
-                    select: { email: true },
-                }),
-                prisma.user.findUnique({
-                    where: { id: pdf.teacherId },
-                    select: { email: true },
-                }),
-            ]);
+            // Send email notifications (await to catch errors)
+            try {
+                const [student, teacher] = await Promise.all([
+                    prisma.user.findUnique({
+                        where: { id: payment.userId },
+                        select: { email: true },
+                    }),
+                    prisma.user.findUnique({
+                        where: { id: pdf.teacherId },
+                        select: { email: true },
+                    }),
+                ]);
 
-            if (student) {
-                sendPurchaseConfirmationEmail(student.email, pdf.title, actualAmount, pdfId);
-            }
-            if (teacher) {
-                sendNewSaleEmail(teacher.email, pdf.title, actualAmount, teacherShare, payment.userId);
+                if (student) {
+                    await sendPurchaseConfirmationEmail(student.email, pdf.title, actualAmount, pdfId);
+                }
+                if (teacher) {
+                    await sendNewSaleEmail(teacher.email, pdf.title, actualAmount, teacherShare, payment.userId);
+                }
+            } catch (emailError) {
+                console.error("Email sending failed, but purchase succeeded:", emailError);
+                // Don't fail the callback if email fails
             }
         } else {
             // Payment failed

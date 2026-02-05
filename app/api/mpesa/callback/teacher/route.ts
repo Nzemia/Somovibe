@@ -94,28 +94,33 @@ export async function POST(req: Request) {
 
             //console.log("✅ Teacher activated:", payment.userId);
 
-            // Send email notifications
-            const [teacher, adminId] = await Promise.all([
-                prisma.user.findUnique({
-                    where: { id: payment.userId },
-                    select: { email: true, phone: true },
-                }),
-                getPlatformAdminId(),
-            ]);
+            // Send email notifications (await to catch errors)
+            try {
+                const [teacher, adminId] = await Promise.all([
+                    prisma.user.findUnique({
+                        where: { id: payment.userId },
+                        select: { email: true, phone: true },
+                    }),
+                    getPlatformAdminId(),
+                ]);
 
-            if (teacher) {
-                sendTeacherVerificationCompleteEmail(teacher.email);
+                if (teacher) {
+                    await sendTeacherVerificationCompleteEmail(teacher.email);
 
-                // Notify admin
-                if (adminId) {
-                    const admin = await prisma.user.findUnique({
-                        where: { id: adminId },
-                        select: { email: true },
-                    });
-                    if (admin) {
-                        sendNewTeacherRegistrationEmail(admin.email, teacher.email, teacher.phone || "N/A");
+                    // Notify admin
+                    if (adminId) {
+                        const admin = await prisma.user.findUnique({
+                            where: { id: adminId },
+                            select: { email: true },
+                        });
+                        if (admin) {
+                            await sendNewTeacherRegistrationEmail(admin.email, teacher.email, teacher.phone || "N/A");
+                        }
                     }
                 }
+            } catch (emailError) {
+                console.error("Email sending failed, but verification succeeded:", emailError);
+                // Don't fail the callback if email fails
             }
         } else {
             // Payment failed
