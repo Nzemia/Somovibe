@@ -109,23 +109,28 @@ export async function POST(req: Request) {
 
         //console.log("✅ Purchase completed in DEV MODE");
 
-        // Send email notifications in DEV MODE
-        const [student, teacher] = await Promise.all([
-            prisma.user.findUnique({
-                where: { id: userId },
-                select: { email: true },
-            }),
-            prisma.user.findUnique({
-                where: { id: pdf.teacherId },
-                select: { email: true },
-            }),
-        ]);
+        // Send email notifications in DEV MODE (await to catch errors)
+        try {
+            const [student, teacher] = await Promise.all([
+                prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { email: true },
+                }),
+                prisma.user.findUnique({
+                    where: { id: pdf.teacherId },
+                    select: { email: true },
+                }),
+            ]);
 
-        if (student) {
-            sendPurchaseConfirmationEmail(student.email, pdf.title, pdf.price, pdfId);
-        }
-        if (teacher) {
-            sendNewSaleEmail(teacher.email, pdf.title, pdf.price, teacherShare, userId);
+            if (student) {
+                await sendPurchaseConfirmationEmail(student.email, pdf.title, pdf.price, pdfId);
+            }
+            if (teacher) {
+                await sendNewSaleEmail(teacher.email, pdf.title, pdf.price, teacherShare, userId);
+            }
+        } catch (emailError) {
+            console.error("Email sending failed in DEV MODE:", emailError);
+            // Don't fail the request if email fails
         }
 
         return NextResponse.json({

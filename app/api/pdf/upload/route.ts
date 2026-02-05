@@ -90,16 +90,21 @@ export async function POST(req: Request) {
 
         //console.log("PDF created successfully:", pdf.id);
 
-        // Notify admin of new material
-        const adminId = await getPlatformAdminId();
-        if (adminId) {
-            const admin = await prisma.user.findUnique({
-                where: { id: adminId },
-                select: { email: true },
-            });
-            if (admin) {
-                sendNewMaterialPendingEmail(admin.email, pdf.title, user.email, pdf.id);
+        // Notify admin of new material (await to catch errors)
+        try {
+            const adminId = await getPlatformAdminId();
+            if (adminId) {
+                const admin = await prisma.user.findUnique({
+                    where: { id: adminId },
+                    select: { email: true },
+                });
+                if (admin) {
+                    await sendNewMaterialPendingEmail(admin.email, pdf.title, user.email, pdf.id);
+                }
             }
+        } catch (emailError) {
+            console.error("Email sending failed, but upload succeeded:", emailError);
+            // Don't fail the request if email fails
         }
 
         return NextResponse.json(pdf);

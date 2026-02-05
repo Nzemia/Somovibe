@@ -41,11 +41,16 @@ export async function POST(req: Request) {
 
         //console.log(`PDF ${pdfId} ${status.toLowerCase()} by admin`);
 
-        // Send email notification
-        if (status === "APPROVED") {
-            sendMaterialApprovedEmail(pdf.teacher.email, pdf.title, pdf.id);
-        } else {
-            sendMaterialRejectedEmail(pdf.teacher.email, pdf.title);
+        // Send email notification (await to catch errors)
+        try {
+            if (status === "APPROVED") {
+                await sendMaterialApprovedEmail(pdf.teacher.email, pdf.title, pdf.id);
+            } else {
+                await sendMaterialRejectedEmail(pdf.teacher.email, pdf.title);
+            }
+        } catch (emailError) {
+            console.error("Email sending failed, but approval succeeded:", emailError);
+            // Don't fail the request if email fails
         }
 
         return NextResponse.json({ ok: true, status });
