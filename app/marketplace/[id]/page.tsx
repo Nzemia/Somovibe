@@ -237,7 +237,7 @@ export default async function MaterialDetailPage({ params }: Props) {
                                         materialType: material.materialType,
                                     }}
                                     hasPurchased={!!hasPurchased}
-                                    user={user ? { id: user.id, email: user.email, phone: user.phone } : null}
+                                    user={user ? { id: user.id, email: user.email, phone: user.phone, role: user.role } : null}
                                 />
 
                                 {/* Related Materials */}
