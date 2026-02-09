@@ -112,7 +112,7 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
                 <button
                   onClick={handleSignOut}
                   disabled={signingOut}
-                  className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium rounded-lg border border-red-500 text-red-600 bg-transparent hover:bg-red-50 transition-colors disabled:opacity-60"
                 >
                   {signingOut ? "Signing out..." : "Sign Out"}
                 </button>

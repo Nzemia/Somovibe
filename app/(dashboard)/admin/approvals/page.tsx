@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import ApprovalActions from "@/app/(dashboard)/admin/approvals/ApprovalActions";
 import { AdminNav } from "@/components/AdminNav";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminApprovalsPage() {
     const user = await getCurrentUser();
 
