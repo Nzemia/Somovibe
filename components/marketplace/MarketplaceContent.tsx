@@ -131,13 +131,14 @@ export function MarketplaceContent({
     sort,
   ]);
 
-  const hasActiveFilters =
+  const hasActiveFilters = Boolean(
     search.trim() ||
     grades.length > 0 ||
     subjects.length > 0 ||
     minPrice !== undefined ||
     maxPrice !== undefined ||
-    verifiedOnly;
+    verifiedOnly
+  );
 
   return (
     <div className="flex-1 w-full min-w-0 space-y-6 lg:pr-4">
