@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/apiAuth";
+import { sendNewReviewNotificationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
     try {
@@ -77,11 +78,49 @@ export async function POST(req: Request) {
             },
         });
 
+        // Send email notification to teacher
+        try {
+            const material = await prisma.pdf.findUnique({
+                where: { id: pdfId },
+                include: {
+                    teacher: {
+                        select: {
+                            email: true,
+                        },
+                    },
+                },
+            });
+
+            if (material) {
+                await sendNewReviewNotificationEmail(
+                    material.teacher.email,
+                    material.title,
+                    rating,
+                    user.email,
+                    comment || null,
+                    pdfId
+                );
+            }
+        } catch (emailError) {
+            console.error("Failed to send review notification email:", emailError);
+            // Don't fail the request if email fails
+        }
+
         return NextResponse.json(review);
     } catch (error: any) {
         console.error("Review submission error:", error);
+
+        // User-friendly error messages
+        let errorMessage = "Unable to submit review. Please try again.";
+
+        if (error.code === "P2002") {
+            errorMessage = "You've already reviewed this material";
+        } else if (error.code === "P2025") {
+            errorMessage = "Material not found";
+        }
+
         return NextResponse.json(
-            { error: error.message || "Failed to submit review" },
+            { error: errorMessage },
             { status: 500 }
         );
     }
