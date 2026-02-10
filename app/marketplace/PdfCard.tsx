@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getMaterialTypeConfig } from "@/lib/materialTypes";
+import { getAverageRating } from "@/lib/utils";
 import Link from "next/link";
 
 type PdfCardProps = {
@@ -21,7 +22,11 @@ type PdfCardProps = {
         };
         _count: {
             downloads: number;
+            reviews: number;
         };
+        reviews: {
+            rating: number;
+        }[];
     };
     isPurchased: boolean;
     user: { id?: string; email: string; phone?: string | null } | null;
@@ -32,6 +37,7 @@ export default function PdfCard({ pdf, isPurchased, user }: PdfCardProps) {
     const [downloading, setDownloading] = useState(false);
 
     const materialConfig = getMaterialTypeConfig(pdf.materialType);
+    const avgRating = getAverageRating(pdf.reviews);
 
     const handleDownload = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -109,12 +115,25 @@ export default function PdfCard({ pdf, isPurchased, user }: PdfCardProps) {
 
                     {/* Stats */}
                     <div className="flex items-center justify-between mb-3 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                            <span className="text-yellow-500">⭐</span>
-                            <span>{pdf._count.downloads}</span>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                <span>{pdf._count.downloads}</span>
+                            </div>
+                            {avgRating > 0 && (
+                                <div className="flex items-center gap-1">
+                                    <svg className="w-4 h-4 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    <span>{avgRating.toFixed(1)}</span>
+                                    <span className="text-muted-foreground/70">({pdf._count.reviews})</span>
+                                </div>
+                            )}
                         </div>
                         <span className={`${materialConfig.textColor} font-medium`}>
-                            {materialConfig.icon} {materialConfig.label}
+                            {materialConfig.icon}
                         </span>
                     </div>
 

@@ -29,7 +29,8 @@ type Material = {
     materialType: string;
     thumbnailUrl: string | null;
     teacher: { email: string };
-    _count: { downloads: number };
+    _count: { downloads: number; reviews: number };
+    reviews: { rating: number }[];
 };
 
 type Props = {

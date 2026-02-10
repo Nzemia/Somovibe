@@ -3,8 +3,11 @@ import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { notFound } from "next/navigation";
 import { getMaterialTypeConfig } from "@/lib/materialTypes";
+import { getAverageRating, maskEmail } from "@/lib/utils";
 import Link from "next/link";
 import MaterialDetailClient from "./MaterialDetailClient";
+import ReviewSection from "./ReviewSection";
+
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -28,6 +31,19 @@ export default async function MaterialDetailPage({ params }: Props) {
                 select: {
                     id: true,
                 },
+            },
+            reviews: {
+                include: {
+                    user: {
+                        select: {
+                            email: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+                take: 3,
             },
         },
     });
@@ -73,6 +89,12 @@ export default async function MaterialDetailPage({ params }: Props) {
             _count: {
                 select: {
                     downloads: true,
+                    reviews: true,
+                },
+            },
+            reviews: {
+                select: {
+                    rating: true,
                 },
             },
         },
@@ -96,6 +118,12 @@ export default async function MaterialDetailPage({ params }: Props) {
             _count: {
                 select: {
                     downloads: true,
+                    reviews: true,
+                },
+            },
+            reviews: {
+                select: {
+                    rating: true,
                 },
             },
         },
@@ -234,6 +262,22 @@ export default async function MaterialDetailPage({ params }: Props) {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Reviews Section */}
+                            <ReviewSection
+                                materialId={material.id}
+                                reviews={material.reviews.map(r => ({
+                                    id: r.id,
+                                    rating: r.rating,
+                                    comment: r.comment,
+                                    createdAt: r.createdAt,
+                                    userEmail: maskEmail(r.user.email),
+                                }))}
+                                averageRating={getAverageRating(material.reviews)}
+                                totalReviews={material.reviews.length}
+                                hasPurchased={!!hasPurchased}
+                                user={user}
+                            />
                         </div>
 
                         {/* Right Column - Purchase Card */}

@@ -17,6 +17,12 @@ export default async function Marketplace() {
             _count: {
                 select: {
                     downloads: true,
+                    reviews: true,
+                },
+            },
+            reviews: {
+                select: {
+                    rating: true,
                 },
             },
         },
