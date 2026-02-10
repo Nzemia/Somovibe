@@ -285,3 +285,44 @@ export async function sendNewTeacherRegistrationEmail(
         `,
     });
 }
+
+export async function sendNewReviewNotificationEmail(
+    teacherEmail: string,
+    materialTitle: string,
+    rating: number,
+    reviewerEmail: string,
+    comment: string | null,
+    materialId: string
+) {
+    const stars = "⭐".repeat(rating);
+    return sendEmail({
+        to: teacherEmail,
+        subject: `${stars} New Review on "${materialTitle}"`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #f59e0b;">New Review Received! ${stars}</h1>
+                <p>Someone just reviewed your material "<strong>${materialTitle}</strong>".</p>
+                
+                <div style="background-color: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                    <p><strong>Rating:</strong> ${stars} (${rating}/5)</p>
+                    <p><strong>Reviewer:</strong> ${reviewerEmail.split('@')[0]}***</p>
+                    ${comment ? `
+                        <div style="background-color: white; padding: 15px; border-radius: 6px; margin-top: 15px;">
+                            <p style="margin: 0; color: #374151; font-style: italic;">"${comment}"</p>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <a href="${process.env.NEXT_PUBLIC_BASE_URL}/marketplace/${materialId}" 
+                   style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                    View Review & Reply
+                </a>
+                
+                <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                    You can reply to this review to engage with your students!
+                </p>
+            </div>
+        `,
+    });
+}
+

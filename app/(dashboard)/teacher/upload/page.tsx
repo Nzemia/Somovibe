@@ -43,6 +43,8 @@ export default function UploadPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [file, setFile] = useState<File | null>(null);
+    const [thumbnail, setThumbnail] = useState<File | null>(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
 
     const [formData, setFormData] = useState({
         title: "",
@@ -73,6 +75,25 @@ export default function UploadPage() {
         }
     };
 
+    const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (selectedFile) {
+            if (!selectedFile.type.startsWith("image/")) {
+                setError("Thumbnail must be an image file");
+                setThumbnail(null);
+                return;
+            }
+            if (selectedFile.size > 5 * 1024 * 1024) { // 5MB limit
+                setError("Thumbnail size must be less than 5MB");
+                setThumbnail(null);
+                return;
+            }
+            setThumbnail(selectedFile);
+            setThumbnailPreview(URL.createObjectURL(selectedFile));
+            setError("");
+        }
+    };
+
     const getAcceptedFileTypes = () => {
         if (!formData.materialType) return ".pdf,.pptx,.ppt";
         const materialType = MATERIAL_TYPES.find(t => t.value === formData.materialType);
@@ -98,6 +119,9 @@ export default function UploadPage() {
         try {
             const formDataToSend = new FormData();
             formDataToSend.append("file", file);
+            if (thumbnail) {
+                formDataToSend.append("thumbnail", thumbnail);
+            }
             formDataToSend.append("title", formData.title);
             formDataToSend.append("description", formData.description);
             formDataToSend.append("subject", formData.subject);
@@ -299,6 +323,52 @@ export default function UploadPage() {
                                             </p>
                                             <p className="text-xs text-muted-foreground">
                                                 {formData.materialType ? `Accepted: ${getAcceptedFileTypes()} • Max: 10MB` : "Choose a material type above"}
+                                            </p>
+                                        </div>
+                                    )}
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Thumbnail Upload */}
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Thumbnail Image (Optional)
+                            </label>
+                            <p className="text-xs text-muted-foreground mb-3">
+                                Upload a custom thumbnail or we'll use a default one based on material type
+                            </p>
+                            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleThumbnailChange}
+                                    className="hidden"
+                                    id="thumbnail-upload"
+                                />
+                                <label htmlFor="thumbnail-upload" className="cursor-pointer">
+                                    {thumbnailPreview ? (
+                                        <div className="flex flex-col items-center space-y-3">
+                                            <img
+                                                src={thumbnailPreview}
+                                                alt="Thumbnail preview"
+                                                className="w-48 h-32 object-cover rounded-lg"
+                                            />
+                                            <p className="text-sm font-medium text-foreground">{thumbnail?.name}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {thumbnail && (thumbnail.size / 1024 / 1024).toFixed(2)} MB
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <svg className="w-12 h-12 mx-auto text-muted-foreground mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p className="text-sm font-medium text-foreground mb-1">
+                                                Click to upload thumbnail
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                PNG, JPG, WEBP • Max: 5MB
                                             </p>
                                         </div>
                                     )}

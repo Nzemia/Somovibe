@@ -3,8 +3,11 @@ import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { notFound } from "next/navigation";
 import { getMaterialTypeConfig } from "@/lib/materialTypes";
+import { getAverageRating, maskEmail } from "@/lib/utils";
 import Link from "next/link";
 import MaterialDetailClient from "./MaterialDetailClient";
+import ReviewSection from "./ReviewSection";
+
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -28,6 +31,19 @@ export default async function MaterialDetailPage({ params }: Props) {
                 select: {
                     id: true,
                 },
+            },
+            reviews: {
+                include: {
+                    user: {
+                        select: {
+                            email: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+                take: 3,
             },
         },
     });
@@ -70,6 +86,17 @@ export default async function MaterialDetailPage({ params }: Props) {
                     email: true,
                 },
             },
+            _count: {
+                select: {
+                    downloads: true,
+                    reviews: true,
+                },
+            },
+            reviews: {
+                select: {
+                    rating: true,
+                },
+            },
         },
         take: 3,
         orderBy: { createdAt: "desc" },
@@ -86,6 +113,17 @@ export default async function MaterialDetailPage({ params }: Props) {
             teacher: {
                 select: {
                     email: true,
+                },
+            },
+            _count: {
+                select: {
+                    downloads: true,
+                    reviews: true,
+                },
+            },
+            reviews: {
+                select: {
+                    rating: true,
                 },
             },
         },
@@ -111,6 +149,7 @@ export default async function MaterialDetailPage({ params }: Props) {
 
                     {/* Main Content */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
                         {/* Left Column - Material Details */}
                         <div className="lg:col-span-2 space-y-6">
                             {/* Material Type Badge */}
@@ -224,10 +263,42 @@ export default async function MaterialDetailPage({ params }: Props) {
                                     </div>
                                 </div>
                             )}
+                            {/* Purchase Card */}
+                            <div className="lg:hidden">
+                                <MaterialDetailClient
+                                    material={{
+                                        id: material.id,
+                                        title: material.title,
+                                        price: material.price,
+                                        materialType: material.materialType,
+                                    }}
+                                    hasPurchased={!!hasPurchased}
+                                    user={user ? { id: user.id, email: user.email, phone: user.phone, role: user.role } : null}
+                                />
+                            </div>
+
+                            <ReviewSection
+                                materialId={material.id}
+                                reviews={material.reviews.map(r => ({
+                                    id: r.id,
+                                    rating: r.rating,
+                                    comment: r.comment,
+                                    reply: r.reply,
+                                    repliedAt: r.repliedAt,
+                                    createdAt: r.createdAt,
+                                    userEmail: maskEmail(r.user.email),
+                                    userId: r.userId,
+                                }))}
+                                averageRating={getAverageRating(material.reviews)}
+                                totalReviews={material.reviews.length}
+                                hasPurchased={!!hasPurchased}
+                                isTeacher={user?.id === material.teacherId}
+                                user={user}
+                            />
                         </div>
 
-                        {/* Right Column - Purchase Card */}
-                        <div className="lg:col-span-1">
+                        {/* Right Column - Purchase Card (Desktop Only) */}
+                        <div className="hidden lg:block lg:col-span-1">
                             <div className="sticky top-8">
                                 <MaterialDetailClient
                                     material={{
