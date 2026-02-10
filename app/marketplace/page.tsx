@@ -14,6 +14,17 @@ export default async function Marketplace() {
                     email: true,
                 },
             },
+            _count: {
+                select: {
+                    downloads: true,
+                    reviews: true,
+                },
+            },
+            reviews: {
+                select: {
+                    rating: true,
+                },
+            },
         },
         orderBy: { createdAt: "desc" },
     });

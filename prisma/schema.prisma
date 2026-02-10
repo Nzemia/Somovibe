@@ -37,6 +37,7 @@ model User {
   pendingPayments PendingPayment[]
   downloads       Download[]
   materialViews   MaterialView[]
+  reviews         Review[]
 }
 
 model Account {
@@ -137,6 +138,7 @@ model Pdf {
   grade        String
   price        Int
   fileUrl      String
+  thumbnailUrl String?
   materialType MaterialType @default(PDF)
   status       PdfStatus    @default(PENDING)
   teacherId    String
@@ -147,6 +149,7 @@ model Pdf {
   purchases     Purchase[]
   downloads     Download[]
   materialViews MaterialView[]
+  reviews       Review[]
 }
 
 model Wallet {
@@ -206,4 +209,22 @@ model MaterialView {
 
   @@index([pdfId])
   @@index([userId])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  pdfId     String
+  rating    Int      // 1-5 stars
+  comment   String?
+  reply     String?  // Teacher's reply to the review
+  repliedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  pdf  Pdf  @relation(fields: [pdfId], references: [id])
+
+  @@unique([userId, pdfId]) // One review per user per material
+  @@index([pdfId])
 }
