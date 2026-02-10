@@ -70,6 +70,11 @@ export default async function MaterialDetailPage({ params }: Props) {
                     email: true,
                 },
             },
+            _count: {
+                select: {
+                    downloads: true,
+                },
+            },
         },
         take: 3,
         orderBy: { createdAt: "desc" },
@@ -86,6 +91,11 @@ export default async function MaterialDetailPage({ params }: Props) {
             teacher: {
                 select: {
                     email: true,
+                },
+            },
+            _count: {
+                select: {
+                    downloads: true,
                 },
             },
         },

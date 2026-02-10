@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { signIn } from "next-auth/react";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -100,7 +101,7 @@ export default function LoginPage() {
                     </div>
 
                     <Button type="submit" disabled={loading} className="w-full" size="lg">
-                        {loading ? "Signing in..." : "Sign In"}
+                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Sign In"}
                     </Button>
                 </form>
 
