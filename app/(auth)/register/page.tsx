@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { signIn } from "next-auth/react";
+import { Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -202,7 +203,7 @@ export default function RegisterPage() {
                         className="w-full"
                         size="lg"
                     >
-                        {loading ? "Creating Account..." : "Create Account"}
+                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Create Account"}
                     </Button>
                 </form>
 

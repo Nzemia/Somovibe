@@ -137,6 +137,7 @@ model Pdf {
   grade        String
   price        Int
   fileUrl      String
+  thumbnailUrl String?
   materialType MaterialType @default(PDF)
   status       PdfStatus    @default(PENDING)
   teacherId    String
