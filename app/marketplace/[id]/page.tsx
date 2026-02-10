@@ -149,19 +149,6 @@ export default async function MaterialDetailPage({ params }: Props) {
 
                     {/* Main Content */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Mobile: Purchase Card First */}
-                        <div className="lg:hidden">
-                            <MaterialDetailClient
-                                material={{
-                                    id: material.id,
-                                    title: material.title,
-                                    price: material.price,
-                                    materialType: material.materialType,
-                                }}
-                                hasPurchased={!!hasPurchased}
-                                user={user ? { id: user.id, email: user.email, phone: user.phone, role: user.role } : null}
-                            />
-                        </div>
 
                         {/* Left Column - Material Details */}
                         <div className="lg:col-span-2 space-y-6">
@@ -276,6 +263,19 @@ export default async function MaterialDetailPage({ params }: Props) {
                                     </div>
                                 </div>
                             )}
+                            {/* Purchase Card */}
+                            <div className="lg:hidden">
+                                <MaterialDetailClient
+                                    material={{
+                                        id: material.id,
+                                        title: material.title,
+                                        price: material.price,
+                                        materialType: material.materialType,
+                                    }}
+                                    hasPurchased={!!hasPurchased}
+                                    user={user ? { id: user.id, email: user.email, phone: user.phone, role: user.role } : null}
+                                />
+                            </div>
 
                             <ReviewSection
                                 materialId={material.id}
