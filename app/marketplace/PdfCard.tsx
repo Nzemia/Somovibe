@@ -75,15 +75,21 @@ export default function PdfCard({ pdf, isPurchased, user }: PdfCardProps) {
             <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-muted overflow-hidden">
-                    <img
-                        src={pdf.thumbnailUrl || materialConfig.lightColor}
-                        alt={pdf.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = `https://via.placeholder.com/400x225/6366f1/ffffff?text=${encodeURIComponent(materialConfig.icon)}`;
-                        }}
-                    />
+                    {pdf.thumbnailUrl ? (
+                        <img
+                            src={pdf.thumbnailUrl}
+                            alt={pdf.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = `https://via.placeholder.com/400x225/6366f1/ffffff?text=${encodeURIComponent(materialConfig.icon)}`;
+                            }}
+                        />
+                    ) : (
+                        <div className={`w-full h-full flex items-center justify-center ${materialConfig.lightColor}`}>
+                            <span className="text-6xl">{materialConfig.icon}</span>
+                        </div>
+                    )}
                     {isPurchased && (
                         <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full shadow-lg">
                             ✓ Owned

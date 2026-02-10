@@ -217,6 +217,8 @@ model Review {
   pdfId     String
   rating    Int      // 1-5 stars
   comment   String?
+  reply     String?  // Teacher's reply to the review
+  repliedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
