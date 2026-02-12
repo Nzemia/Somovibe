@@ -32,6 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env
+.env.example
+
+
+withdrawal_setup.md
+
+# generated prisma client
+generated/client
 
 # vercel
 .vercel
