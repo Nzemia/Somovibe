@@ -4,82 +4,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getMaterialTypeConfig } from "@/lib/materialTypes";
+import { getAverageRating } from "@/lib/utils";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
-type Props = {
-    material: {
-        id: string;
-        title: string;
-        price: number;
-        materialType: string;
-    };
-    hasPurchased: boolean;
-    user: { id: string; email: string; phone: string | null; role: string } | null;
+type MaterialDetailClientProps = {
+    material: any;
+    isPurchased: boolean;
+    user: any;
 };
 
-export default function MaterialDetailClient({ material, hasPurchased, user }: Props) {
+export default function MaterialDetailClient({
+    material,
+    isPurchased,
+    user,
+}: MaterialDetailClientProps) {
     const router = useRouter();
-    const [showModal, setShowModal] = useState(false);
-    const [phone, setPhone] = useState(user?.phone || "");
-    const [loading, setLoading] = useState(false);
     const [downloading, setDownloading] = useState(false);
+    const [purchasing, setPurchasing] = useState(false);
 
     const materialConfig = getMaterialTypeConfig(material.materialType);
-
-    const handleBuyClick = () => {
-        if (!user) {
-            toast.error("Please login to purchase materials");
-            router.push("/login");
-            return;
-        }
-        setShowModal(true);
-    };
-
-    const handlePurchase = async () => {
-        if (!phone) {
-            toast.error("Please enter your M-Pesa phone number");
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            const res = await fetch("/api/mpesa/stk/purchase", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    phone,
-                    pdfId: material.id,
-                    userId: user?.id,
-                }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || "Failed to initiate payment");
-            }
-
-            // Check if dev mode
-            if (data.devMode) {
-                toast.success("Purchase completed successfully!");
-                setShowModal(false);
-                router.refresh();
-                return;
-            }
-
-            toast.success("STK push sent! Please enter your M-Pesa PIN");
-            setShowModal(false);
-
-            // Refresh after a delay to show the purchase
-            setTimeout(() => {
-                router.refresh();
-            }, 3000);
-        } catch (err: any) {
-            toast.error(err.message || "Failed to initiate payment");
-        } finally {
-            setLoading(false);
-        }
-    };
+    const avgRating = getAverageRating(material.reviews);
 
     const handleDownload = async () => {
         setDownloading(true);
@@ -111,157 +56,238 @@ export default function MaterialDetailClient({ material, hasPurchased, user }: P
         }
     };
 
-    return (
-        <>
-            <div className={`bg-card border-2 ${materialConfig.borderColor} rounded-lg p-6 space-y-6`}>
-                {/* Price */}
-                <div>
-                    <p className="text-sm text-muted-foreground mb-2">Price</p>
-                    <p className="text-4xl font-bold text-primary">KES {material.price}</p>
-                </div>
+    const handlePurchase = async () => {
+        if (!user) {
+            toast.error("Please login to purchase");
+            router.push("/login");
+            return;
+        }
 
-                {/* Action Button */}
-                {user?.role === "ADMIN" ? (
-                    <button
-                        onClick={handleDownload}
-                        disabled={downloading}
-                        className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center space-x-2"
-                    >
-                        {downloading ? (
-                            <>
-                                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Downloading...</span>
-                            </>
-                        ) : (
-                            <>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                <span>Preview Material (Admin)</span>
-                            </>
-                        )}
-                    </button>
-                ) : hasPurchased ? (
-                    <button
-                        onClick={handleDownload}
-                        disabled={downloading}
-                        className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center space-x-2"
-                    >
-                        {downloading ? (
-                            <>
-                                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Downloading...</span>
-                            </>
-                        ) : (
-                            <>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        if (!user.phone) {
+            toast.error("Please add your phone number in your profile");
+            router.push(`/${user.role.toLowerCase()}/profile`);
+            return;
+        }
+
+        setPurchasing(true);
+        const loadingToast = toast.loading("Initiating payment...");
+
+        try {
+            const res = await fetch("/api/mpesa/stk/purchase", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    pdfId: material.id,
+                    phone: user.phone,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to initiate payment");
+            }
+
+            toast.success("Payment request sent! Check your phone", { id: loadingToast });
+            router.push(`/payment-status?ref=${data.referenceCode}`);
+        } catch (err: any) {
+            toast.error(err.message || "Failed to initiate payment", { id: loadingToast });
+        } finally {
+            setPurchasing(false);
+        }
+    };
+
+    const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: material.title,
+                    text: `Check out this learning material: ${material.title}`,
+                    url: shareUrl,
+                });
+            } catch (err) {
+                // User cancelled or error
+            }
+        } else {
+            navigator.clipboard.writeText(shareUrl);
+            toast.success("Link copied to clipboard!");
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-background">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Back Button */}
+                <Link
+                    href="/marketplace"
+                    className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
+                >
+                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to Marketplace
+                </Link>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Main Content */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Thumbnail */}
+                        <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+                            {material.thumbnailUrl ? (
+                                <img
+                                    src={material.thumbnailUrl}
+                                    alt={material.title}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className={`w-full h-full flex items-center justify-center ${materialConfig.lightColor}`}>
+                                    <span className="text-9xl">{materialConfig.icon}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Title and Badges */}
+                        <div>
+                            <div className="flex items-center gap-2 mb-3">
+                                <Badge className={materialConfig.textColor}>
+                                    {materialConfig.icon} {materialConfig.label}
+                                </Badge>
+                                <Badge variant="outline">{material.subject}</Badge>
+                                <Badge variant="outline">{material.grade}</Badge>
+                            </div>
+                            <h1 className="text-3xl font-bold text-foreground mb-2">
+                                {material.title}
+                            </h1>
+                            <p className="text-muted-foreground">{material.description}</p>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex items-center gap-6 text-sm">
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
-                                <span>Download Now</span>
-                            </>
-                        )}
-                    </button>
-                ) : (
-                    <button
-                        onClick={handleBuyClick}
-                        className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
-                    >
-                        Buy Now
-                    </button>
-                )}
+                                <span className="text-foreground font-medium">{material._count.downloads}</span>
+                                <span className="text-muted-foreground">Downloads</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                                <span className="text-foreground font-medium">{material._count.purchases}</span>
+                                <span className="text-muted-foreground">Sales</span>
+                            </div>
+                            {avgRating > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    <span className="text-foreground font-medium">{avgRating.toFixed(1)}</span>
+                                    <span className="text-muted-foreground">({material._count.reviews} reviews)</span>
+                                </div>
+                            )}
+                        </div>
 
-                {/* Features */}
-                <div className="pt-6 border-t border-border space-y-3">
-                    <div className="flex items-start space-x-3">
-                        <svg className="w-5 h-5 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <p className="text-sm text-muted-foreground">Instant download after purchase</p>
+                        {/* Teacher Info */}
+                        <div className="bg-card border border-border rounded-lg p-4">
+                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Created by</h3>
+                            <Link
+                                href={`/teacher/${material.teacher.id}`}
+                                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                            >
+                                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <span className="text-xl font-bold text-primary">
+                                        {(material.teacher.name || material.teacher.email)[0].toUpperCase()}
+                                    </span>
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-medium text-foreground">
+                                            {material.teacher.name || material.teacher.email.split("@")[0]}
+                                        </p>
+                                        {material.teacher.teacherProfile?.isActive && (
+                                            <Badge className="bg-green-500 text-white text-xs">
+                                                ✓ Verified
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">View all materials →</p>
+                                </div>
+                            </Link>
+                        </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                        <svg className="w-5 h-5 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <p className="text-sm text-muted-foreground">Verified by admin</p>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                        <svg className="w-5 h-5 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <p className="text-sm text-muted-foreground">Secure M-Pesa payment</p>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                        <svg className="w-5 h-5 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <p className="text-sm text-muted-foreground">Download anytime</p>
+
+                    {/* Sidebar */}
+                    <div className="space-y-4">
+                        {/* Purchase Card */}
+                        <div className="bg-card border border-border rounded-lg p-6 sticky top-4">
+                            <div className="text-3xl font-bold text-foreground mb-4">
+                                KES {material.price}
+                            </div>
+
+                            {isPurchased ? (
+                                <>
+                                    <div className="mb-4 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md">
+                                        <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                                            ✓ You own this material
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={handleDownload}
+                                        disabled={downloading}
+                                        className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50 mb-3"
+                                    >
+                                        {downloading ? "Downloading..." : "Download Now"}
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={handlePurchase}
+                                    disabled={purchasing}
+                                    className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50 mb-3"
+                                >
+                                    {purchasing ? "Processing..." : "Buy Now"}
+                                </button>
+                            )}
+
+                            <button
+                                onClick={handleShare}
+                                className="w-full px-6 py-3 bg-secondary text-secondary-foreground rounded-md font-medium hover:bg-secondary/80 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                                Share
+                            </button>
+
+                            <div className="mt-4 pt-4 border-t border-border">
+                                <ul className="space-y-2 text-sm text-muted-foreground">
+                                    <li className="flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Instant download after purchase
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Lifetime access
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Quality verified content
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            {/* Purchase Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-card border border-border rounded-lg max-w-md w-full p-6">
-                        <h3 className="text-xl font-bold text-foreground mb-4">Complete Purchase</h3>
-
-                        <div className="mb-4">
-                            <p className="text-sm text-muted-foreground mb-2">
-                                Material: <span className="font-medium text-foreground">{material.title}</span>
-                            </p>
-                            <p className="text-sm text-muted-foreground mb-2">
-                                Price: <span className="font-bold text-primary">KES {material.price}</span>
-                            </p>
-                        </div>
-
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-foreground mb-2">
-                                M-Pesa Phone Number
-                            </label>
-                            <input
-                                type="tel"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="254712345678"
-                                className="w-full px-4 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
-                            />
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                Format: 254XXXXXXXXX (no spaces or +)
-                            </p>
-                        </div>
-
-                        {process.env.NEXT_PUBLIC_DEV_MODE === "true" && (
-                            <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded text-xs text-primary">
-                                🔧 DEV MODE: Purchase will be auto-approved for testing
-                            </div>
-                        )}
-
-                        <div className="flex space-x-3">
-                            <button
-                                onClick={handlePurchase}
-                                disabled={loading}
-                                className="flex-1 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-                            >
-                                {loading ? "Processing..." : "Pay with M-Pesa"}
-                            </button>
-                            <button
-                                onClick={() => setShowModal(false)}
-                                disabled={loading}
-                                className="px-6 py-2 bg-secondary text-secondary-foreground rounded-md font-medium hover:bg-secondary/80 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
+        </div>
     );
 }

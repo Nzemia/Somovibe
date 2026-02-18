@@ -58,6 +58,15 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
                     Home
                   </Link>
                   <Link
+                    href="/marketplace"
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/marketplace")
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      }`}
+                  >
+                    Marketplace
+                  </Link>
+                  <Link
                     href="/about"
                     className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/about")
                       ? "bg-primary text-primary-foreground"
@@ -240,6 +249,19 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                         <span>Home</span>
+                      </Link>
+                      <Link
+                        href="/marketplace"
+                        onClick={closeMobileMenu}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/marketplace")
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-accent"
+                          }`}
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span>Marketplace</span>
                       </Link>
                       <Link
                         href="/about"

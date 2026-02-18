@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getMaterialTypeConfig } from "@/lib/materialTypes";
 import { Badge } from "@/components/ui/badge";
+import ShareButton from "@/components/ShareButton";
 
 export default async function TeacherAnalyticsPage() {
     const user = await getCurrentUser();
@@ -130,9 +131,19 @@ export default async function TeacherAnalyticsPage() {
                                                 <div className="flex items-start space-x-3 mb-3">
                                                     <span className="text-3xl">{config.icon}</span>
                                                     <div className="flex-1">
-                                                        <h3 className="text-lg font-bold text-foreground mb-1">
-                                                            {material.title}
-                                                        </h3>
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <h3 className="text-lg font-bold text-foreground mb-1">
+                                                                {material.title}
+                                                            </h3>
+                                                            {material.status === "APPROVED" && (
+                                                                <ShareButton
+                                                                    url={`/marketplace/${material.id}`}
+                                                                    title={material.title}
+                                                                    description={material.description}
+                                                                    variant="icon"
+                                                                />
+                                                            )}
+                                                        </div>
                                                         <div className="flex flex-wrap gap-2 mb-2">
                                                             <Badge variant="secondary">{material.subject}</Badge>
                                                             <Badge variant="secondary">{material.grade}</Badge>
