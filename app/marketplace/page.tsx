@@ -2,6 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import MarketplaceClient from "./MarketplaceClient";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Questy | Marketplace",
+    description: "Discover quality CBC learning materials from verified teachers. Browse notes, schemes of work, lesson plans, and more for all grades.",
+    openGraph: {
+        title: "Questy Marketplace - Quality Learning Materials",
+        description: "Browse and purchase quality learning materials from verified teachers",
+        type: "website",
+    },
+};
 
 export default async function Marketplace({
     searchParams,

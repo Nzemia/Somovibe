@@ -3,6 +3,18 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import HeroSlider from "@/components/HeroSlider";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Questy | Home - CBC Learning Platform",
+  description: "Quality CBC learning materials from verified teachers. Learn, teach, and earn with Questy - Kenya's premier educational marketplace.",
+  openGraph: {
+    title: "Questy - CBC Learning Platform",
+    description: "Quality CBC learning materials from verified teachers",
+    type: "website",
+  },
+};
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -16,34 +28,12 @@ export default async function Home() {
   return (
     <>
       <Navbar user={null} />
-      <div className="min-h-screen bg-background">
-        {/* Hero Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-              Welcome to <span className="text-primary">Questy</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Quality CBC learning materials from verified teachers. Learn, teach, and earn.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/marketplace"
-                className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
-              >
-                Browse Materials
-              </Link>
-              <Link
-                href="/teacher-register"
-                className="px-8 py-4 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:bg-secondary/80 transition-colors"
-              >
-                Become a Teacher
-              </Link>
-            </div>
-          </div>
-        </div>
 
-        {/* Features Section */}
+      {/* Full-Screen Hero Slider */}
+      <HeroSlider />
+
+      {/* Features Section */}
+      <div className="bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* For Students */}
@@ -113,8 +103,8 @@ export default async function Home() {
           </div>
         </div>
       </div>
+
       <Footer />
     </>
   );
 }
-
