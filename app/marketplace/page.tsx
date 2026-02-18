@@ -3,14 +3,20 @@ import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import MarketplaceClient from "./MarketplaceClient";
 
-export default async function Marketplace() {
+export default async function Marketplace({
+    searchParams,
+}: {
+    searchParams: Promise<{ material?: string; teacher?: string }>;
+}) {
     const user = await getCurrentUser();
+    const params = await searchParams;
 
     const pdfs = await prisma.pdf.findMany({
         where: { status: "APPROVED" },
         include: {
             teacher: {
                 select: {
+                    id: true,
                     email: true,
                 },
             },
@@ -64,6 +70,8 @@ export default async function Marketplace() {
                             materials={pdfs}
                             purchasedIds={purchasedPdfIds}
                             user={user ? { id: user.id, email: user.email, role: user.role, phone: user.phone } : null}
+                            highlightMaterialId={params.material}
+                            filterTeacherId={params.teacher}
                         />
                     )}
                 </div>
