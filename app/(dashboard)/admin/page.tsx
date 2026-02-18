@@ -114,7 +114,7 @@ export default async function AdminDashboard() {
                         <p className="text-xs text-muted-foreground mt-1">{pendingPdfs} pending approval</p>
                     </div>
 
-                    <div className="bg-card border border-border rounded-lg p-6">
+                    <Link href="/admin/wallet" className="bg-card border border-border rounded-lg p-6 hover:bg-accent transition-colors block">
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-muted-foreground text-sm font-medium">Platform Wallet</h3>
                             <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,8 +122,8 @@ export default async function AdminDashboard() {
                             </svg>
                         </div>
                         <p className="text-3xl font-bold text-primary">KES {platformWallet?.balance || 0}</p>
-                        <p className="text-xs text-muted-foreground mt-1">Current balance</p>
-                    </div>
+                        <p className="text-xs text-muted-foreground mt-1">Click to manage</p>
+                    </Link>
                 </div>
 
                 {/* Revenue Breakdown */}

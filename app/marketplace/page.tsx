@@ -2,15 +2,32 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import MarketplaceClient from "./MarketplaceClient";
+import { Metadata } from "next";
 
-export default async function Marketplace() {
+export const metadata: Metadata = {
+    title: "Questy | Marketplace",
+    description: "Discover quality CBC learning materials from verified teachers. Browse notes, schemes of work, lesson plans, and more for all grades.",
+    openGraph: {
+        title: "Questy Marketplace - Quality Learning Materials",
+        description: "Browse and purchase quality learning materials from verified teachers",
+        type: "website",
+    },
+};
+
+export default async function Marketplace({
+    searchParams,
+}: {
+    searchParams: Promise<{ material?: string; teacher?: string }>;
+}) {
     const user = await getCurrentUser();
+    const params = await searchParams;
 
     const pdfs = await prisma.pdf.findMany({
         where: { status: "APPROVED" },
         include: {
             teacher: {
                 select: {
+                    id: true,
                     email: true,
                 },
             },
@@ -64,6 +81,8 @@ export default async function Marketplace() {
                             materials={pdfs}
                             purchasedIds={purchasedPdfIds}
                             user={user ? { id: user.id, email: user.email, role: user.role, phone: user.phone } : null}
+                            highlightMaterialId={params.material}
+                            filterTeacherId={params.teacher}
                         />
                     )}
                 </div>

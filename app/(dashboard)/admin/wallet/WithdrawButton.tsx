@@ -94,7 +94,6 @@ export default function WithdrawButton({
             <Button
                 onClick={() => setShowDialog(true)}
                 disabled={balance <= 0}
-                className="flex-1 sm:flex-none"
                 size="lg"
             >
                 <svg
@@ -110,16 +109,15 @@ export default function WithdrawButton({
                         d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                     />
                 </svg>
-                Withdraw to M-Pesa
+                Withdraw Platform Earnings
             </Button>
 
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Withdraw to M-Pesa</DialogTitle>
+                        <DialogTitle>Withdraw Platform Earnings</DialogTitle>
                         <DialogDescription>
-                            Enter the amount you want to withdraw. Funds will be sent to your
-                            M-Pesa account.
+                            Withdraw platform commission and verification fees to M-Pesa.
                         </DialogDescription>
                     </DialogHeader>
 

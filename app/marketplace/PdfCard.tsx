@@ -18,6 +18,7 @@ type PdfCardProps = {
         materialType: string;
         thumbnailUrl: string | null;
         teacher: {
+            id: string;
             email: string;
         };
         _count: {

@@ -2,6 +2,17 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getCurrentUser } from "@/lib/auth";
 import ContactForm from "@/app/contact/ContactForm";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Questy | Contact Us - Get in Touch",
+    description: "Have questions about Questy? Contact our support team for help with CBC learning materials, teacher verification, or platform assistance.",
+    openGraph: {
+        title: "Contact Questy - We're Here to Help",
+        description: "Get in touch with our support team for any questions or assistance",
+        type: "website",
+    },
+};
 
 export default async function ContactPage() {
     const user = await getCurrentUser();
