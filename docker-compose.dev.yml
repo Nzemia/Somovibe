@@ -1,0 +1,28 @@
+# Development Docker Compose
+# For local testing with hot reload
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: questy-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+    networks:
+      - questy-network
+
+networks:
+  questy-network:
+    driver: bridge
