@@ -1,6 +1,17 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getCurrentUser } from "@/lib/auth";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Questy | About Us - CBC Learning Platform",
+    description: "Learn about Questy, Kenya's premier CBC learning platform connecting students with verified teachers and quality educational materials.",
+    openGraph: {
+        title: "About Questy - CBC Learning Platform",
+        description: "Connecting students with verified teachers and quality educational materials",
+        type: "website",
+    },
+};
 
 export default async function AboutPage() {
     const user = await getCurrentUser();
@@ -35,7 +46,7 @@ export default async function AboutPage() {
                         <h2 className="text-2xl font-bold text-foreground mb-4">What We Do</h2>
                         <div className="space-y-4">
                             <div className="flex items-start space-x-3">
-                                <svg className="w-6 h-6 text-primary mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-6 h-6 text-primary mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                                 <p className="text-muted-foreground">
@@ -43,7 +54,7 @@ export default async function AboutPage() {
                                 </p>
                             </div>
                             <div className="flex items-start space-x-3">
-                                <svg className="w-6 h-6 text-primary mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-6 h-6 text-primary mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                                 <p className="text-muted-foreground">
@@ -51,7 +62,7 @@ export default async function AboutPage() {
                                 </p>
                             </div>
                             <div className="flex items-start space-x-3">
-                                <svg className="w-6 h-6 text-primary mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-6 h-6 text-primary mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                                 <p className="text-muted-foreground">
@@ -59,7 +70,7 @@ export default async function AboutPage() {
                                 </p>
                             </div>
                             <div className="flex items-start space-x-3">
-                                <svg className="w-6 h-6 text-primary mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-6 h-6 text-primary mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                                 <p className="text-muted-foreground">
