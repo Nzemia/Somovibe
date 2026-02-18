@@ -224,35 +224,104 @@ export default async function StudentProfilePage() {
                             </CardContent>
                         </Card>
 
-                        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                            <CardContent className="pt-6">
-                                <div className="text-center">
-                                    <svg
-                                        className="w-12 h-12 mx-auto text-primary mb-3"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                    <h3 className="font-bold text-foreground mb-2">
-                                        Become a Teacher
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        Share your knowledge and earn 75% from every sale
-                                    </p>
-                                    <Link
-                                        href="/teacher-register"
-                                        className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity text-sm"
-                                    >
-                                        Get Started
-                                    </Link>
-                                </div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Quick Links</CardTitle>
+                                <CardDescription>Helpful resources</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <Link
+                                    href="/marketplace"
+                                    className="flex items-center space-x-3 p-3 bg-accent/50 rounded-lg hover:bg-accent transition-colors group"
+                                >
+                                    <div className="flex-shrink-0">
+                                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                            <svg
+                                                className="w-5 h-5 text-primary"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-foreground">
+                                            Browse Marketplace
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Find new materials
+                                        </p>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    href="/student/downloads"
+                                    className="flex items-center space-x-3 p-3 bg-accent/50 rounded-lg hover:bg-accent transition-colors group"
+                                >
+                                    <div className="flex-shrink-0">
+                                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                            <svg
+                                                className="w-5 h-5 text-primary"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-foreground">
+                                            Download History
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            View all downloads
+                                        </p>
+                                    </div>
+                                </Link>
+
+                                <Link
+                                    href="/about"
+                                    className="flex items-center space-x-3 p-3 bg-accent/50 rounded-lg hover:bg-accent transition-colors group"
+                                >
+                                    <div className="flex-shrink-0">
+                                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                            <svg
+                                                className="w-5 h-5 text-primary"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-foreground">
+                                            About Questy
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Learn more about us
+                                        </p>
+                                    </div>
+                                </Link>
                             </CardContent>
                         </Card>
                     </div>
