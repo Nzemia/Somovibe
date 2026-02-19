@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/HeroSection";
 import { StatsSection } from "@/components/StatsSection";
 import { FAQSection } from "@/components/FAQSection";
+import { CategoriesSection } from "@/components/CategoriesSection";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -213,7 +214,7 @@ export default async function Home() {
       </section>
 
       {/* ── How It Works ── */}
-      <section id="how-it-works" className="bg-white py-14 sm:py-20">
+      <section id="how-it-works" className="bg-white py-14 sm:py-20 scroll-mt-[7.5rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-14">
             <span className="inline-block bg-[#f0faf5] text-[#008c43] text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border border-[#d1e8dc] mb-4">
@@ -317,6 +318,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Categories ── */}
+      <CategoriesSection />
 
       {/* ── FAQ ── */}
       <FAQSection />
