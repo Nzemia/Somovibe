@@ -59,9 +59,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* ── Right panel: form ── */}
       <div className="flex-1 flex flex-col items-center justify-center p-5 sm:p-8 bg-[#f5faf7] min-h-screen">
         {/* Mobile logo */}
-        <div className="lg:hidden mb-8 flex items-center gap-3">
-          <Image src="/logos/Somovibe logo.png" alt="Somovibe" width={40} height={40} className="h-9 w-auto object-contain" />
-          <Image src="/logos/Somovibe text.png" alt="Somovibe" width={160} height={44} className="h-9 w-auto object-contain" />
+        <div className="lg:hidden mb-8">
+          <Image src="/logos/Somovibe text.png" alt="Somovibe" width={220} height={60} className="h-12 w-auto object-contain" />
         </div>
 
         <div className="w-full max-w-md">
