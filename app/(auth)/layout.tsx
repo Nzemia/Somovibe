@@ -20,9 +20,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Content */}
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-3">
-            <Image src="/logos/Somovibe logo white.png" alt="Somovibe" width={44} height={44} className="h-10 w-auto object-contain" />
-            <Image src="/logos/Somovibe text white.png" alt="Somovibe" width={160} height={44} className="h-10 w-auto object-contain" />
+          <Link href="/">
+            <Image src="/logos/Somovibe text white.png" alt="Somovibe" width={240} height={68} className="h-[60px] w-auto object-contain" />
           </Link>
         </div>
 
