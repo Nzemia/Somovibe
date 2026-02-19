@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization - only create Resend instance when needed
+function getResendClient() {
+    return new Resend(process.env.RESEND_API_KEY);
+}
+
 const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
 // Helper function to safely send emails with better error handling
@@ -14,6 +18,7 @@ async function sendEmail(options: {
         console.log(`   Subject: ${options.subject}`);
         console.log(`   From: ${fromEmail}`);
 
+        const resend = getResendClient();
         const result = await resend.emails.send({
             from: fromEmail,
             to: options.to,
