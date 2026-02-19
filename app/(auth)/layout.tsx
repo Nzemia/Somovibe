@@ -61,8 +61,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* Mobile logo */}
         <div className="lg:hidden mb-8 flex items-center gap-3">
           <Image src="/logos/Somovibe logo.png" alt="Somovibe" width={40} height={40} className="h-9 w-auto object-contain" />
-          <Image src="/logos/Somovibe text white.png" alt="Somovibe" width={140} height={38} className="h-8 w-auto object-contain hidden" />
-          <span className="text-xl font-extrabold text-[#008c43] tracking-tight">Somovibe</span>
+          <Image src="/logos/Somovibe text.png" alt="Somovibe" width={160} height={44} className="h-9 w-auto object-contain" />
         </div>
 
         <div className="w-full max-w-md">
