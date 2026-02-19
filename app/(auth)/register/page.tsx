@@ -63,7 +63,9 @@ export default function RegisterPage() {
 
     setSuccess(true);
     setLoading(false);
-    router.push("/");
+    const role = data.user?.role ?? "STUDENT";
+    const dest = role === "ADMIN" ? "/admin" : role === "TEACHER" ? "/teacher" : "/student";
+    router.push(dest);
     router.refresh();
   }
 
