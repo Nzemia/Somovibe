@@ -3,53 +3,37 @@
 @plugin "tailwindcss-animate";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme {
   --radius: 0.625rem;
-  
-  /* Light mode colors */
-  --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  --color-card: #ffffff;
-  --color-card-foreground: #0f172a;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #0f172a;
-  --color-primary: #3b82f6;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #f1f5f9;
-  --color-secondary-foreground: #0f172a;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  --color-accent: #f1f5f9;
-  --color-accent-foreground: #0f172a;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-ring: #3b82f6;
-}
 
-.dark {
-  --color-background: #000000;
-  --color-foreground: #f1f5f9;
-  --color-card: #0a0a0a;
-  --color-card-foreground: #f1f5f9;
-  --color-popover: #0a0a0a;
-  --color-popover-foreground: #f1f5f9;
-  --color-primary: #3b82f6;
+  /* Somovibe brand: #008c43 green + white */
+  --color-background: #ffffff;
+  --color-foreground: #1a1a1a;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a1a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1a1a;
+  --color-primary: #008c43;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #1a1a1a;
-  --color-secondary-foreground: #f1f5f9;
-  --color-muted: #1a1a1a;
-  --color-muted-foreground: #94a3b8;
-  --color-accent: #1a1a1a;
-  --color-accent-foreground: #f1f5f9;
+  --color-secondary: #f0faf5;
+  --color-secondary-foreground: #1a1a1a;
+  --color-muted: #f0faf5;
+  --color-muted-foreground: #5a7a68;
+  --color-accent: #e0f2ea;
+  --color-accent-foreground: #004d25;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
-  --color-border: #1a1a1a;
-  --color-input: #1a1a1a;
-  --color-ring: #3b82f6;
+  --color-border: #d1e8dc;
+  --color-input: #d1e8dc;
+  --color-ring: #008c43;
+
+  /* Brand shades */
+  --brand: #008c43;
+  --brand-dark: #006832;
+  --brand-darker: #004d25;
+  --brand-light: #e0f2ea;
+  --brand-lighter: #f0faf5;
+  --brand-bright: #00b856;
 }
 
 @keyframes slide-in {
@@ -63,8 +47,44 @@
   }
 }
 
+@keyframes fade-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 140, 67, 0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(0, 140, 67, 0); }
+}
+
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+}
+
+.animate-pulse-green {
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+/* Scroll reveal — elements start hidden, JS adds .revealed */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 body {

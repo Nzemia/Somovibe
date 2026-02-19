@@ -118,7 +118,7 @@ export default async function ManageTeachersPage() {
                                         const approvedPdfs = teacher.pdfs.filter(
                                             (p) => p.status === "APPROVED"
                                         ).length;
-                                        const walletBalance = teacher.wallets[0]?.balance || 0;
+                                        const walletBalance = teacher.wallets?.balance || 0;
 
                                         return (
                                             <TableRow key={teacher.id}>
