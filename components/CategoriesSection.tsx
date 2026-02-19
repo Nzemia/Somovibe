@@ -1,82 +1,197 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
-/* ── Subject → icon & color mapping ─────────────────────── */
 interface CategoryMeta {
   color: string;
   icon: React.ReactNode;
 }
 
+/* ── Context-specific icons per subject ─────────────────── */
 const CATEGORY_META: Record<string, CategoryMeta> = {
+
   mathematics: {
     color: "from-[#008c43] to-[#00b856]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V13.5Zm0 2.25h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V18Zm2.498-6.75h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V13.5Zm0 2.25h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V18Zm2.504-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5Zm0 2.25h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V18Zm2.498-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5ZM8.25 6h7.5v2.25h-7.5V6ZM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.6 4.5 4.574v9.176a2.25 2.25 0 0 0 2.25 2.25h.75v2.25c0 .621.504 1.125 1.125 1.125H12M12 2.25c1.892 0 3.758.11 5.593.322C18.693 2.7 19.5 3.6 19.5 4.574v9.176a2.25 2.25 0 0 1-2.25 2.25h-.75v2.25c0 .621-.504 1.125-1.125 1.125H12m0-3.375v3.375" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Abacus-style calculator */}
+        <rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round" />
+        <path d="M9 9h.01M12 9h.01M15 9h.01M9 12h.01M15 12h.01M9 15h6" strokeLinecap="round" />
+        <path d="M7 3v18" strokeLinecap="round" />
       </svg>
     ),
   },
+
   english: {
     color: "from-[#006832] to-[#008c43]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Open book with letter A */}
+        <path d="M12 21V6M12 6C10 4 6 3 3 4v14c3-1 6 0 9 3M12 6c2-2 6-3 9-2v14c-3-1-6 0-9 3" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M6 9l1.5 4M7.5 13l1.5-4M7.5 13h3M9 11h2" strokeLinecap="round" />
       </svg>
     ),
   },
+
   science: {
     color: "from-[#004d25] to-[#006832]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 1-6.23-.693L4.2 14.007m15.6 1.293-.413 2.056a2.25 2.25 0 0 1-1.991 1.818l-3.291.374a42.493 42.493 0 0 1-9.61 0l-3.291-.374a2.25 2.25 0 0 1-1.991-1.818L2.4 14.3" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Conical flask / beaker */}
+        <path d="M9 3h6M9 3v6l-5 9a1 1 0 00.9 1.5h14.2A1 1 0 0020 18l-5-9V3" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M7.5 15h9" strokeLinecap="round" />
+        <circle cx="10" cy="17" r="0.5" fill="currentColor" />
+        <circle cx="14" cy="16" r="0.5" fill="currentColor" />
       </svg>
     ),
   },
+
   kiswahili: {
     color: "from-[#008c43] to-[#00a854]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Speech bubble with KE flag colours stripe suggestion */}
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8 10h8M8 13h5" strokeLinecap="round" />
       </svg>
     ),
   },
+
   "social studies": {
     color: "from-[#006832] to-[#008c43]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Globe with latitude/longitude lines */}
+        <circle cx="12" cy="12" r="9" strokeLinecap="round" />
+        <path d="M12 3c-2.5 2.5-4 5.5-4 9s1.5 6.5 4 9M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9M3 12h18" strokeLinecap="round" />
       </svg>
     ),
   },
+
   worksheets: {
     color: "from-[#004d25] to-[#008c43]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Checklist / worksheet */}
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 12l2 2 4-4M9 16h4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
+
+  agriculture: {
+    color: "from-[#3d6b1a] to-[#5a9e25]",
+    icon: (
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Hoe / farming tool */}
+        <path d="M3 21l7-7" strokeLinecap="round" />
+        <path d="M10 14L17 4" strokeLinecap="round" />
+        <path d="M14 3h6v5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M20 3l-6 6" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+
+  "home science": {
+    color: "from-[#a35c00] to-[#d47a00]",
+    icon: (
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Fork and knife — utensils */}
+        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M7 2v20" strokeLinecap="round" />
+        <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+
   "creative arts": {
     color: "from-[#008c43] to-[#00c462]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Artist palette */}
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 3 .97 4.29C4.42 19.04 7.97 21 12 21c1.65 0 3-.89 3-2.43 0-.65-.22-1.24-.6-1.72-.38-.47-.6-1.06-.6-1.68 0-1.55 1.34-2.81 3-2.81h2c2.21 0 4-1.79 4-4C24 6.71 18.52 2 12 2z" strokeLinecap="round" />
+        <circle cx="6.5" cy="11.5" r="1" fill="currentColor" />
+        <circle cx="9.5" cy="7.5" r="1" fill="currentColor" />
+        <circle cx="14.5" cy="6.5" r="1" fill="currentColor" />
       </svg>
     ),
   },
+
   ict: {
     color: "from-[#006832] to-[#00a854]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 7.409a2.25 2.25 0 0 1-1.07-1.916V5.25" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Laptop / computer */}
+        <path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v9H4V5z" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 18h20M8 14v4M16 14v4" strokeLinecap="round" />
       </svg>
     ),
   },
+
   "physical education": {
     color: "from-[#004d25] to-[#006832]",
     icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Running figure */}
+        <circle cx="13" cy="4" r="1.5" fill="currentColor" />
+        <path d="M7 21l3-6 2 3 3-5 3 2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 12l2-3 3 1 2-3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+
+  music: {
+    color: "from-[#5b008c] to-[#8c00d4]",
+    icon: (
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Musical note */}
+        <path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="16" r="3" />
+      </svg>
+    ),
+  },
+
+  "religious education": {
+    color: "from-[#8c6400] to-[#c49000]",
+    icon: (
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Praying hands */}
+        <path d="M12 2v20M8 6C6 8 5 11 5 13v5h6V10L8 6zM16 6c2 2 3 5 3 7v5h-6V10l3-4z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+
+  "business studies": {
+    color: "from-[#005a8c] to-[#007ab8]",
+    icon: (
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Briefcase */}
+        <rect x="2" y="7" width="20" height="14" rx="2" strokeLinecap="round" />
+        <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M12 12v.01" strokeLinecap="round" />
+        <path d="M2 12h20" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+
+  geography: {
+    color: "from-[#006832] to-[#008c43]",
+    icon: (
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Compass */}
+        <circle cx="12" cy="12" r="9" />
+        <path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="1" fill="currentColor" />
+      </svg>
+    ),
+  },
+
+  history: {
+    color: "from-[#8c3d00] to-[#c45500]",
+    icon: (
+      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        {/* Hourglass */}
+        <path d="M5 3h14M5 21h14M7 3l4 6 4-6M7 21l4-6 4 6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 12h6" strokeLinecap="round" />
       </svg>
     ),
   },
@@ -85,29 +200,22 @@ const CATEGORY_META: Record<string, CategoryMeta> = {
 const DEFAULT_META: CategoryMeta = {
   color: "from-[#008c43] to-[#006832]",
   icon: (
-    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
     </svg>
   ),
 };
 
-/* ── Guaranteed fallback categories ─────────────────────── */
 const FALLBACK_SUBJECTS = [
-  "Mathematics",
-  "English",
-  "Science",
-  "Kiswahili",
-  "Social Studies",
-  "Creative Arts",
-  "ICT",
-  "Worksheets",
+  "Mathematics", "English", "Science", "Kiswahili",
+  "Social Studies", "Agriculture", "Home Science",
+  "Creative Arts", "ICT", "Worksheets",
 ];
 
 function getMeta(subject: string): CategoryMeta {
   return CATEGORY_META[subject.toLowerCase()] ?? DEFAULT_META;
 }
 
-/* ── Server component ───────────────────────────────────── */
 export async function CategoriesSection() {
   let subjects: string[] = [];
 
@@ -120,10 +228,9 @@ export async function CategoriesSection() {
     });
     subjects = rows.map((r) => r.subject).filter(Boolean);
   } catch {
-    // DB unavailable — fall back silently
+    // DB unavailable — silent fallback
   }
 
-  // Merge DB subjects with fallbacks, deduplicated, title-cased
   const dbSet = new Set(subjects.map((s) => s.toLowerCase()));
   const merged = [
     ...subjects,
@@ -131,10 +238,7 @@ export async function CategoriesSection() {
   ];
 
   return (
-    <section
-      id="categories"
-      className="bg-[#f0faf5] py-14 sm:py-20 scroll-mt-[7.5rem]"
-    >
+    <section id="categories" className="bg-[#f0faf5] py-14 sm:py-20 scroll-mt-[7.5rem]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-14">
@@ -145,29 +249,27 @@ export async function CategoriesSection() {
             What Are You Looking For?
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto text-sm sm:text-base">
-            Pick a subject to instantly browse all available CBC materials in
-            the marketplace.
+            Pick a subject to instantly browse all available CBC materials.
           </p>
         </div>
 
-        {/* Category grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
+        {/* Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
           {merged.map((subject) => {
             const meta = getMeta(subject);
             return (
               <Link
                 key={subject}
                 href={`/marketplace?subject=${encodeURIComponent(subject)}`}
-                className="group relative overflow-hidden rounded-2xl bg-white border border-[#d1e8dc] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-5 sm:p-6 flex flex-col items-center text-center gap-3"
+                className="group relative overflow-hidden rounded-2xl bg-white border border-[#d1e8dc] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col items-center text-center gap-3"
               >
-                {/* Icon circle */}
                 <div
                   className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${meta.color} text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}
                 >
                   {meta.icon}
                 </div>
 
-                <span className="font-bold text-gray-800 text-sm sm:text-base leading-snug">
+                <span className="font-bold text-gray-800 text-sm leading-snug">
                   {subject}
                 </span>
 
@@ -178,16 +280,14 @@ export async function CategoriesSection() {
                   </svg>
                 </span>
 
-                {/* Subtle green corner accent */}
-                <div className="absolute top-0 right-0 w-8 h-8 overflow-hidden">
-                  <div className={`absolute -top-4 -right-4 w-8 h-8 bg-gradient-to-br ${meta.color} opacity-20 rotate-45`} />
+                <div className="absolute top-0 right-0 w-10 h-10 overflow-hidden pointer-events-none">
+                  <div className={`absolute -top-5 -right-5 w-10 h-10 bg-gradient-to-br ${meta.color} opacity-15 rotate-45`} />
                 </div>
               </Link>
             );
           })}
         </div>
 
-        {/* View all */}
         <div className="mt-10 text-center">
           <Link
             href="/marketplace"
