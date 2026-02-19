@@ -182,9 +182,13 @@ export function QuickNav() {
       {/* Sell modal */}
       {showSellModal && <SellModal onClose={() => setShowSellModal(false)} />}
 
-      {/* Icon strip — sticky directly below the h-14 navbar */}
+      {/* Icon strip — sticky directly below the h-14 navbar, same gradient = one unified header */}
       <div
-        className="sticky top-14 z-40 backdrop-blur-md bg-white/10 border-b border-white/15"
+        className="sticky top-14 z-40 backdrop-blur-md border-b border-white/10"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(0,20,10,0.97) 0%, rgba(0,60,30,0.94) 50%, rgba(0,120,58,0.91) 100%)",
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-around sm:justify-center sm:gap-20 h-16">
