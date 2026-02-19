@@ -1,8 +1,6 @@
 # Development Docker Compose
 # For local testing with hot reload
 
-version: '3.8'
-
 services:
   app:
     build:
