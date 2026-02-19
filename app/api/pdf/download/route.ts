@@ -13,18 +13,34 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "PDF ID required" }, { status: 400 });
         }
 
-        // Check if user has purchased this PDF
-        const purchase = await prisma.purchase.findUnique({
-            where: {
-                userId_pdfId: { userId: user.id, pdfId },
-            },
-            include: {
-                pdf: true,
-            },
+        // Get the PDF first
+        const pdf = await prisma.pdf.findUnique({
+            where: { id: pdfId },
         });
 
-        if (!purchase) {
-            return NextResponse.json({ error: "You haven't purchased this material" }, { status: 403 });
+        if (!pdf) {
+            return NextResponse.json({ error: "Material not found" }, { status: 404 });
+        }
+
+        // Admin bypass: Admins can download any material without purchase
+        let purchase = null;
+        if (user.role === "ADMIN") {
+            // Admin can access any material - create a virtual purchase object
+            purchase = { pdf };
+        } else {
+            // Regular users need to have purchased the material
+            purchase = await prisma.purchase.findUnique({
+                where: {
+                    userId_pdfId: { userId: user.id, pdfId },
+                },
+                include: {
+                    pdf: true,
+                },
+            });
+
+            if (!purchase) {
+                return NextResponse.json({ error: "You haven't purchased this material" }, { status: 403 });
+            }
         }
 
         // Check if it's a placeholder file
@@ -46,7 +62,7 @@ export async function GET(req: Request) {
             }
         );
 
-        console.log("Downloading file:", purchase.pdf.fileUrl);
+        //console.log("Downloading file:", purchase.pdf.fileUrl);
 
         const { data, error } = await supabase.storage
             .from("pdfs")
@@ -59,7 +75,17 @@ export async function GET(req: Request) {
             }, { status: 500 });
         }
 
-        console.log("File downloaded successfully, size:", data.size);
+        //console.log("File downloaded successfully, size:", data.size);
+
+        // Track download (skip for admin reviews)
+        if (user.role !== "ADMIN") {
+            await prisma.download.create({
+                data: {
+                    userId: user.id,
+                    pdfId,
+                },
+            }).catch(() => { }); // Ignore errors for download tracking
+        }
 
         // Return the PDF file
         return new NextResponse(data, {

@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { AdminNav } from "@/components/AdminNav";
 
 export default function AdminNotFound() {
     return (
         <div className="min-h-screen bg-background">
-            <AdminNav />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="flex flex-col items-center justify-center text-center">
                     <div className="mb-8">

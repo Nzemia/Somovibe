@@ -47,7 +47,7 @@ export function AdminNav() {
     ];
 
     return (
-        <div className="border-b border-border bg-card">
+        <div className="hidden md:block border-b border-border bg-card">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <nav className="flex space-x-1 py-4 overflow-x-auto">
                     {navItems.map((item) => {

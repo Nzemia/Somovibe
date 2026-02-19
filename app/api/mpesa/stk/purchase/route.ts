@@ -1,10 +1,11 @@
-import { getMpesaToken } from "@/lib/mpesa";
+import { getMpesaToken, getMpesaBaseUrl } from "@/lib/mpesa";
 import axios from "axios";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
 import { creditWallet } from "@/lib/wallet";
 import { getPlatformAdminId } from "@/lib/platformAdmin";
+import { sendNewSaleEmail, sendPurchaseConfirmationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
     const { phone, pdfId, userId } = await req.json();
@@ -12,6 +13,28 @@ export async function POST(req: Request) {
     if (!phone || !pdfId || !userId) {
         return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
+
+    // Validate and format phone number
+    let formattedPhone = phone.replace(/\s+/g, ''); // Remove spaces
+
+    // Remove + if present
+    if (formattedPhone.startsWith('+')) {
+        formattedPhone = formattedPhone.substring(1);
+    }
+
+    // If starts with 0, replace with 254
+    if (formattedPhone.startsWith('0')) {
+        formattedPhone = '254' + formattedPhone.substring(1);
+    }
+
+    // Validate format (should be 254XXXXXXXXX - 12 digits)
+    if (!/^254\d{9}$/.test(formattedPhone)) {
+        return NextResponse.json({
+            error: "Invalid phone number format. Use 254XXXXXXXXX"
+        }, { status: 400 });
+    }
+
+    //console.log("Purchase request - Phone:", formattedPhone, "PDF:", pdfId, "User:", userId);
 
     // Get PDF details
     const pdf = await prisma.pdf.findUnique({ where: { id: pdfId } });
@@ -42,7 +65,7 @@ export async function POST(req: Request) {
     await prisma.pendingPayment.create({
         data: {
             userId,
-            phone,
+            phone: formattedPhone,
             amount: pdf.price,
             type: "PDF_PURCHASE",
             referenceCode,
@@ -52,6 +75,8 @@ export async function POST(req: Request) {
 
     // DEV MODE: Auto-complete purchase
     if (process.env.DEV_MODE === "true") {
+        //console.log("DEV MODE: Auto-completing purchase");
+
         // Calculate shares
         const teacherShare = Math.floor(pdf.price * 0.75);
         const platformShare = pdf.price - teacherShare;
@@ -82,6 +107,32 @@ export async function POST(req: Request) {
             },
         });
 
+        //console.log("✅ Purchase completed in DEV MODE");
+
+        // Send email notifications in DEV MODE (await to catch errors)
+        try {
+            const [student, teacher] = await Promise.all([
+                prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { email: true },
+                }),
+                prisma.user.findUnique({
+                    where: { id: pdf.teacherId },
+                    select: { email: true },
+                }),
+            ]);
+
+            if (student) {
+                await sendPurchaseConfirmationEmail(student.email, pdf.title, pdf.price, pdfId);
+            }
+            if (teacher) {
+                await sendNewSaleEmail(teacher.email, pdf.title, pdf.price, teacherShare, userId);
+            }
+        } catch (emailError) {
+            console.error("Email sending failed in DEV MODE:", emailError);
+            // Don't fail the request if email fails
+        }
+
         return NextResponse.json({
             message: "DEV MODE: Purchase completed",
             devMode: true,
@@ -102,17 +153,19 @@ export async function POST(req: Request) {
     ).toString("base64");
 
     try {
+        //console.log("Sending STK push to:", formattedPhone, "Amount:", pdf.price);
+
         await axios.post(
-            "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+            `${getMpesaBaseUrl()}/mpesa/stkpush/v1/processrequest`,
             {
                 BusinessShortCode: process.env.MPESA_SHORTCODE,
                 Password: password,
                 Timestamp: timestamp,
                 TransactionType: "CustomerPayBillOnline",
                 Amount: pdf.price,
-                PartyA: phone,
+                PartyA: formattedPhone,
                 PartyB: process.env.MPESA_SHORTCODE,
-                PhoneNumber: phone,
+                PhoneNumber: formattedPhone,
                 CallBackURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/mpesa/callback/purchase`,
                 AccountReference: referenceCode,
                 TransactionDesc: `Purchase: ${pdf.title}`,
@@ -121,6 +174,8 @@ export async function POST(req: Request) {
                 headers: { Authorization: `Bearer ${token}` },
             }
         );
+
+        //console.log("✅ STK push sent successfully");
 
         return NextResponse.json({ message: "STK push sent to your phone", referenceCode });
     } catch (error: any) {
