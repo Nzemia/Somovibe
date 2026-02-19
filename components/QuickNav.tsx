@@ -184,12 +184,7 @@ export function QuickNav() {
 
       {/* Icon strip — sticky directly below the h-14 navbar */}
       <div
-        className="sticky top-14 z-40"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(0,40,20,0.97) 0%, rgba(0,100,50,0.95) 50%, rgba(0,140,67,0.93) 100%)",
-          backdropFilter: "blur(10px)",
-        }}
+        className="sticky top-14 z-40 backdrop-blur-md bg-white/10 border-b border-white/15"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-around sm:justify-center sm:gap-20 h-16">

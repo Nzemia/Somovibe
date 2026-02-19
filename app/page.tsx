@@ -151,6 +151,9 @@ export default async function Home() {
       {/* ── Hero Sections ── */}
       <HeroSection />
 
+      {/* ── Categories ── */}
+      <CategoriesSection />
+
       {/* ── Stats ── */}
       <StatsSection />
 
@@ -318,9 +321,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* ── Categories ── */}
-      <CategoriesSection />
 
       {/* ── FAQ ── */}
       <FAQSection />
