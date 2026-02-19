@@ -17,17 +17,67 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  phone     String?  @unique
-  role      Role     @default(STUDENT)
-  createdAt DateTime @default(now())
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For credentials login
+  phone         String?   @unique
+  role          Role      @default(STUDENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt @default(now())
 
+  accounts        Account[]
+  sessions        Session[]
   teacherProfile  TeacherProfile?
   pdfs            Pdf[]
   wallets         Wallet[]
   purchases       Purchase[]
   pendingPayments PendingPayment[]
+  downloads       Download[]
+  materialViews   MaterialView[]
+  reviews         Review[]
+  withdrawalRequests WithdrawalRequest[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }
 
 model TeacherProfile {
@@ -71,21 +121,36 @@ enum PdfStatus {
   REJECTED
 }
 
+enum MaterialType {
+  PDF
+  PDF_SLIDES
+  POWERPOINT
+  CLASS_INSTRUCTIONS
+  SCHEME_OF_WORK
+  LESSON_PLAN
+  EXAM_QUIZ
+}
+
 model Pdf {
-  id          String     @id @default(uuid())
-  title       String
-  description String
-  subject     String
-  grade       String
-  price       Int
-  fileUrl     String
-  status      PdfStatus  @default(PENDING)
-  teacherId   String
-  createdAt   DateTime   @default(now())
+  id           String       @id @default(uuid())
+  title        String
+  description  String
+  subject      String
+  grade        String
+  price        Int
+  fileUrl      String
+  thumbnailUrl String?
+  materialType MaterialType @default(PDF)
+  status       PdfStatus    @default(PENDING)
+  teacherId    String
+  createdAt    DateTime     @default(now())
 
   teacher User @relation(fields: [teacherId], references: [id])
 
-  purchases Purchase[]
+  purchases     Purchase[]
+  downloads     Download[]
+  materialViews MaterialView[]
+  reviews       Review[]
 
   // Index for marketplace queries: filter by status, order by createdAt
   // Enables fast pagination of approved PDFs without full table scan
@@ -103,14 +168,46 @@ model Wallet {
   walletTransactions WalletTransaction[]
 }
 
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
 model WalletTransaction {
-  id        String   @id @default(uuid())
+  id        String          @id @default(uuid())
   walletId  String
   amount    Int
-  type      String   // credit | debit
-  createdAt DateTime @default(now())
+  type      TransactionType
+  createdAt DateTime        @default(now())
 
   wallet Wallet @relation(fields: [walletId], references: [id])
+}
+
+model WithdrawalRequest {
+  id                String           @id @default(uuid())
+  userId            String
+  amount            Int
+  phone             String
+  status            WithdrawalStatus @default(PENDING)
+  mpesaReceiptNumber String?
+  mpesaConversationId String?
+  mpesaResponseCode  String?
+  failureReason     String?
+  createdAt         DateTime         @default(now())
+  completedAt       DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Purchase {
@@ -126,4 +223,48 @@ model Purchase {
   // Used when querying: WHERE userId = ? AND pdfId IN (...)
   @@index([userId, pdfId])
   @@unique([userId, pdfId])
+}
+
+model Download {
+  id        String   @id @default(uuid())
+  userId    String
+  pdfId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  pdf  Pdf  @relation(fields: [pdfId], references: [id])
+
+  @@index([userId, pdfId])
+  @@index([pdfId])
+}
+
+model MaterialView {
+  id        String   @id @default(uuid())
+  userId    String?  // Nullable for anonymous views
+  pdfId     String
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+  pdf  Pdf   @relation(fields: [pdfId], references: [id])
+
+  @@index([pdfId])
+  @@index([userId])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  pdfId     String
+  rating    Int      // 1-5 stars
+  comment   String?
+  reply     String?  // Teacher's reply to the review
+  repliedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  pdf  Pdf  @relation(fields: [pdfId], references: [id])
+
+  @@unique([userId, pdfId]) // One review per user per material
+  @@index([pdfId])
 }

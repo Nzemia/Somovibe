@@ -17,15 +17,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        // Get theme from localStorage or system preference BEFORE mounting
         const stored = localStorage.getItem("theme") as Theme;
-        if (stored) {
-            setTheme(stored);
-            document.documentElement.classList.toggle("dark", stored === "dark");
-        } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-            setTheme("dark");
-            document.documentElement.classList.add("dark");
-        }
+        const initialTheme = stored || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+        setTheme(initialTheme);
+        document.documentElement.classList.toggle("dark", initialTheme === "dark");
+        setMounted(true);
     }, []);
 
     const toggleTheme = () => {
@@ -35,7 +33,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.toggle("dark");
     };
 
-    if (!mounted) return <>{children}</>;
+    // Prevent flash of wrong theme
+    if (!mounted) {
+        return <div style={{ visibility: 'hidden' }}>{children}</div>;
+    }
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>

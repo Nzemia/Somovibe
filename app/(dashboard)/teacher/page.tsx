@@ -12,6 +12,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import SuccessToast from "./SuccessToast";
+import ShareButton from "@/components/ShareButton";
 
 export default async function TeacherPage({
     searchParams,
@@ -68,25 +69,33 @@ export default async function TeacherPage({
                             Manage your materials and track earnings
                         </p>
                     </div>
-                    <Link
-                        href="/teacher/upload"
-                        className="px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2"
-                    >
-                        <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                    <div className="flex items-center gap-3">
+                        <ShareButton
+                            url={`/teacher/${user.id}`}
+                            title="My Teaching Profile"
+                            description="Check out my teaching materials and resources"
+                            variant="button"
+                        />
+                        <Link
+                            href="/teacher/upload"
+                            className="px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2"
                         >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>Upload Material</span>
-                    </Link>
+                            <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                            <span>Upload Material</span>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Stats Grid */}
@@ -170,6 +179,36 @@ export default async function TeacherPage({
                                         </h3>
                                         <p className="text-sm text-muted-foreground">
                                             Share your teaching resources
+                                        </p>
+                                    </div>
+                                </div>
+                            </Link>
+                            <Link
+                                href="/teacher/analytics"
+                                className="p-4 border border-border rounded-lg hover:bg-accent transition-colors text-left group"
+                            >
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                        <svg
+                                            className="w-6 h-6 text-primary"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-foreground mb-1">
+                                            Material Analytics
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Track views, sales, and earnings
                                         </p>
                                     </div>
                                 </div>
@@ -277,6 +316,7 @@ export default async function TeacherPage({
                                         <TableHead>Status</TableHead>
                                         <TableHead>Sales</TableHead>
                                         <TableHead>Uploaded</TableHead>
+                                        <TableHead>Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -315,6 +355,16 @@ export default async function TeacherPage({
                                                 {new Date(
                                                     material.createdAt
                                                 ).toLocaleDateString()}
+                                            </TableCell>
+                                            <TableCell>
+                                                {material.status === "APPROVED" && (
+                                                    <ShareButton
+                                                        url={`/marketplace/${material.id}`}
+                                                        title={material.title}
+                                                        description={material.description}
+                                                        variant="icon"
+                                                    />
+                                                )}
                                             </TableCell>
                                         </TableRow>
                                     ))}
