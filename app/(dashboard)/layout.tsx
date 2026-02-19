@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
+import { QuickNav } from "@/components/QuickNav";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,10 @@ export default async function DashboardLayout({
     return (
         <>
             <Navbar user={user ? { email: user.email, role: user.role } : null} />
-            {children}
+            <QuickNav />
+            <div className="min-h-screen bg-[#f5faf7]">
+                {children}
+            </div>
         </>
     );
 }

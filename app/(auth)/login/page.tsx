@@ -31,7 +31,11 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    const dest =
+      data.role === "ADMIN" ? "/admin" :
+      data.role === "TEACHER" ? "/teacher" :
+      "/student";
+    router.push(dest);
     router.refresh();
   }
 
