@@ -60,7 +60,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="flex-1 flex flex-col items-center justify-center p-5 sm:p-8 bg-[#f5faf7] min-h-screen">
         {/* Mobile logo */}
         <div className="lg:hidden mb-8">
-          <Image src="/logos/Somovibe text.png" alt="Somovibe" width={220} height={60} className="h-12 w-auto object-contain" />
+          <Image src="/logos/Somovibe text.png" alt="Somovibe" width={220} height={60} className="h-[60px] w-auto object-contain" />
         </div>
 
         <div className="w-full max-w-md">
