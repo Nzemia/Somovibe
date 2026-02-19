@@ -16,8 +16,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Questy - CBC Learning Platform",
-  description: "Quality learning materials for CBC curriculum",
+  title: "Somovibe - CBC Learning Platform",
+  description: "Quality CBC learning materials from verified teachers. Learn, teach, and earn with Somovibe — Kenya's premier educational marketplace.",
+  icons: {
+    icon: [
+      { url: "/logos/Somovibe logo.png", type: "image/png" },
+    ],
+    apple: "/logos/Somovibe logo.png",
+  },
+  openGraph: {
+    title: "Somovibe - CBC Learning Platform",
+    description: "Quality CBC learning materials from verified teachers. Learn, teach, and earn.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -26,20 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                const theme = localStorage.getItem('theme') || 
-                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                document.documentElement.classList.toggle('dark', theme === 'dark');
-              })();
-            `,
-          }}
-        />
-      </head>
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
