@@ -28,14 +28,15 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          {/* Text logo — larger without growing the bar */}
-          <Link href="/" className="shrink-0 flex items-center">
+          {/* Text logo — vertically centered, larger */}
+          <Link href="/" className="shrink-0 flex items-center self-center">
             <Image
               src="/logos/Somovibe text white.png"
               alt="Somovibe"
-              width={180}
-              height={52}
-              className="h-11 w-auto object-contain"
+              width={200}
+              height={56}
+              className="w-auto object-contain"
+              style={{ height: "42px", display: "block" }}
               priority
             />
           </Link>
