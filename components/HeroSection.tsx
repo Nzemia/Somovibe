@@ -31,10 +31,10 @@ export function HeroSection() {
         sizes="100vw"
       />
 
-      {/* Solid green overlay — no gradient */}
+      {/* Solid green overlay — 30% opacity */}
       <div
         className="absolute inset-0"
-        style={{ backgroundColor: "rgba(0, 140, 67, 0.78)" }}
+        style={{ backgroundColor: "rgba(0, 140, 67, 0.30)" }}
       />
 
       {/* Content */}

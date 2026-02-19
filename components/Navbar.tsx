@@ -20,11 +20,7 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
 
   return (
     <nav
-      className="sticky top-0 z-50 backdrop-blur-md"
-      style={{
-        background:
-          "linear-gradient(135deg, rgba(0,26,13,0.92) 0%, rgba(0,77,37,0.88) 50%, rgba(0,140,67,0.82) 100%)",
-      }}
+      className="sticky top-0 z-50 backdrop-blur-md bg-white/10 border-b border-white/15"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
@@ -33,10 +29,10 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
             <Image
               src="/logos/Somovibe text white.png"
               alt="Somovibe"
-              width={200}
-              height={56}
+              width={220}
+              height={62}
               className="w-auto object-contain"
-              style={{ height: "42px", display: "block" }}
+              style={{ height: "46px", display: "block" }}
               priority
             />
           </Link>
