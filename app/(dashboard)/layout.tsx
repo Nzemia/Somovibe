@@ -14,7 +14,7 @@ export default async function DashboardLayout({
     return (
         <>
             <Navbar user={user ? { email: user.email, role: user.role } : null} />
-            <QuickNav />
+            <QuickNav variant="dashboard" />
             <div className="min-h-screen bg-[#f5faf7]">
                 {children}
             </div>

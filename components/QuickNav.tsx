@@ -131,7 +131,7 @@ interface NavItem {
 }
 
 /* ── Main component ─────────────────────────────────────── */
-export function QuickNav() {
+export function QuickNav({ variant = "landing" }: { variant?: "landing" | "dashboard" }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
@@ -146,7 +146,7 @@ export function QuickNav() {
     }
   };
 
-  const navItems: NavItem[] = [
+  const allNavItems: NavItem[] = [
     {
       id: "home",
       label: "Home",
@@ -176,6 +176,12 @@ export function QuickNav() {
       icon: (filled) => <ContactIcon filled={filled} />,
     },
   ];
+
+  /* Dashboard only shows Buy + Sell */
+  const navItems =
+    variant === "dashboard"
+      ? allNavItems.filter((i) => i.id === "buy" || i.id === "sell")
+      : allNavItems;
 
   return (
     <>

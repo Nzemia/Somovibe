@@ -6,6 +6,7 @@ import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [role, setRole] = useState<"STUDENT" | "TEACHER">("STUDENT");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -50,7 +51,7 @@ export default function RegisterPage() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, role }),
     });
 
     const data = await res.json().catch(() => ({}));
@@ -76,13 +77,56 @@ export default function RegisterPage() {
 
       <div className="px-7 sm:px-10 pt-8 pb-10">
         {/* Heading */}
-        <div className="mb-7">
+        <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
             Create your account
           </h1>
           <p className="text-gray-500 text-sm mt-1.5">
             Free forever · Pay only when you buy
           </p>
+        </div>
+
+        {/* Role toggle */}
+        <div className="mb-6">
+          <p className="text-sm font-semibold text-gray-700 mb-2">I want to join as a</p>
+          <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setRole("STUDENT")}
+              className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
+                role === "STUDENT"
+                  ? "bg-white text-[#008c43] shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              Buyer
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole("TEACHER")}
+              className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
+                role === "TEACHER"
+                  ? "bg-white text-[#008c43] shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              Teacher
+            </button>
+          </div>
+          {role === "TEACHER" && (
+            <p className="mt-2 text-xs text-[#008c43] flex items-start gap-1.5">
+              <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              A one-time KES 100 verification fee applies to activate selling.
+            </p>
+          )}
         </div>
 
         {/* Error */}
