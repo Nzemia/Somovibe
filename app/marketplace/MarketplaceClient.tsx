@@ -28,7 +28,7 @@ type Material = {
     price: number;
     materialType: string;
     thumbnailUrl: string | null;
-    teacher: { email: string };
+    teacher: { id: string; email: string };
     _count: { downloads: number; reviews: number };
     reviews: { rating: number }[];
 };
@@ -37,6 +37,8 @@ type Props = {
     materials: Material[];
     purchasedIds: Set<string>;
     user: { id?: string; email: string; role: string; phone?: string | null } | null;
+    highlightMaterialId?: string;
+    filterTeacherId?: string;
 };
 
 const SUBJECTS = [
@@ -60,7 +62,7 @@ const GRADE_GROUPS = [
 
 const ITEMS_PER_PAGE = 16;
 
-export default function MarketplaceClient({ materials, purchasedIds, user }: Props) {
+export default function MarketplaceClient({ materials, purchasedIds, user, highlightMaterialId, filterTeacherId }: Props) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
     const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
@@ -71,6 +73,11 @@ export default function MarketplaceClient({ materials, purchasedIds, user }: Pro
 
     const filteredMaterials = useMemo(() => {
         return materials.filter((material) => {
+            // Teacher filter (if coming from teacher profile link)
+            if (filterTeacherId && material.teacher.id !== filterTeacherId) {
+                return false;
+            }
+
             // Search filter
             const matchesSearch =
                 searchQuery === "" ||
@@ -97,7 +104,7 @@ export default function MarketplaceClient({ materials, purchasedIds, user }: Pro
 
             return matchesSearch && matchesType && matchesSubject && matchesGrade && matchesPrice;
         });
-    }, [materials, searchQuery, selectedTypes, selectedSubjects, selectedGrades, priceRange]);
+    }, [materials, searchQuery, selectedTypes, selectedSubjects, selectedGrades, priceRange, filterTeacherId]);
 
     // Pagination
     const totalPages = Math.ceil(filteredMaterials.length / ITEMS_PER_PAGE);
@@ -242,7 +249,7 @@ export default function MarketplaceClient({ materials, purchasedIds, user }: Pro
                     </div>
 
                     {/* Verified Only Toggle */}
-                    <div className="space-y-3">
+                    {/* <div className="space-y-3">
                         <label className="flex items-center justify-between cursor-pointer">
                             <div>
                                 <h3 className="text-sm font-medium text-foreground">Verified only</h3>
@@ -260,7 +267,7 @@ export default function MarketplaceClient({ materials, purchasedIds, user }: Pro
                                 className="w-10 h-6 rounded-full"
                             />
                         </label>
-                    </div>
+                    </div> */}
                 </div>
             </aside>
 
@@ -354,12 +361,16 @@ export default function MarketplaceClient({ materials, purchasedIds, user }: Pro
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mr-4">
                             {paginatedMaterials.map((material) => (
-                                <PdfCard
+                                <div
                                     key={material.id}
-                                    pdf={material}
-                                    isPurchased={purchasedIds.has(material.id)}
-                                    user={user}
-                                />
+                                    className={highlightMaterialId === material.id ? "ring-2 ring-primary rounded-lg" : ""}
+                                >
+                                    <PdfCard
+                                        pdf={material}
+                                        isPurchased={purchasedIds.has(material.id)}
+                                        user={user}
+                                    />
+                                </div>
                             ))}
                         </div>
 

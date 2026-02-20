@@ -1,0 +1,31 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📦 Create Database Backup
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            cd /opt/questy
+            ./scripts/backup-db.sh
+            
+      - name: ✅ Backup Complete
+        if: success()
+        run: echo "Database backup successful!"
+        
+      - name: ❌ Backup Failed
+        if: failure()
+        run: echo "Database backup failed!"
