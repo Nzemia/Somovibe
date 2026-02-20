@@ -117,8 +117,8 @@ export default async function TeacherPage({
                             <TeacherQuotes />
                         </div>
 
-                        {/* Action buttons */}
-                        <div className="hidden sm:flex items-center gap-2 shrink-0">
+                        {/* Action buttons — visible on all screen sizes */}
+                        <div className="flex items-center gap-2 shrink-0 flex-wrap">
                             <ShareButton
                                 url={`/teacher/${user.id}`}
                                 title="My Teaching Profile"
