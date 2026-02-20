@@ -270,13 +270,8 @@ export default async function MaterialDetailPage({ params }: Props) {
                             {/* Purchase Card */}
                             <div className="lg:hidden">
                                 <MaterialDetailClient
-                                    material={{
-                                        id: material.id,
-                                        title: material.title,
-                                        price: material.price,
-                                        materialType: material.materialType,
-                                    }}
-                                    hasPurchased={!!hasPurchased}
+                                    material={material}
+                                    isPurchased={!!hasPurchased}
                                     user={user ? { id: user.id, email: user.email, phone: user.phone, role: user.role } : null}
                                 />
                             </div>
@@ -305,13 +300,8 @@ export default async function MaterialDetailPage({ params }: Props) {
                         <div className="hidden lg:block lg:col-span-1">
                             <div className="sticky top-8">
                                 <MaterialDetailClient
-                                    material={{
-                                        id: material.id,
-                                        title: material.title,
-                                        price: material.price,
-                                        materialType: material.materialType,
-                                    }}
-                                    hasPurchased={!!hasPurchased}
+                                    material={material}
+                                    isPurchased={!!hasPurchased}
                                     user={user ? { id: user.id, email: user.email, phone: user.phone, role: user.role } : null}
                                 />
 
