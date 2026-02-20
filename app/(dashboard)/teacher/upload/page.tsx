@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -140,13 +140,33 @@ const inputCls = "w-full px-4 py-3 border border-gray-200 rounded-xl text-sm tex
 export default function UploadPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+    const [apiError, setApiError] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [thumbnail, setThumbnail] = useState<File | null>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState("");
     const [formData, setFormData] = useState({
         title: "", description: "", subject: "", grade: "", price: "", materialType: "",
     });
+    const [highlighted, setHighlighted] = useState<string | null>(null);
+
+    // Section refs for scroll-to on validation failure
+    const sectionRefs = {
+        type:    useRef<HTMLDivElement>(null),
+        details: useRef<HTMLDivElement>(null),
+        target:  useRef<HTMLDivElement>(null),
+        price:   useRef<HTMLDivElement>(null),
+        file:    useRef<HTMLDivElement>(null),
+    };
+
+    const scrollAndHighlight = (section: keyof typeof sectionRefs) => {
+        const el = sectionRefs[section].current;
+        if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            setHighlighted(section);
+            // 3 blinks × 500 ms each = 1500 ms, clear after
+            setTimeout(() => setHighlighted(null), 1600);
+        }
+    };
 
     const set = (key: string, val: string) => setFormData(p => ({ ...p, [key]: val }));
 
@@ -156,24 +176,37 @@ export default function UploadPage() {
         const f = e.target.files?.[0];
         if (!f) return;
         const allowed = ["application/pdf", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"];
-        if (!allowed.includes(f.type)) { setError("Only PDF and PowerPoint files are allowed"); setFile(null); return; }
-        if (f.size > 10 * 1024 * 1024) { setError("File must be under 10 MB"); setFile(null); return; }
-        setFile(f); setError("");
+        if (!allowed.includes(f.type)) { setApiError("Only PDF and PowerPoint files are allowed"); setFile(null); return; }
+        if (f.size > 10 * 1024 * 1024) { setApiError("File must be under 10 MB"); setFile(null); return; }
+        setFile(f); setApiError("");
     };
 
     const handleThumb = (e: React.ChangeEvent<HTMLInputElement>) => {
         const f = e.target.files?.[0];
         if (!f) return;
-        if (!f.type.startsWith("image/")) { setError("Thumbnail must be an image"); setThumbnail(null); return; }
-        if (f.size > 5 * 1024 * 1024) { setError("Thumbnail must be under 5 MB"); setThumbnail(null); return; }
-        setThumbnail(f); setThumbnailPreview(URL.createObjectURL(f)); setError("");
+        if (!f.type.startsWith("image/")) { setApiError("Thumbnail must be an image"); setThumbnail(null); return; }
+        if (f.size > 5 * 1024 * 1024) { setApiError("Thumbnail must be under 5 MB"); setThumbnail(null); return; }
+        setThumbnail(f); setThumbnailPreview(URL.createObjectURL(f)); setApiError("");
+    };
+
+    // Intercept file area click if no type selected yet
+    const handleFileAreaClick = (e: React.MouseEvent) => {
+        if (!formData.materialType) {
+            e.preventDefault();
+            scrollAndHighlight("type");
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.materialType) { setError("Please select a material type"); return; }
-        if (!file) { setError("Please select a file to upload"); return; }
-        setError(""); setLoading(true);
+        // Scroll to first missing required section
+        if (!formData.materialType)                       { scrollAndHighlight("type");    return; }
+        if (!formData.title || !formData.description)     { scrollAndHighlight("details"); return; }
+        if (!formData.subject || !formData.grade)         { scrollAndHighlight("target");  return; }
+        if (!formData.price)                              { scrollAndHighlight("price");   return; }
+        if (!file)                                        { scrollAndHighlight("file");    return; }
+
+        setApiError(""); setLoading(true);
         try {
             const fd = new FormData();
             fd.append("file", file);
@@ -184,7 +217,7 @@ export default function UploadPage() {
             if (!res.ok) throw new Error(data.error || "Upload failed");
             router.push("/teacher?upload=success");
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Upload failed");
+            setApiError(err instanceof Error ? err.message : "Upload failed");
         } finally {
             setLoading(false);
         }
@@ -203,6 +236,15 @@ export default function UploadPage() {
     return (
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 pb-24 sm:pb-10">
 
+            {/* Blink animation for highlighted sections */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes sectionBlink {
+                    0%,100% { border-color: #e5e7eb; box-shadow: none; }
+                    50%     { border-color: #ef4444; box-shadow: 0 0 0 4px rgba(239,68,68,0.15); background-color: #fff8f8; }
+                }
+                .section-blink { animation: sectionBlink 0.5s ease-in-out 3; }
+            `}} />
+
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
@@ -217,20 +259,21 @@ export default function UploadPage() {
                 </Link>
             </div>
 
-            {/* Error */}
-            {error && (
+            {/* API / file-level errors only */}
+            {apiError && (
                 <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 rounded-2xl px-4 py-3 mb-5 text-sm">
                     <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    {error}
+                    {apiError}
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
 
                 {/* ── Step 1: Material Type ── */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                <div ref={sectionRefs.type}
+                    className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${highlighted === "type" ? "section-blink" : "border-gray-100"}`}>
                     <SectionLabel num={1} label="What type of material is this?" done={sectionDone.type} />
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                         {MATERIAL_TYPES.map((t) => {
@@ -266,7 +309,8 @@ export default function UploadPage() {
                 </div>
 
                 {/* ── Step 2: Title & Description ── */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                <div ref={sectionRefs.details}
+                    className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${highlighted === "details" ? "section-blink" : "border-gray-100"}`}>
                     <SectionLabel num={2} label="Give it a title and description" done={sectionDone.details} />
                     <div className="space-y-4">
                         <div>
@@ -293,7 +337,8 @@ export default function UploadPage() {
                 </div>
 
                 {/* ── Step 3: Subject & Grade ── */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                <div ref={sectionRefs.target}
+                    className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${highlighted === "target" ? "section-blink" : "border-gray-100"}`}>
                     <SectionLabel num={3} label="Subject & Grade" done={sectionDone.target} />
 
                     {/* Subject pills */}
@@ -346,7 +391,8 @@ export default function UploadPage() {
                 </div>
 
                 {/* ── Step 4: Pricing ── */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                <div ref={sectionRefs.price}
+                    className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${highlighted === "price" ? "section-blink" : "border-gray-100"}`}>
                     <SectionLabel num={4} label="Set your price" done={sectionDone.price} />
 
                     {/* Quick presets */}
@@ -393,18 +439,17 @@ export default function UploadPage() {
                 </div>
 
                 {/* ── Step 5: File Upload ── */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                <div ref={sectionRefs.file}
+                    className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${highlighted === "file" ? "section-blink" : "border-gray-100"}`}>
                     <SectionLabel num={5} label="Upload your file" done={sectionDone.file} />
 
                     <input type="file" id="file-upload" accept={getAccept()} onChange={handleFile}
-                        className="hidden" disabled={!formData.materialType} />
-                    <label htmlFor="file-upload"
+                        className="hidden" />
+                    <label htmlFor="file-upload" onClick={handleFileAreaClick}
                         className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-2xl py-10 px-6 transition-all cursor-pointer ${
-                            !formData.materialType
-                                ? "border-gray-200 opacity-50 cursor-not-allowed"
-                                : file
-                                    ? "border-[#008c43] bg-[#f0faf5]"
-                                    : "border-gray-200 hover:border-[#008c43] hover:bg-[#f8fdfb]"
+                            file
+                                ? "border-[#008c43] bg-[#f0faf5]"
+                                : "border-gray-200 hover:border-[#008c43] hover:bg-[#f8fdfb]"
                         }`}>
                         {file ? (
                             <>
@@ -422,18 +467,18 @@ export default function UploadPage() {
                             </>
                         ) : (
                             <>
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${formData.materialType ? "bg-[#f0faf5] text-[#008c43]" : "bg-gray-100 text-gray-300"}`}>
+                                <div className="w-14 h-14 rounded-2xl bg-[#f0faf5] text-[#008c43] flex items-center justify-center">
                                     <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                                     </svg>
                                 </div>
                                 <div className="text-center">
-                                    <p className={`text-sm font-bold ${formData.materialType ? "text-gray-800" : "text-gray-400"}`}>
-                                        {formData.materialType ? "Tap to choose your file" : "Select a material type first"}
+                                    <p className="text-sm font-bold text-gray-800">
+                                        {formData.materialType ? "Tap to choose your file" : "Tap to choose your file"}
                                     </p>
-                                    {formData.materialType && (
-                                        <p className="text-xs text-gray-400 mt-1">{getAccept()} &nbsp;·&nbsp; Max 10 MB</p>
-                                    )}
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {formData.materialType ? `${getAccept()} · Max 10 MB` : "We'll guide you if something is missing"}
+                                    </p>
                                 </div>
                             </>
                         )}
