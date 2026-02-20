@@ -38,6 +38,7 @@ model User {
   downloads       Download[]
   materialViews   MaterialView[]
   reviews         Review[]
+  withdrawalRequests WithdrawalRequest[]
 }
 
 model Account {
@@ -173,14 +174,46 @@ model Wallet {
   walletTransactions WalletTransaction[]
 }
 
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
 model WalletTransaction {
-  id        String   @id @default(uuid())
+  id        String          @id @default(uuid())
   walletId  String
   amount    Int
-  type      String   // credit | debit
-  createdAt DateTime @default(now())
+  type      TransactionType
+  createdAt DateTime        @default(now())
 
   wallet Wallet @relation(fields: [walletId], references: [id])
+}
+
+model WithdrawalRequest {
+  id                String           @id @default(uuid())
+  userId            String
+  amount            Int
+  phone             String
+  status            WithdrawalStatus @default(PENDING)
+  mpesaReceiptNumber String?
+  mpesaConversationId String?
+  mpesaResponseCode  String?
+  failureReason     String?
+  createdAt         DateTime         @default(now())
+  completedAt       DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Purchase {

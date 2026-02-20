@@ -45,6 +45,16 @@ export default function WithdrawButton({
             return;
         }
 
+        // Format phone number
+        let formattedPhone = phoneNumber.replace(/\s/g, "");
+        if (formattedPhone.startsWith("0")) {
+            formattedPhone = "254" + formattedPhone.substring(1);
+        } else if (formattedPhone.startsWith("+254")) {
+            formattedPhone = formattedPhone.substring(1);
+        } else if (!formattedPhone.startsWith("254")) {
+            formattedPhone = "254" + formattedPhone;
+        }
+
         setIsLoading(true);
 
         try {
@@ -53,7 +63,7 @@ export default function WithdrawButton({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     amount: withdrawAmount,
-                    phone: phoneNumber,
+                    phone: formattedPhone,
                 }),
             });
 
@@ -63,7 +73,12 @@ export default function WithdrawButton({
                 throw new Error(data.error || "Withdrawal failed");
             }
 
-            toast.success("Withdrawal request initiated! Check your phone for M-Pesa prompt");
+            if (data.devMode) {
+                toast.success("DEV MODE: Withdrawal completed instantly!");
+            } else {
+                toast.success("Withdrawal initiated! You will receive the money shortly.");
+            }
+
             setShowDialog(false);
             setAmount("");
             router.refresh();
@@ -76,8 +91,7 @@ export default function WithdrawButton({
 
     return (
         <>
-            {/* TODO :: Implement this */}
-            {/* <Button
+            <Button
                 onClick={() => setShowDialog(true)}
                 disabled={balance <= 0}
                 className="flex-1 sm:flex-none"
@@ -97,18 +111,17 @@ export default function WithdrawButton({
                     />
                 </svg>
                 Withdraw to M-Pesa
-            </Button> */}
+            </Button>
 
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
                 <DialogContent>
-                    {/* // TODO :: Implement this */}
-                    {/* <DialogHeader>
+                    <DialogHeader>
                         <DialogTitle>Withdraw to M-Pesa</DialogTitle>
                         <DialogDescription>
                             Enter the amount you want to withdraw. Funds will be sent to your
                             M-Pesa account.
                         </DialogDescription>
-                    </DialogHeader> */}
+                    </DialogHeader>
 
                     <div className="space-y-4 py-4">
                         <div>
@@ -129,11 +142,11 @@ export default function WithdrawButton({
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="Enter amount"
-                                min="1"
+                                min="10"
                                 max={balance}
                             />
                             <p className="text-xs text-muted-foreground mt-1">
-                                Minimum: KES 1 | Maximum: KES {balance.toLocaleString()}
+                                Minimum: KES 10 | Maximum: KES {balance.toLocaleString()}
                             </p>
                         </div>
 
@@ -145,10 +158,10 @@ export default function WithdrawButton({
                                 type="tel"
                                 value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
-                                placeholder="254712345678"
+                                placeholder="254712345678 or 0712345678"
                             />
                             <p className="text-xs text-muted-foreground mt-1">
-                                Format: 254XXXXXXXXX
+                                Format: 254XXXXXXXXX or 07XXXXXXXX
                             </p>
                         </div>
                     </div>
