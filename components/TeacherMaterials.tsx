@@ -105,7 +105,7 @@ export function TeacherMaterials({ materials }: { materials: MaterialRow[] }) {
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${s.dot} shrink-0`} />
-              <span className="hidden sm:inline">{s.label}</span>
+              <span>{s.label}</span>
             </button>
           ))}
         </div>
