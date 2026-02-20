@@ -326,3 +326,34 @@ export async function sendNewReviewNotificationEmail(
     });
 }
 
+// Password Reset Email
+export async function sendPasswordResetEmail(email: string, token: string) {
+    const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
+
+    return sendEmail({
+        to: email,
+        subject: "Reset Your Password - Questy",
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #3b82f6;">Reset Your Password</h1>
+                <p>You requested to reset your password. Click the button below to reset it:</p>
+                
+                <a href="${resetLink}" 
+                   style="display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                    Reset Password
+                </a>
+                
+                <p>Or copy and paste this link into your browser:</p>
+                <p style="color: #666; word-break: break-all; background-color: #f3f4f6; padding: 10px; border-radius: 4px;">${resetLink}</p>
+                
+                <div style="background-color: #fef2f2; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ef4444;">
+                    <p style="margin: 0; color: #991b1b;"><strong>⏰ This link will expire in 1 hour.</strong></p>
+                </div>
+                
+                <p style="color: #6b7280; font-size: 14px;">
+                    If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
+                </p>
+            </div>
+        `,
+    });
+}
