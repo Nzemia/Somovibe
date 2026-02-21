@@ -60,7 +60,6 @@ export async function POST(req: Request) {
             data: { password: hashedPassword },
         });
 
-        console.log(`✅ Password updated for user: ${user.email}`);
 
         return NextResponse.json({
             message: "Password updated successfully"

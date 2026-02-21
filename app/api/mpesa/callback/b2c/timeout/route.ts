@@ -6,7 +6,6 @@ export async function POST(req: Request) {
     try {
         const payload = await req.json();
 
-        console.log("B2C Timeout Callback:", JSON.stringify(payload, null, 2));
 
         const result = payload.Result;
 
@@ -38,7 +37,6 @@ export async function POST(req: Request) {
         // Refund the amount
         await refundWallet(withdrawal.userId, withdrawal.amount);
 
-        console.log("⏱️ Withdrawal timeout, refunded:", withdrawal.id);
 
         return NextResponse.json({ ok: true });
     } catch (error: any) {

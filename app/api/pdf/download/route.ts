@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/apiAuth";
-import { createClient } from "@supabase/supabase-js";
 
 export async function GET(req: Request) {
     try {
@@ -50,32 +49,17 @@ export async function GET(req: Request) {
             }, { status: 404 });
         }
 
-        // Use service role key for download (same as upload)
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                auth: {
-                    autoRefreshToken: false,
-                    persistSession: false,
-                },
-            }
-        );
+        // Cloudinary URLs are direct download links, just fetch and return
+        const response = await fetch(purchase.pdf.fileUrl);
 
-        //console.log("Downloading file:", purchase.pdf.fileUrl);
-
-        const { data, error } = await supabase.storage
-            .from("pdfs")
-            .download(purchase.pdf.fileUrl);
-
-        if (error || !data) {
-            console.error("Download error:", error);
+        if (!response.ok) {
+            console.error("Download error: Failed to fetch from Cloudinary");
             return NextResponse.json({
                 error: "Failed to download file. Please contact support."
             }, { status: 500 });
         }
 
-        //console.log("File downloaded successfully, size:", data.size);
+        const data = await response.blob();
 
         // Track download (skip for admin reviews)
         if (user.role !== "ADMIN") {
