@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import ApprovalActions from "@/app/(dashboard)/admin/approvals/ApprovalActions";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminApprovalsPage() {
     const user = await getCurrentUser();
 
