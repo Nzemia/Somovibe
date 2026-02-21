@@ -60,6 +60,11 @@ export type Session = Prisma.SessionModel
  */
 export type VerificationToken = Prisma.VerificationTokenModel
 /**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
  * Model TeacherProfile
  * 
  */
