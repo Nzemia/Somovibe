@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { createSession } from "@/lib/session";
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 
@@ -53,6 +54,8 @@ export async function POST(req: Request) {
                 },
             });
         }
+
+        await createSession(user.id);
 
         return NextResponse.json({
             user: {
