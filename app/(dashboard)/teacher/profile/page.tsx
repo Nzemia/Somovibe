@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import ProfileForm from "./ProfileForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
+import { TeacherFAB } from "@/components/TeacherFAB";
 
 export default async function TeacherProfilePage() {
     const user = await getCurrentUser();
@@ -278,6 +279,8 @@ export default async function TeacherProfilePage() {
                     </div>
                 </div>
             </div>
+
+            <TeacherFAB currentPage="profile" />
         </div>
     );
 }

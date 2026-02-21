@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import WithdrawButton from "./WithdrawButton";
+import { TeacherFAB } from "@/components/TeacherFAB";
 
 export default async function WalletPage() {
     const user = await getCurrentUser();
@@ -33,24 +34,44 @@ export default async function WalletPage() {
     const totalCredits   = transactions.filter(t => t.type === "CREDIT").reduce((s, t) => s + t.amount, 0);
     const totalWithdrawn = transactions.filter(t => t.type === "DEBIT").reduce((s, t) => s + t.amount, 0);
 
-    const statCards = [
-        { label: "Total Earnings",   value: `KES ${totalEarnings.toLocaleString()}`,  sub: "75% of all sales",       icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>), bg: "bg-[#f0faf5]", icon_color: "text-[#008c43]", val_color: "text-[#008c43]" },
-        { label: "Total Sales",      value: totalSales.toString(),                    sub: "across all materials",   icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>), bg: "bg-emerald-50", icon_color: "text-emerald-600", val_color: "text-emerald-700" },
-        { label: "Total Credits",    value: `KES ${totalCredits.toLocaleString()}`,   sub: "money received",         icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>), bg: "bg-sky-50", icon_color: "text-sky-600", val_color: "text-sky-700" },
-        { label: "Total Withdrawn",  value: `KES ${totalWithdrawn.toLocaleString()}`, sub: "paid out via M-Pesa",    icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>), bg: "bg-amber-50", icon_color: "text-amber-600", val_color: "text-amber-700" },
+    const heroBannerStats = [
+        {
+            label: "Total Earnings", value: `KES ${totalEarnings.toLocaleString()}`, sub: "75% of sales",
+            gradient: "from-[#008c43] to-[#004d25]", shadow: "shadow-green-900/30",
+            light: "text-green-200", lighter: "text-green-300",
+            icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>),
+        },
+        {
+            label: "Total Sales", value: totalSales.toString(), sub: "all materials",
+            gradient: "from-emerald-500 to-teal-600", shadow: "shadow-teal-900/30",
+            light: "text-emerald-200", lighter: "text-emerald-300",
+            icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>),
+        },
+        {
+            label: "Total Credits", value: `KES ${totalCredits.toLocaleString()}`, sub: "money received",
+            gradient: "from-sky-500 to-blue-600", shadow: "shadow-blue-900/30",
+            light: "text-sky-200", lighter: "text-sky-300",
+            icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>),
+        },
+        {
+            label: "Withdrawn", value: `KES ${totalWithdrawn.toLocaleString()}`, sub: "via M-Pesa",
+            gradient: "from-amber-400 to-orange-500", shadow: "shadow-orange-900/30",
+            light: "text-amber-100", lighter: "text-amber-200",
+            icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>),
+        },
     ];
 
     return (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 sm:pb-8">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 sm:pb-10">
 
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            {/* Page header */}
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <p className="text-[#008c43] text-sm font-semibold mb-0.5">Teacher Dashboard</p>
+                    <p className="text-[#008c43] text-xs font-semibold uppercase tracking-widest mb-0.5">Teacher Dashboard</p>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">My Wallet</h1>
-                    <p className="text-gray-500 text-sm mt-0.5">Manage your earnings and withdrawals</p>
                 </div>
-                <Link href="/teacher" className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-[#d1e8dc] text-[#008c43] font-semibold rounded-xl hover:bg-[#f0faf5] transition-colors text-sm w-fit">
+                <Link href="/teacher"
+                    className="flex items-center gap-1.5 px-4 py-2.5 border border-[#d1e8dc] text-[#008c43] font-semibold rounded-xl hover:bg-[#f0faf5] transition-colors text-sm">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                     </svg>
@@ -58,52 +79,58 @@ export default async function WalletPage() {
                 </Link>
             </div>
 
-            {/* Balance card */}
-            <div className="rounded-2xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden"
-                style={{ background: "linear-gradient(135deg, #002a14 0%, #005c2a 50%, #008c43 100%)" }}>
-                {/* Decorative circles */}
-                <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
-                <div className="absolute -bottom-12 -left-6 w-52 h-52 rounded-full bg-white/5 pointer-events-none" />
+            {/* Hero banner — balance + stat mini-cards in one green container */}
+            <div
+                className="rounded-2xl sm:rounded-3xl overflow-hidden mb-6 relative"
+                style={{ background: "linear-gradient(135deg, #003318 0%, #006832 45%, #008c43 80%, #00b856 100%)" }}
+            >
+                {/* Grid texture */}
+                <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
+                    style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
 
-                <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-1">
-                        <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                        <span className="text-white/70 text-sm font-medium">Available Balance</span>
+                <div className="relative px-4 sm:px-6 pt-5 pb-5">
+                    {/* Balance + actions row */}
+                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <svg className="w-4 h-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                                <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">Available Balance</p>
+                            </div>
+                            <p className="text-4xl sm:text-5xl font-extrabold text-white leading-none">
+                                KES {balance.toLocaleString()}
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2.5">
+                            <WithdrawButton balance={balance} phone={user.phone} />
+                            <Link href="/teacher/upload"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/15 border border-white/20 text-white font-semibold rounded-xl hover:bg-white/25 transition-colors text-sm">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                </svg>
+                                Upload
+                            </Link>
+                        </div>
                     </div>
-                    <p className="text-4xl sm:text-5xl font-extrabold mb-6">
-                        KES {balance.toLocaleString()}
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                        <WithdrawButton balance={balance} phone={user.phone} />
-                        <Link href="/teacher/upload"
-                            className="inline-flex items-center gap-2 px-5 py-3 bg-white/15 border border-white/20 text-white font-semibold rounded-xl hover:bg-white/25 transition-colors text-sm">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                            </svg>
-                            Upload Material
-                        </Link>
+
+                    {/* 4 stat mini-cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                        {heroBannerStats.map(s => (
+                            <div key={s.label}
+                                className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 bg-gradient-to-br ${s.gradient} shadow-lg ${s.shadow}`}>
+                                <div className={`${s.light} mb-1.5`}>{s.icon}</div>
+                                <p className="text-xl sm:text-2xl font-extrabold text-white leading-none">{s.value}</p>
+                                <p className={`${s.light} text-xs font-semibold mt-1`}>{s.label}</p>
+                                <p className={`${s.lighter} text-xs mt-0.5`}>{s.sub}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
 
-            {/* Stat cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-                {statCards.map((s) => (
-                    <div key={s.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                        <div className={`w-9 h-9 rounded-xl ${s.bg} ${s.icon_color} flex items-center justify-center mb-3`}>
-                            {s.icon}
-                        </div>
-                        <p className={`text-lg font-extrabold ${s.val_color}`}>{s.value}</p>
-                        <p className="text-xs font-semibold text-gray-600 mt-0.5">{s.label}</p>
-                        <p className="text-xs text-gray-400">{s.sub}</p>
-                    </div>
-                ))}
-            </div>
-
             {/* Transaction history */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div>
                         <h2 className="text-lg font-bold text-gray-900">Transaction History</h2>
@@ -168,6 +195,8 @@ export default async function WalletPage() {
                     </div>
                 )}
             </div>
+
+            <TeacherFAB currentPage="wallet" />
         </div>
     );
 }

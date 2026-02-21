@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { TeacherFAB } from "@/components/TeacherFAB";
 
 const SUBJECTS = [
     "Mathematics", "English", "Kiswahili", "Science",
@@ -593,6 +594,8 @@ export default function UploadPage() {
                     </div>
                 </div>
             </form>
+
+            <TeacherFAB currentPage="upload" />
         </div>
     );
 }

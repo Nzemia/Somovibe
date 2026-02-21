@@ -3,23 +3,9 @@ import { prisma } from "./prisma";
 
 /**
  * CACHING STRATEGY:
- * 
- * The approved PDFs list is PUBLIC data that rarely changes (only when admin approves new PDFs).
- * We cache this for 60 seconds using unstable_cache with tag-based invalidation.
- * 
- * This means:
- * - First request: Queries DB, caches result for 60 seconds
- * - Requests within 60s: Returns cached result (NO DB CALL)
- * - After 60s: Revalidates by querying DB again
- * - Admin approval: Can trigger revalidation via revalidateTag("marketplace-pdfs")
- * 
- * WHY THIS MAKES BACK NAVIGATION FAST:
- * When user returns to marketplace, instead of waiting for a fresh DB query,
- * they get the cached PDF list instantly. Pagination can still load new data dynamically.
- * 
- * PAGINATION:
- * We support cursor-based pagination to avoid overfetching.
- * Only load items needed for current page + next page preview.
+ *
+ * The approved PDFs list is PUBLIC data that rarely changes.
+ * Cached for 60 seconds with tag-based invalidation via revalidateTag("marketplace-pdfs").
  */
 
 type GetCachedApprovedPdfsParams = {
@@ -29,6 +15,7 @@ type GetCachedApprovedPdfsParams = {
   sort?: string;
   grades?: string[];
   subjects?: string[];
+  materialTypes?: string[];
   minPrice?: number;
   maxPrice?: number;
   verifiedOnly?: boolean;
@@ -36,22 +23,19 @@ type GetCachedApprovedPdfsParams = {
 
 export const getCachedApprovedPdfs = unstable_cache(
   async ({
-    take = 12,
+    take = 50,
     cursor = null,
     search = "",
     sort = "newest",
     grades = [],
     subjects = [],
+    materialTypes = [],
     minPrice,
     maxPrice,
     verifiedOnly = false,
   }: GetCachedApprovedPdfsParams) => {
-    // Build where clause
-    const whereConditions: any[] = [
-      { status: "APPROVED" },
-    ];
+    const whereConditions: any[] = [{ status: "APPROVED" }];
 
-    // Search filter (title, description, or subject)
     if (search.trim()) {
       whereConditions.push({
         OR: [
@@ -59,11 +43,12 @@ export const getCachedApprovedPdfs = unstable_cache(
           { description: { contains: search.trim(), mode: "insensitive" } },
           { subject: { contains: search.trim(), mode: "insensitive" } },
           { grade: { contains: search.trim(), mode: "insensitive" } },
+          { teacher: { name: { contains: search.trim(), mode: "insensitive" } } },
+          { teacher: { email: { contains: search.trim(), mode: "insensitive" } } },
         ],
       });
     }
 
-    // Grade filter
     if (grades.length > 0) {
       const gradeConditions = grades.flatMap((gradeRange) => {
         if (gradeRange === "1-3") {
@@ -87,56 +72,44 @@ export const getCachedApprovedPdfs = unstable_cache(
         }
         return [];
       });
-      
       if (gradeConditions.length > 0) {
         whereConditions.push({ OR: gradeConditions });
       }
     }
 
-    // Subject filter
     if (subjects.length > 0) {
       whereConditions.push({ subject: { in: subjects } });
     }
 
-    // Price range filter
+    if (materialTypes.length > 0) {
+      whereConditions.push({ materialType: { in: materialTypes } });
+    }
+
     if (minPrice !== undefined || maxPrice !== undefined) {
       const priceCondition: any = {};
-      if (minPrice !== undefined) {
-        priceCondition.gte = minPrice;
-      }
-      if (maxPrice !== undefined) {
-        priceCondition.lte = maxPrice;
-      }
+      if (minPrice !== undefined) priceCondition.gte = minPrice;
+      if (maxPrice !== undefined) priceCondition.lte = maxPrice;
       whereConditions.push({ price: priceCondition });
     }
 
-    // Verified only filter (requires teacher profile check)
     if (verifiedOnly) {
       whereConditions.push({
-        teacher: {
-          teacherProfile: {
-            isActive: true,
-          },
-        },
+        teacher: { teacherProfile: { isActive: true } },
       });
     }
 
-    const where = whereConditions.length > 1 ? { AND: whereConditions } : whereConditions[0];
+    const where =
+      whereConditions.length > 1 ? { AND: whereConditions } : whereConditions[0];
 
-    // Build orderBy clause
+    // Build orderBy — popular uses real purchase count via Prisma relation ordering
     let orderBy: any = { createdAt: "desc" };
-    if (sort === "price-low") {
-      orderBy = { price: "asc" };
-    } else if (sort === "price-high") {
-      orderBy = { price: "desc" };
-    } else if (sort === "newest") {
-      orderBy = { createdAt: "desc" };
-    } else if (sort === "popular" || sort === "rated") {
-      // For now, fallback to newest since we don't have rating/popularity data yet
-      orderBy = { createdAt: "desc" };
-    }
+    if (sort === "price-low")   orderBy = { price: "asc" };
+    if (sort === "price-high")  orderBy = { price: "desc" };
+    if (sort === "oldest")      orderBy = { createdAt: "asc" };
+    if (sort === "newest")      orderBy = { createdAt: "desc" };
+    if (sort === "popular")     orderBy = { purchases: { _count: "desc" } };
+    // "rated" is sorted client-side after computing avg from review ratings
 
-    // Fetch one extra to determine if there's a next page
     const pdfs = await prisma.pdf.findMany({
       where,
       select: {
@@ -146,70 +119,52 @@ export const getCachedApprovedPdfs = unstable_cache(
         subject: true,
         grade: true,
         price: true,
+        materialType: true,
+        thumbnailUrl: true,
         createdAt: true,
         teacher: {
           select: {
+            name: true,
             email: true,
             teacherProfile: {
-              select: {
-                isActive: true,
-              },
+              select: { isActive: true },
             },
           },
         },
+        _count: {
+          select: { purchases: true },
+        },
+        reviews: {
+          select: { rating: true },
+        },
       },
       orderBy,
-      take: take + 1, // Fetch one extra to check hasNextPage
+      take: take + 1,
       ...(cursor && { skip: 1, cursor: { id: cursor } }),
     });
 
     const hasNextPage = pdfs.length > take;
     const items = pdfs.slice(0, take);
 
-    return {
-      items,
-      hasNextPage,
-      nextCursor: hasNextPage ? items[items.length - 1]?.id : null,
-    };
+    return { items, hasNextPage, nextCursor: hasNextPage ? items[items.length - 1]?.id : null };
   },
-  ["marketplace-pdfs"], // Cache tag for revalidation
-  {
-    revalidate: 60, // Revalidate every 60 seconds
-    tags: ["marketplace-pdfs"],
-  }
+  ["marketplace-pdfs"],
+  { revalidate: 60, tags: ["marketplace-pdfs"] }
 );
 
 /**
- * Get user's purchased PDF IDs (DYNAMIC - not cached)
- * 
- * We only query purchases for PDFs the user can see (filtered by pdfIds).
- * This is more efficient than fetching ALL purchases and checking membership.
- * 
- * This remains dynamic because it's user-specific data.
- * Executed only if user is logged in, so unauthenticated users don't trigger this.
+ * Get user's purchased PDF IDs — dynamic (user-specific, never cached)
  */
 export async function getUserPurchasedPdfIds(
   userId: string,
   pdfIds: string[]
 ): Promise<Set<string>> {
   if (!pdfIds.length) return new Set();
-
   const purchases = await prisma.purchase.findMany({
-    where: {
-      userId,
-      pdfId: { in: pdfIds },
-    },
+    where: { userId, pdfId: { in: pdfIds } },
     select: { pdfId: true },
   });
-
   return new Set(purchases.map((p) => p.pdfId));
 }
 
-/**
- * Revalidate marketplace cache when needed (e.g., after admin approves a PDF)
- * Import this in your admin API routes:
- * 
- * import { revalidateTag } from "next/cache";
- * revalidateTag("marketplace-pdfs");
- */
 export { revalidateTag } from "next/cache";

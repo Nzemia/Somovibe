@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AnalyticsMaterials, type AnalyticsRow } from "@/components/AnalyticsMaterials";
+import { TeacherFAB } from "@/components/TeacherFAB";
 
 export default async function TeacherAnalyticsPage() {
     const user = await getCurrentUser();
@@ -174,6 +175,8 @@ export default async function TeacherAnalyticsPage() {
                     <AnalyticsMaterials materials={rows} />
                 </div>
             </div>
+
+            <TeacherFAB currentPage="analytics" />
         </div>
     );
 }

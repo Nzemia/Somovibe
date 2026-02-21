@@ -5,30 +5,34 @@ import { MarketplaceControls } from "./MarketplaceControls";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { MarketplaceContent } from "./MarketplaceContent";
 
-type Pdf = {
+export type PdfItem = {
   id: string;
   title: string;
   description: string;
   subject: string;
   grade: string;
   price: number;
+  materialType: string;
+  thumbnailUrl?: string | null;
   createdAt: Date | string;
   teacher: {
+    name?: string | null;
     email: string;
-    teacherProfile?: {
-      isActive: boolean;
-    } | null;
+    teacherProfile?: { isActive: boolean } | null;
   };
+  _count: { purchases: number };
+  reviews: { rating: number }[];
 };
 
-type MarketplaceClientWrapperProps = {
-  initialPdfs: Pdf[];
+type Props = {
+  initialPdfs: PdfItem[];
   purchasedPdfIds: Set<string>;
   user: { id: string; email: string; phone: string | null } | null;
   initialSearch?: string;
   initialSort?: string;
   initialGrades?: string[];
   initialSubjects?: string[];
+  initialMaterialTypes?: string[];
   initialMinPrice?: number;
   initialMaxPrice?: number;
   initialVerifiedOnly?: boolean;
@@ -42,14 +46,16 @@ export function MarketplaceClientWrapper({
   initialSort = "newest",
   initialGrades = [],
   initialSubjects = [],
+  initialMaterialTypes = [],
   initialMinPrice,
   initialMaxPrice,
   initialVerifiedOnly = false,
-}: MarketplaceClientWrapperProps) {
+}: Props) {
   const [search, setSearch] = useState(initialSearch);
   const [sort, setSort] = useState(initialSort);
   const [grades, setGrades] = useState<string[]>(initialGrades);
   const [subjects, setSubjects] = useState<string[]>(initialSubjects);
+  const [materialTypes, setMaterialTypes] = useState<string[]>(initialMaterialTypes);
   const [minPrice, setMinPrice] = useState<number | undefined>(initialMinPrice);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(initialMaxPrice);
   const [verifiedOnly, setVerifiedOnly] = useState(initialVerifiedOnly);
@@ -61,46 +67,47 @@ export function MarketplaceClientWrapper({
     if (sort && sort !== "newest") params.set("sort", sort);
     grades.forEach((g) => params.append("grade", g));
     subjects.forEach((s) => params.append("subject", s));
+    materialTypes.forEach((t) => params.append("type", t));
     if (minPrice !== undefined) params.set("minPrice", minPrice.toString());
     if (maxPrice !== undefined) params.set("maxPrice", maxPrice.toString());
     if (verifiedOnly) params.set("verifiedOnly", "true");
     params.delete("cursor");
-
-    // Use replace to avoid adding to history, scroll: false for smooth UX
-    window.history.replaceState(
-      {},
-      "",
-      `/marketplace?${params.toString()}`
-    );
-  }, [search, sort, grades, subjects, minPrice, maxPrice, verifiedOnly]);
+    window.history.replaceState({}, "", `/marketplace?${params.toString()}`);
+  }, [search, sort, grades, subjects, materialTypes, minPrice, maxPrice, verifiedOnly]);
 
   return (
-    <>
+    <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+      {/* Search + sort bar */}
       <MarketplaceControls
         initialSearch={search}
         initialSort={sort}
         onSearchChange={setSearch}
         onSortChange={setSort}
+        totalCount={initialPdfs.length}
       />
-      <section className="w-full mt-8 pb-12">
-        <div className="flex flex-col lg:flex-row gap-4 items-start">
-          {/* Filters Sidebar */}
-          <div className="w-full lg:w-64 lg:flex-shrink-0 lg:ml-[10px]">
-            <MarketplaceFilters
-              initialGrades={grades}
-              initialSubjects={subjects}
-              initialMinPrice={minPrice?.toString()}
-              initialMaxPrice={maxPrice?.toString()}
-              initialVerifiedOnly={verifiedOnly}
-              onGradesChange={setGrades}
-              onSubjectsChange={setSubjects}
-              onMinPriceChange={(val) => setMinPrice(val ? parseInt(val) : undefined)}
-              onMaxPriceChange={(val) => setMaxPrice(val ? parseInt(val) : undefined)}
-              onVerifiedOnlyChange={setVerifiedOnly}
-            />
-          </div>
 
-          {/* Content - Optimistic filtering */}
+      {/* Sidebar + grid */}
+      <div className="flex flex-col lg:flex-row gap-6 pt-4 pb-12 items-start">
+        <div className="w-full lg:w-60 lg:shrink-0 lg:sticky lg:top-24">
+          <MarketplaceFilters
+            initialGrades={grades}
+            initialSubjects={subjects}
+            initialMaterialTypes={materialTypes}
+            initialMinPrice={minPrice?.toString()}
+            initialMaxPrice={maxPrice?.toString()}
+            initialVerifiedOnly={verifiedOnly}
+            initialSort={sort}
+            onGradesChange={setGrades}
+            onSubjectsChange={setSubjects}
+            onMaterialTypesChange={setMaterialTypes}
+            onMinPriceChange={(val) => setMinPrice(val ? parseInt(val) : undefined)}
+            onMaxPriceChange={(val) => setMaxPrice(val ? parseInt(val) : undefined)}
+            onVerifiedOnlyChange={setVerifiedOnly}
+            onSortChange={setSort}
+          />
+        </div>
+
+        <div className="flex-1 min-w-0">
           <MarketplaceContent
             initialPdfs={initialPdfs}
             purchasedPdfIds={purchasedPdfIds}
@@ -109,12 +116,13 @@ export function MarketplaceClientWrapper({
             sort={sort}
             grades={grades}
             subjects={subjects}
+            materialTypes={materialTypes}
             minPrice={minPrice}
             maxPrice={maxPrice}
             verifiedOnly={verifiedOnly}
           />
         </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
 }
