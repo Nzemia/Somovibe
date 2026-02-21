@@ -3,7 +3,22 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-const ACTIONS = [
+export type FABPage = "dashboard" | "upload" | "analytics" | "wallet" | "profile";
+
+const DASHBOARD_ACTION = {
+  id: "dashboard",
+  label: "Dashboard",
+  href: "/teacher",
+  bg: "bg-[#008c43]",
+  icon: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
+  ),
+};
+
+const ALL_ACTIONS = [
   {
     id: "upload",
     label: "Upload Material",
@@ -23,10 +38,8 @@ const ACTIONS = [
     bg: "bg-indigo-500",
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-          d="M3 13.5l4-4 4 4 4-6 4 3" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-          d="M3 20h18" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 13.5l4-4 4 4 4-6 4 3" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 20h18" />
       </svg>
     ),
   },
@@ -56,7 +69,7 @@ const ACTIONS = [
   },
 ];
 
-export function TeacherFAB() {
+export function TeacherFAB({ currentPage = "dashboard" }: { currentPage?: FABPage }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
@@ -69,6 +82,11 @@ export function TeacherFAB() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Replace the current page's action with the Dashboard action
+  const actions = ALL_ACTIONS.map(a =>
+    a.id === currentPage ? DASHBOARD_ACTION : a
+  );
+
   return (
     <div ref={ref} className="sm:hidden fixed bottom-6 right-4 z-50 flex flex-col items-end gap-2.5">
 
@@ -78,7 +96,7 @@ export function TeacherFAB() {
           open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
-        {ACTIONS.map((a, i) => (
+        {actions.map((a, i) => (
           <button
             key={a.id}
             onClick={() => { setOpen(false); router.push(a.href); }}
@@ -99,7 +117,7 @@ export function TeacherFAB() {
 
       {/* Main toggle button */}
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(v => !v)}
         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 active:scale-90 ${
           open ? "bg-gray-800" : "bg-[#008c43] hover:bg-[#006832]"
         }`}

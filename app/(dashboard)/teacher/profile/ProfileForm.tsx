@@ -60,9 +60,9 @@ export default function ProfileForm({ user }: { user: User }) {
                         type="email"
                         value={user.email}
                         disabled
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-400 bg-gray-50 cursor-not-allowed select-none"
+                        className="w-full pl-10 pr-20 py-3 border border-gray-200 rounded-xl text-sm text-gray-400 bg-gray-50 cursor-not-allowed select-none truncate"
                     />
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap pointer-events-none">
                         Locked
                     </span>
                 </div>

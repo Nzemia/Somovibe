@@ -134,7 +134,8 @@ export default function PurchaseButton({
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2 text-xs md:text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50 shadow-sm shadow-[#008c43]/20 active:scale-95"
+          style={{ background: "linear-gradient(135deg, #006832 0%, #008c43 100%)" }}
         >
           {downloading ? (
             <>
@@ -183,11 +184,20 @@ export default function PurchaseButton({
           onClick={handleBuyClick}
           className={
             variant === "secondary"
-              ? "px-2 py-1 border border-slate-300 text-[10px] font-medium text-slate-900 rounded-md hover:bg-slate-50 transition-colors"
-              : "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              ? "inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-[#008c43] text-[#008c43] text-[11px] font-bold rounded-xl hover:bg-[#f0faf5] transition-colors active:scale-95"
+              : "inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-[#008c43]/20 active:scale-95"
           }
+          style={variant === "primary" ? { background: "linear-gradient(135deg, #006832 0%, #008c43 100%)" } : undefined}
         >
-          Buy
+          {variant === "secondary" ? (
+            <>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Buy
+            </>
+          ) : "Pay with M‑Pesa"}
         </button>
       )}
 
@@ -202,109 +212,90 @@ export default function PurchaseButton({
             }
           }}
         >
-          <div 
-            className="bg-white border border-slate-200 rounded-xl shadow-xl max-w-md w-full p-6 relative animate-in fade-in-0 zoom-in-95 duration-200"
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-              aria-label="Close modal"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <h3 className="text-xl font-semibold text-slate-900 mb-4 pr-8">
-              Complete Purchase
-            </h3>
-
-            <div className="mb-5 space-y-2">
-              <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
-                <span className="text-sm text-slate-600">Material:</span>
-                <span className="text-sm font-medium text-slate-900">{title}</span>
-              </div>
-              <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
-                <span className="text-sm text-slate-600">Price:</span>
-                <span className="text-base font-semibold text-slate-900">KES {price}</span>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-900 mb-2">
-                M-Pesa Phone Number
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="254712345678"
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 placeholder:text-slate-400"
-                autoFocus
-              />
-              <p className="mt-1.5 text-xs text-slate-500">
-                Format: 254XXXXXXXXX (no spaces or +)
-              </p>
-            </div>
-
-            {process.env.NEXT_PUBLIC_DEV_MODE === "true" && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
-                🔧 DEV MODE: Purchase will be auto-approved for testing
-              </div>
-            )}
-
-            <div className="flex gap-3">
+            {/* Modal header — green gradient */}
+            <div className="relative px-6 pt-5 pb-4"
+              style={{ background: "linear-gradient(135deg, #003318 0%, #006832 50%, #008c43 100%)" }}>
               <button
                 onClick={() => setShowModal(false)}
-                disabled={loading}
-                className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-900 disabled:opacity-50"
+                className="absolute top-3.5 right-4 p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Close modal"
               >
-                Cancel
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
-              <button
-                onClick={handlePurchase}
-                disabled={loading}
-                className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm font-medium flex items-center justify-center"
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="animate-spin w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Processing...
-                  </span>
-                ) : (
-                  "Pay with M-Pesa"
-                )}
-              </button>
+              <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">M-Pesa Checkout</p>
+              <h3 className="text-white text-lg font-extrabold pr-8 leading-tight line-clamp-2">{title}</h3>
+              <div className="mt-2 inline-flex items-center gap-1.5 bg-white/15 border border-white/20 rounded-xl px-3 py-1.5">
+                <span className="text-white/70 text-xs">Total</span>
+                <span className="text-white text-lg font-extrabold">KES {price.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Modal body */}
+            <div className="px-6 py-5">
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                M-Pesa Phone Number
+              </label>
+              <div className="relative">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="254712345678"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008c43] focus:border-transparent text-gray-900 placeholder:text-gray-400 text-sm"
+                  autoFocus
+                />
+              </div>
+              <p className="mt-1.5 text-xs text-gray-400">
+                Format: <span className="font-mono">254XXXXXXXXX</span> — no spaces or +
+              </p>
+
+              {process.env.NEXT_PUBLIC_DEV_MODE === "true" && (
+                <div className="mt-3 p-3 bg-[#f0faf5] border border-[#d1e8dc] rounded-xl text-xs text-[#006832] font-medium">
+                  DEV MODE: Purchase will be auto-approved instantly
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-5">
+                <button
+                  onClick={() => setShowModal(false)}
+                  disabled={loading}
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePurchase}
+                  disabled={loading || !phone}
+                  className="flex-1 px-4 py-2.5 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-md shadow-[#008c43]/20 active:scale-95"
+                  style={{ background: "linear-gradient(135deg, #006832 0%, #008c43 60%, #00a854 100%)" }}
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Processing…
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Pay with M‑Pesa
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>,
