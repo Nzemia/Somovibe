@@ -14,9 +14,7 @@ async function sendEmail(options: {
     html: string;
 }) {
     try {
-        console.log(`📧 Attempting to send email to: ${options.to}`);
-        console.log(`   Subject: ${options.subject}`);
-        console.log(`   From: ${fromEmail}`);
+      
 
         const resend = getResendClient();
         const result = await resend.emails.send({
@@ -26,7 +24,6 @@ async function sendEmail(options: {
             html: options.html,
         });
 
-        console.log(`✅ Email sent successfully to ${options.to}`, result);
         return result;
     } catch (error: any) {
         console.error(`❌ Failed to send email to ${options.to}:`, error);

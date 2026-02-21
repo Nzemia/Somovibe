@@ -21,10 +21,7 @@ async function main() {
         },
     });
 
-    console.log('✅ Platform admin created:', admin.email);
-    console.log('✅ Admin ID:', admin.id);
-    console.log('\n📝 Add this to your .env file:');
-    console.log(`PLATFORM_ADMIN_ID="${admin.id}"`);
+
 }
 
 main()

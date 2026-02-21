@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
-import { createClient } from "@supabase/supabase-js";
 import { sendNewMaterialPendingEmail } from "@/lib/email";
 import { getPlatformAdminId } from "@/lib/platformAdmin";
 import { uploadToCloudinary, getDefaultThumbnail } from "@/lib/cloudinary";
@@ -44,7 +43,7 @@ export async function POST(req: Request) {
         let thumbnailUrl: string;
         if (thumbnail) {
             try {
-                thumbnailUrl = await uploadToCloudinary(thumbnail, "material-thumbnails");
+                thumbnailUrl = await uploadToCloudinary(thumbnail, "material-thumbnails", "image");
             } catch (error) {
                 console.error("Thumbnail upload failed:", error);
                 thumbnailUrl = getDefaultThumbnail(materialType);
@@ -53,41 +52,16 @@ export async function POST(req: Request) {
             thumbnailUrl = getDefaultThumbnail(materialType);
         }
 
-        // Use service role key for upload permissions
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                auth: {
-                    autoRefreshToken: false,
-                    persistSession: false,
-                },
-            }
-        );
-
-        const filePath = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-
-        // Convert File to ArrayBuffer for Supabase
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        //console.log("Attempting upload to Supabase:", { filePath, size: buffer.length, type: file.type });
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("pdfs")
-            .upload(filePath, buffer, {
-                contentType: file.type,
-                upsert: false,
-            });
-
-        if (uploadError) {
-            console.error("Supabase upload error:", uploadError);
+        // Upload PDF to Cloudinary
+        let fileUrl: string;
+        try {
+            fileUrl = await uploadToCloudinary(file, "materials", "raw");
+        } catch (error) {
+            console.error("File upload failed:", error);
             return NextResponse.json({
-                error: `Failed to upload file: ${uploadError.message}`
+                error: "Failed to upload file"
             }, { status: 500 });
         }
-
-        //console.log("File uploaded to Supabase successfully:", uploadData);
 
         // Create PDF record in database
         const pdf = await prisma.pdf.create({
@@ -97,7 +71,7 @@ export async function POST(req: Request) {
                 subject,
                 grade,
                 price,
-                fileUrl: filePath,
+                fileUrl,
                 thumbnailUrl,
                 materialType: materialType as "PDF" | "PDF_SLIDES" | "POWERPOINT" | "CLASS_INSTRUCTIONS" | "SCHEME_OF_WORK" | "LESSON_PLAN" | "EXAM_QUIZ",
                 teacherId: user.id,

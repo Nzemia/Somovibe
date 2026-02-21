@@ -3,9 +3,7 @@ import { Resend } from "resend";
 
 export async function GET(req: NextRequest) {
     try {
-        console.log("🧪 Testing Resend configuration...");
-        console.log("API Key:", process.env.RESEND_API_KEY ? "✅ Set" : "❌ Missing");
-        console.log("From Email:", process.env.RESEND_FROM_EMAIL);
+        
 
         const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -16,7 +14,6 @@ export async function GET(req: NextRequest) {
             html: "<p>This is a test email to verify Resend is working!</p>",
         });
 
-        console.log("✅ Test email sent:", result);
 
         return NextResponse.json({
             success: true,

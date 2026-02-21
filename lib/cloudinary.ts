@@ -8,7 +8,8 @@ cloudinary.config({
 
 export async function uploadToCloudinary(
     file: File,
-    folder: string = "thumbnails"
+    folder: string = "thumbnails",
+    resourceType: "image" | "raw" | "video" | "auto" = "image"
 ): Promise<string> {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -18,7 +19,7 @@ export async function uploadToCloudinary(
             .upload_stream(
                 {
                     folder,
-                    resource_type: "image",
+                    resource_type: resourceType,
                 },
                 (error, result) => {
                     if (error) reject(error);

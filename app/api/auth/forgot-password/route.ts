@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
         });
 
         // Send email
-        console.log("📧 Attempting to send password reset email to:", email);
         const emailResult = await sendPasswordResetEmail(email, token);
 
         if (!emailResult) {
@@ -61,7 +60,7 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({
-            message: "If an account exists, a reset link has been sent",
+            message: "Reset link sent successfully. Please check your email!",
         });
     } catch (error) {
         console.error("Forgot password error:", error);
