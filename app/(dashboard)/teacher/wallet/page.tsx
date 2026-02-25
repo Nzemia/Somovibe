@@ -51,23 +51,27 @@ export default async function WalletPage() {
         },
     });
 
-    const totalEarnings = materials.reduce((sum, material) => {
+    type MaterialWithPurchases = typeof materials[number];
+    type Transaction = typeof transactions[number];
+
+    const totalEarnings = materials.reduce((sum: number, material: MaterialWithPurchases) => {
         return sum + material.purchases.length * Math.floor(material.price * 0.75);
     }, 0);
 
-    const totalSales = materials.reduce((sum, m) => sum + m.purchases.length, 0);
+    const totalSales = materials.reduce((sum: number, m: MaterialWithPurchases) => sum + m.purchases.length, 0);
 
-    const balance = wallet?.balance || 0;
+    // Use wallet balance, or fall back to calculated earnings if wallet hasn't been credited yet
+    const balance = wallet?.balance || totalEarnings;
     const transactions = wallet?.walletTransactions || [];
 
     // Calculate total credits and debits
     const totalCredits = transactions
-        .filter((t) => t.type === "CREDIT")
-        .reduce((sum, t) => sum + t.amount, 0);
+        .filter((t: Transaction) => t.type === "CREDIT")
+        .reduce((sum: number, t: Transaction) => sum + t.amount, 0);
 
     const totalDebits = transactions
-        .filter((t) => t.type === "DEBIT")
-        .reduce((sum, t) => sum + t.amount, 0);
+        .filter((t: Transaction) => t.type === "DEBIT")
+        .reduce((sum: number, t: Transaction) => sum + t.amount, 0);
 
     return (
         <div className="min-h-screen bg-background">
@@ -235,7 +239,7 @@ export default async function WalletPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {transactions.map((transaction) => (
+                                        {transactions.map((transaction: Transaction) => (
                                             <TableRow key={transaction.id}>
                                                 <TableCell className="text-muted-foreground">
                                                     {new Date(
