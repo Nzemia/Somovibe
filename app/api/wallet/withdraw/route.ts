@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAuth, handleAuthError } from "@/lib/apiAuth";
 import { NextResponse } from "next/server";
-import { debitWallet } from "@/lib/wallet";
+import { debitWallet, creditWallet } from "@/lib/wallet";
 import { initiateB2CPayment } from "@/lib/mpesa";
 
 const MIN_WITHDRAWAL = 10; // Minimum KES 10
@@ -62,29 +62,7 @@ export async function POST(req: Request) {
             );
         }
 
-        // DEV MODE: Auto-complete withdrawal
-        if (process.env.DEV_MODE === "true") {
-            await debitWallet(user.id, amount);
-
-            const withdrawal = await prisma.withdrawalRequest.create({
-                data: {
-                    userId: user.id,
-                    amount,
-                    phone,
-                    status: "COMPLETED",
-                    completedAt: new Date(),
-                    mpesaReceiptNumber: `DEV${Date.now()}`,
-                },
-            });
-
-            return NextResponse.json({
-                message: "DEV MODE: Withdrawal completed instantly",
-                devMode: true,
-                withdrawal,
-            });
-        }
-
-        // PRODUCTION: Debit wallet first
+        // Debit wallet first
         await debitWallet(user.id, amount);
 
         // Create withdrawal request
@@ -105,11 +83,8 @@ export async function POST(req: Request) {
         );
 
         if (!b2cResult.success) {
-            // Refund wallet if B2C fails
-            await prisma.wallet.update({
-                where: { userId: user.id },
-                data: { balance: { increment: amount } },
-            });
+            // Refund wallet if B2C initiation fails (uses creditWallet for proper transaction logging)
+            await creditWallet(user.id, amount);
 
             await prisma.withdrawalRequest.update({
                 where: { id: withdrawal.id },

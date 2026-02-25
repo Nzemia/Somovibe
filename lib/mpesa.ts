@@ -47,8 +47,8 @@ export async function initiateB2CPayment(
                 PartyA: process.env.MPESA_B2C_SHORTCODE,
                 PartyB: phone,
                 Remarks: remarks,
-                QueueTimeOutURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/mpesa/callback/b2c/timeout`,
-                ResultURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api/mpesa/callback/b2c/result`,
+                QueueTimeOutURL: `${process.env.MPESA_CALLBACK_URL}/api/mpesa/callback/b2c/timeout`,
+                ResultURL: `${process.env.MPESA_CALLBACK_URL}/api/mpesa/callback/b2c/result`,
                 Occasion: "Withdrawal",
             },
             {

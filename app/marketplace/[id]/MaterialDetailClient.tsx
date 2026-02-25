@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getMaterialTypeConfig } from "@/lib/materialTypes";
@@ -22,9 +22,56 @@ export default function MaterialDetailClient({
     const router = useRouter();
     const [downloading, setDownloading] = useState(false);
     const [purchasing, setPurchasing] = useState(false);
+    const [paymentPending, setPaymentPending] = useState(false);
+    const [referenceCode, setReferenceCode] = useState<string | null>(null);
+    const [paymentStatus, setPaymentStatus] = useState<string>("PENDING");
+    const [pollCount, setPollCount] = useState(0);
 
     const materialConfig = getMaterialTypeConfig(material.materialType);
     const avgRating = getAverageRating(material.reviews);
+
+    const MAX_POLL_ATTEMPTS = 60; // 60 seconds
+
+    // Poll for payment status
+    useEffect(() => {
+        if (!paymentPending || !referenceCode) return;
+
+        const interval = setInterval(async () => {
+            setPollCount((prev) => {
+                if (prev >= MAX_POLL_ATTEMPTS) {
+                    clearInterval(interval);
+                    setPaymentStatus("TIMEOUT");
+                    setPaymentPending(false);
+                    toast.error("Payment verification timed out. If you paid, the material will appear shortly — please refresh the page.");
+                    return prev;
+                }
+                return prev + 1;
+            });
+
+            try {
+                const res = await fetch(`/api/payment/status?referenceCode=${referenceCode}`);
+                const data = await res.json();
+
+                if (data.status === "COMPLETED") {
+                    clearInterval(interval);
+                    setPaymentStatus("COMPLETED");
+                    setPaymentPending(false);
+                    toast.success("Payment successful! You can now download the material.");
+                    // Refresh the page to update isPurchased state from the server
+                    router.refresh();
+                } else if (data.status === "FAILED") {
+                    clearInterval(interval);
+                    setPaymentStatus("FAILED");
+                    setPaymentPending(false);
+                    toast.error("Payment failed. Please try again.");
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [paymentPending, referenceCode, router]);
 
     const handleDownload = async () => {
         setDownloading(true);
@@ -70,7 +117,7 @@ export default function MaterialDetailClient({
         }
 
         setPurchasing(true);
-        const loadingToast = toast.loading("Initiating payment...");
+        const loadingToast = toast.loading("Initiating M-Pesa payment...");
 
         try {
             const res = await fetch("/api/mpesa/stk/purchase", {
@@ -88,8 +135,13 @@ export default function MaterialDetailClient({
                 throw new Error(data.error || "Failed to initiate payment");
             }
 
-            toast.success("Payment request sent! Check your phone", { id: loadingToast });
-            router.push(`/payment-status?ref=${data.referenceCode}`);
+            toast.success("Check your phone for the M-Pesa prompt!", { id: loadingToast });
+
+            // Start polling for payment status on this same page
+            setReferenceCode(data.referenceCode);
+            setPaymentPending(true);
+            setPaymentStatus("PENDING");
+            setPollCount(0);
         } catch (err: any) {
             toast.error(err.message || "Failed to initiate payment", { id: loadingToast });
         } finally {
@@ -227,6 +279,52 @@ export default function MaterialDetailClient({
                                 KES {material.price}
                             </div>
 
+                            {/* Payment Pending Overlay */}
+                            {paymentPending && (
+                                <div className="mb-4 p-5 bg-primary/5 border-2 border-primary/20 rounded-lg text-center">
+                                    <div className="flex justify-center mb-3">
+                                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-foreground mb-1">
+                                        Waiting for Payment
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground mb-3">
+                                        Check your phone for the M-Pesa prompt and enter your PIN
+                                    </p>
+                                    <div className="bg-background border border-border rounded-md p-2 mb-2">
+                                        <p className="text-xs text-muted-foreground">Reference</p>
+                                        <p className="font-mono text-xs font-bold text-foreground">{referenceCode}</p>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        This may take up to 60 seconds...
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Payment Failed */}
+                            {paymentStatus === "FAILED" && !paymentPending && (
+                                <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                                    <p className="text-sm text-destructive font-medium">
+                                        ✕ Payment failed. Please try again.
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Payment Timeout */}
+                            {paymentStatus === "TIMEOUT" && !paymentPending && (
+                                <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                                    <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">
+                                        ⏱ Payment verification timed out. If you completed the payment, please refresh this page.
+                                    </p>
+                                    <button
+                                        onClick={() => router.refresh()}
+                                        className="mt-2 text-sm text-primary hover:underline font-medium"
+                                    >
+                                        Refresh Page
+                                    </button>
+                                </div>
+                            )}
+
                             {isPurchased ? (
                                 <>
                                     <div className="mb-4 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md">
@@ -245,10 +343,10 @@ export default function MaterialDetailClient({
                             ) : (
                                 <button
                                     onClick={handlePurchase}
-                                    disabled={purchasing}
+                                    disabled={purchasing || paymentPending}
                                     className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50 mb-3"
                                 >
-                                    {purchasing ? "Processing..." : "Buy Now"}
+                                    {purchasing ? "Processing..." : paymentPending ? "Waiting for Payment..." : "Buy Now"}
                                 </button>
                             )}
 

@@ -7,8 +7,6 @@ export async function POST(req: Request) {
     try {
         const payload = await req.json();
 
-        //console.log("Teacher payment callback:", JSON.stringify(payload, null, 2));
-
         const stkCallback = payload.Body?.stkCallback;
 
         if (!stkCallback) {
@@ -28,8 +26,6 @@ export async function POST(req: Request) {
             referenceCode = accountRef?.Value;
         }
 
-        //console.log("Extracted reference code:", referenceCode);
-
         if (!referenceCode) {
             console.error("No reference code found in callback");
             // Try to find by phone number as fallback
@@ -38,7 +34,6 @@ export async function POST(req: Request) {
             const phone = phoneItem?.Value?.toString();
 
             if (phone) {
-                //console.log("Trying to find payment by phone:", phone);
                 const payment = await prisma.pendingPayment.findFirst({
                     where: {
                         phone: phone.startsWith('254') ? phone : `254${phone}`,
@@ -49,7 +44,6 @@ export async function POST(req: Request) {
                 });
 
                 if (payment) {
-                    //console.log("Found payment by phone:", payment.referenceCode);
                     referenceCode = payment.referenceCode;
                 } else {
                     console.error("No pending payment found for phone:", phone);
@@ -70,31 +64,48 @@ export async function POST(req: Request) {
             return NextResponse.json({ ok: false });
         }
 
+        // Idempotency: if already processed, return success without re-processing
+        if (payment.status === "COMPLETED" || payment.status === "FAILED") {
+            console.log("Payment already processed:", referenceCode, "Status:", payment.status);
+            return NextResponse.json({ ok: true });
+        }
+
         // Payment successful
         if (resultCode === 0) {
             const meta = stkCallback.CallbackMetadata?.Item || [];
             const amount = meta.find((i: any) => i.Name === "Amount")?.Value;
 
-            //console.log("Payment successful. Amount:", amount, "Expected:", payment.amount);
+            // Validate amount matches expected payment
+            if (amount !== undefined && Number(amount) !== payment.amount) {
+                console.error(
+                    "Amount mismatch! Expected:", payment.amount, "Received:", amount,
+                    "Reference:", referenceCode
+                );
+                // Mark as failed due to amount mismatch
+                await prisma.pendingPayment.update({
+                    where: { id: payment.id },
+                    data: { status: "FAILED" },
+                });
+                return NextResponse.json({ ok: true });
+            }
 
-            // Update payment status
-            await prisma.pendingPayment.update({
-                where: { id: payment.id },
-                data: {
-                    status: "COMPLETED",
-                    completedAt: new Date(),
-                },
+            // Update payment status and activate teacher in a transaction
+            await prisma.$transaction(async (tx) => {
+                await tx.pendingPayment.update({
+                    where: { id: payment.id },
+                    data: {
+                        status: "COMPLETED",
+                        completedAt: new Date(),
+                    },
+                });
+
+                await tx.teacherProfile.update({
+                    where: { userId: payment.userId },
+                    data: { isActive: true },
+                });
             });
 
-            // Activate teacher profile
-            await prisma.teacherProfile.update({
-                where: { userId: payment.userId },
-                data: { isActive: true },
-            });
-
-            //console.log("✅ Teacher activated:", payment.userId);
-
-            // Send email notifications (await to catch errors)
+            // Send email notifications (non-blocking, don't fail the callback)
             try {
                 const [teacher, adminId] = await Promise.all([
                     prisma.user.findUnique({
@@ -107,7 +118,6 @@ export async function POST(req: Request) {
                 if (teacher) {
                     await sendTeacherVerificationCompleteEmail(teacher.email);
 
-                    // Notify admin
                     if (adminId) {
                         const admin = await prisma.user.findUnique({
                             where: { id: adminId },
@@ -120,7 +130,6 @@ export async function POST(req: Request) {
                 }
             } catch (emailError) {
                 console.error("Email sending failed, but verification succeeded:", emailError);
-                // Don't fail the callback if email fails
             }
         } else {
             // Payment failed
@@ -128,8 +137,6 @@ export async function POST(req: Request) {
                 where: { id: payment.id },
                 data: { status: "FAILED" },
             });
-
-            //console.log("❌ Payment failed for:", referenceCode, "Result code:", resultCode);
         }
 
         return NextResponse.json({ ok: true });
