@@ -50,7 +50,8 @@ export default async function AdminDashboard() {
     ]);
 
     // Calculate total sales revenue
-    const totalRevenue = totalSalesRevenue.reduce((sum, purchase) => sum + purchase.pdf.price, 0);
+    type PurchaseWithPdf = typeof totalSalesRevenue[number];
+    const totalRevenue = totalSalesRevenue.reduce((sum: number, purchase: PurchaseWithPdf) => sum + purchase.pdf.price, 0);
 
     // Calculate expected platform earnings (25% of sales + teacher verifications)
     const expectedPlatformEarnings = Math.floor(totalRevenue * 0.25) + (teacherVerifications * 100);
@@ -121,7 +122,7 @@ export default async function AdminDashboard() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <p className="text-3xl font-bold text-primary">KES {platformWallet?.balance || 0}</p>
+                        <p className="text-3xl font-bold text-primary">KES {platformWallet?.balance || expectedPlatformEarnings}</p>
                         <p className="text-xs text-muted-foreground mt-1">Click to manage</p>
                     </Link>
                 </div>
@@ -224,6 +225,23 @@ export default async function AdminDashboard() {
                                     </div>
                                 </div>
                             </Link>
+
+                            <Link
+                                href="/admin/wallet"
+                                className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors group"
+                            >
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-foreground">Manage Wallet</h3>
+                                        <p className="text-sm text-muted-foreground">Withdraw earnings to M-Pesa</p>
+                                    </div>
+                                </div>
+                            </Link>
                         </div>
                     </div>
 
@@ -277,7 +295,7 @@ export default async function AdminDashboard() {
                                 <div className="text-xs text-muted-foreground space-y-1">
                                     <p>• {totalPurchases} total purchases completed</p>
                                     <p>• {teacherVerifications} teachers verified</p>
-                                    <p>• Current wallet balance: KES {platformWallet?.balance || 0}</p>
+                                    <p>• Current wallet balance: KES {platformWallet?.balance || expectedPlatformEarnings}</p>
                                 </div>
                             </div>
                         </div>
