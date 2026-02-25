@@ -116,8 +116,13 @@ export async function POST(req: Request) {
                 },
             });
 
+            console.error("B2C withdrawal failed:", JSON.stringify(b2cResult.error, null, 2));
+
             return NextResponse.json(
-                { error: "Failed to initiate withdrawal. Your balance has been refunded." },
+                {
+                    error: "Failed to initiate withdrawal. Your balance has been refunded.",
+                    details: b2cResult.error,
+                },
                 { status: 500 }
             );
         }
@@ -135,7 +140,7 @@ export async function POST(req: Request) {
             withdrawal,
         });
     } catch (error: any) {
-        console.error("Withdrawal error:", error);
+        console.error("Withdrawal error:", error?.message || error, error?.response?.data);
         return handleAuthError(error);
     }
 }
