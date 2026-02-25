@@ -60,12 +60,7 @@ export default function TeacherRegisterPage() {
                 throw new Error(data.error || "Payment initiation failed");
             }
 
-            // Check if dev mode auto-approved
-            if (data.devMode) {
-                // In dev mode, payment is instant
-                router.push("/teacher?verified=true");
-                return;
-            }
+
 
             setStep("checking");
             // Start polling for payment status
@@ -187,11 +182,7 @@ export default function TeacherRegisterPage() {
                                 <p className="text-sm text-muted-foreground">
                                     This helps us verify genuine teachers and maintain quality on our platform.
                                 </p>
-                                {process.env.NEXT_PUBLIC_DEV_MODE === "true" && (
-                                    <div className="mt-3 p-2 bg-primary/10 border border-primary/20 rounded text-xs text-primary">
-                                        🔧 DEV MODE: Payment will be auto-approved for testing
-                                    </div>
-                                )}
+
                             </div>
 
                             <button
@@ -214,21 +205,15 @@ export default function TeacherRegisterPage() {
                                     </svg>
                                 </div>
                                 <h3 className="text-xl font-bold text-foreground mb-2">Ready to Pay</h3>
-                                {process.env.NEXT_PUBLIC_DEV_MODE === "true" ? (
-                                    <p className="text-muted-foreground mb-4">
-                                        🔧 <strong>DEV MODE:</strong> Click below to instantly activate your account (no real payment needed)
-                                    </p>
-                                ) : (
-                                    <p className="text-muted-foreground mb-4">
-                                        Click the button below to receive an M-Pesa prompt on your phone
-                                    </p>
-                                )}
+                                <p className="text-muted-foreground mb-4">
+                                    Click the button below to receive an M-Pesa prompt on your phone
+                                </p>
                                 <div className="bg-background border border-border rounded-md p-3 mb-4">
                                     <p className="text-xs text-muted-foreground mb-1">Reference Code</p>
                                     <p className="font-mono text-sm font-bold text-foreground">{referenceCode}</p>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                    Amount: <span className="font-bold text-primary">KES 100</span>
+                                    Amount: <span className="font-bold text-primary">KES 1</span>
                                 </p>
                             </div>
 
@@ -237,7 +222,7 @@ export default function TeacherRegisterPage() {
                                 disabled={loading}
                                 className="w-full py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
                             >
-                                {loading ? (process.env.NEXT_PUBLIC_DEV_MODE === "true" ? "Activating..." : "Sending STK Push...") : (process.env.NEXT_PUBLIC_DEV_MODE === "true" ? "Activate Account (Dev Mode)" : "Pay with M-Pesa")}
+                                {loading ? "Sending STK Push..." : "Pay with M-Pesa"}
                             </button>
 
                             <button

@@ -8,8 +8,6 @@ export async function POST(req: Request) {
     try {
         const payload = await req.json();
 
-        //console.log("Purchase callback:", JSON.stringify(payload, null, 2));
-
         const stkCallback = payload.Body?.stkCallback;
 
         if (!stkCallback) {
@@ -29,8 +27,6 @@ export async function POST(req: Request) {
             referenceCode = accountRef?.Value;
         }
 
-        //console.log("Extracted reference code:", referenceCode);
-
         if (!referenceCode) {
             console.error("No reference code found in callback");
             // Try to find by phone number as fallback
@@ -39,7 +35,6 @@ export async function POST(req: Request) {
             const phone = phoneItem?.Value?.toString();
 
             if (phone) {
-                //console.log("Trying to find payment by phone:", phone);
                 const payment = await prisma.pendingPayment.findFirst({
                     where: {
                         phone: phone.startsWith('254') ? phone : `254${phone}`,
@@ -50,7 +45,6 @@ export async function POST(req: Request) {
                 });
 
                 if (payment) {
-                    //console.log("Found payment by phone:", payment.referenceCode);
                     referenceCode = payment.referenceCode;
                 } else {
                     console.error("No pending payment found for phone:", phone);
@@ -71,12 +65,29 @@ export async function POST(req: Request) {
             return NextResponse.json({ ok: false });
         }
 
+        // Idempotency: if already processed, return success without re-processing
+        if (payment.status === "COMPLETED" || payment.status === "FAILED") {
+            console.log("Payment already processed:", referenceCode, "Status:", payment.status);
+            return NextResponse.json({ ok: true });
+        }
+
         // Payment successful
         if (resultCode === 0) {
             const meta = stkCallback.CallbackMetadata?.Item || [];
             const amount = meta.find((i: any) => i.Name === "Amount")?.Value;
 
-            //console.log("Payment successful. Amount:", amount, "Expected:", payment.amount);
+            // Validate amount matches expected payment
+            if (amount !== undefined && Number(amount) !== payment.amount) {
+                console.error(
+                    "Amount mismatch! Expected:", payment.amount, "Received:", amount,
+                    "Reference:", referenceCode
+                );
+                await prisma.pendingPayment.update({
+                    where: { id: payment.id },
+                    data: { status: "FAILED" },
+                });
+                return NextResponse.json({ ok: true });
+            }
 
             const metadata = JSON.parse(payment.metadata || "{}");
             const pdfId = metadata.pdfId;
@@ -93,12 +104,10 @@ export async function POST(req: Request) {
                 return NextResponse.json({ ok: false });
             }
 
-            // Use the actual amount paid (from callback) or expected amount
-            const actualAmount = amount || payment.amount;
-
-            // Calculate shares based on actual amount
-            const teacherShare = Math.floor(actualAmount * 0.75);
-            const platformShare = actualAmount - teacherShare;
+            // Use the expected amount (not callback amount) for revenue split
+            const expectedAmount = payment.amount;
+            const teacherShare = Math.floor(expectedAmount * 0.75);
+            const platformShare = expectedAmount - teacherShare;
 
             // Create purchase record
             await prisma.purchase.create({
@@ -126,15 +135,7 @@ export async function POST(req: Request) {
                 },
             });
 
-            // console.log("✅ Purchase completed:", {
-            //     userId: payment.userId,
-            //     pdfId,
-            //     actualAmount,
-            //     teacherShare,
-            //     platformShare,
-            // });
-
-            // Send email notifications (await to catch errors)
+            // Send email notifications (non-blocking, don't fail the callback)
             try {
                 const [student, teacher] = await Promise.all([
                     prisma.user.findUnique({
@@ -148,14 +149,13 @@ export async function POST(req: Request) {
                 ]);
 
                 if (student) {
-                    await sendPurchaseConfirmationEmail(student.email, pdf.title, actualAmount, pdfId);
+                    await sendPurchaseConfirmationEmail(student.email, pdf.title, expectedAmount, pdfId);
                 }
                 if (teacher) {
-                    await sendNewSaleEmail(teacher.email, pdf.title, actualAmount, teacherShare, payment.userId);
+                    await sendNewSaleEmail(teacher.email, pdf.title, expectedAmount, teacherShare, payment.userId);
                 }
             } catch (emailError) {
                 console.error("Email sending failed, but purchase succeeded:", emailError);
-                // Don't fail the callback if email fails
             }
         } else {
             // Payment failed
@@ -163,8 +163,6 @@ export async function POST(req: Request) {
                 where: { id: payment.id },
                 data: { status: "FAILED" },
             });
-
-            console.log("❌ Payment failed for:", referenceCode, "Result code:", resultCode);
         }
 
         return NextResponse.json({ ok: true });
