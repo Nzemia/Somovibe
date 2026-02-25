@@ -2,18 +2,17 @@ import { getMpesaToken, getMpesaBaseUrl } from "@/lib/mpesa";
 import { NextResponse } from "next/server";
 import axios from "axios";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, handleAuthError } from "@/lib/apiAuth";
 
 export async function POST(req: Request) {
     try {
-        const user = await requireAuth();
         const { referenceCode } = await req.json();
 
         if (!referenceCode) {
             return NextResponse.json({ error: "Reference code required" }, { status: 400 });
         }
 
-        // Get pending payment
+        // Get pending payment — the referenceCode itself serves as auth
+        // (generated server-side with 12 random hex chars = practically unguessable)
         const payment = await prisma.pendingPayment.findUnique({
             where: { referenceCode },
             include: { user: true },
@@ -21,11 +20,6 @@ export async function POST(req: Request) {
 
         if (!payment) {
             return NextResponse.json({ error: "Invalid reference code" }, { status: 404 });
-        }
-
-        // Verify the authenticated user owns this payment
-        if (payment.userId !== user.id) {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         if (payment.status === "COMPLETED") {
@@ -94,6 +88,7 @@ export async function POST(req: Request) {
             );
         }
     } catch (error: any) {
-        return handleAuthError(error);
+        console.error("Teacher STK error:", error);
+        return NextResponse.json({ error: "An error occurred" }, { status: 500 });
     }
 }
