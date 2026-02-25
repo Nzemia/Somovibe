@@ -85,7 +85,15 @@ export async function POST(req: Request) {
         }
 
         // Debit wallet first
-        await debitWallet(user.id, amount);
+        try {
+            await debitWallet(user.id, amount);
+        } catch (debitError: any) {
+            console.error("Debit wallet error:", debitError?.message);
+            return NextResponse.json(
+                { error: `Failed to debit wallet: ${debitError?.message || "Unknown error"}` },
+                { status: 500 }
+            );
+        }
 
         // Create withdrawal request
         const withdrawal = await prisma.withdrawalRequest.create({
@@ -98,44 +106,88 @@ export async function POST(req: Request) {
         });
 
         // Initiate M-Pesa B2C payment
-        const b2cResult = await initiateB2CPayment(
-            phone,
-            amount,
-            `Withdrawal - ${user.email}`
-        );
+        try {
+            const b2cResult = await initiateB2CPayment(
+                phone,
+                amount,
+                `Withdrawal - ${user.email}`
+            );
 
-        if (!b2cResult.success) {
-            // Refund wallet if B2C initiation fails (uses creditWallet for proper transaction logging)
+            if (!b2cResult.success) {
+                // Refund wallet if B2C initiation fails
+                await creditWallet(user.id, amount);
+
+                await prisma.withdrawalRequest.update({
+                    where: { id: withdrawal.id },
+                    data: {
+                        status: "FAILED",
+                        failureReason: JSON.stringify(b2cResult.error),
+                    },
+                });
+
+                console.error("B2C withdrawal failed:", JSON.stringify(b2cResult.error, null, 2));
+
+                return NextResponse.json(
+                    {
+                        error: "Failed to initiate M-Pesa withdrawal. Your balance has been refunded.",
+                        details: b2cResult.error,
+                    },
+                    { status: 500 }
+                );
+            }
+
+            // Update withdrawal with M-Pesa conversation ID
+            await prisma.withdrawalRequest.update({
+                where: { id: withdrawal.id },
+                data: {
+                    mpesaConversationId: b2cResult.data.ConversationID,
+                },
+            });
+
+            return NextResponse.json({
+                message: "Withdrawal initiated. You will receive the money shortly.",
+                withdrawal,
+            });
+        } catch (b2cError: any) {
+            // If B2C throws an exception (e.g. token fetch fails), refund the wallet
+            console.error("B2C exception:", b2cError?.message, b2cError?.response?.data);
+
             await creditWallet(user.id, amount);
 
             await prisma.withdrawalRequest.update({
                 where: { id: withdrawal.id },
                 data: {
                     status: "FAILED",
-                    failureReason: JSON.stringify(b2cResult.error),
+                    failureReason: b2cError?.message || "B2C exception",
                 },
             });
 
             return NextResponse.json(
-                { error: "Failed to initiate withdrawal. Your balance has been refunded." },
+                {
+                    error: `M-Pesa B2C payment failed: ${b2cError?.message || "Unknown error"}`,
+                    details: b2cError?.response?.data || null,
+                },
                 { status: 500 }
             );
         }
-
-        // Update withdrawal with M-Pesa conversation ID
-        await prisma.withdrawalRequest.update({
-            where: { id: withdrawal.id },
-            data: {
-                mpesaConversationId: b2cResult.data.ConversationID,
-            },
-        });
-
-        return NextResponse.json({
-            message: "Withdrawal initiated. You will receive the money shortly.",
-            withdrawal,
-        });
     } catch (error: any) {
-        console.error("Withdrawal error:", error);
-        return handleAuthError(error);
+        console.error("Withdrawal error:", error?.message || error);
+
+        if (error instanceof Error) {
+            if (error.message === "UNAUTHORIZED") {
+                return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            }
+            if (error.message === "FORBIDDEN") {
+                return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+            }
+            if (error.message === "USER_NOT_FOUND") {
+                return NextResponse.json({ error: "User not found" }, { status: 404 });
+            }
+        }
+
+        return NextResponse.json(
+            { error: `Withdrawal failed: ${error?.message || "Unknown error"}` },
+            { status: 500 }
+        );
     }
 }
