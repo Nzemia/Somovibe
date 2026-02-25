@@ -73,11 +73,7 @@ export default function WithdrawButton({
                 throw new Error(data.error || "Withdrawal failed");
             }
 
-            if (data.devMode) {
-                toast.success("DEV MODE: Withdrawal completed instantly!");
-            } else {
-                toast.success("Withdrawal initiated! You will receive the money shortly.");
-            }
+            toast.success("Withdrawal initiated! You will receive the money shortly.");
 
             setShowDialog(false);
             setAmount("");
