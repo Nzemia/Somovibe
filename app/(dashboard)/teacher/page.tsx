@@ -46,13 +46,20 @@ export default async function TeacherPage({
         }),
     ]);
 
+    type MaterialWithPurchases = typeof materials[number];
+
+    // Calculate expected earnings from actual purchases (75% teacher share)
+    const calculatedEarnings = materials.reduce((sum: number, m: MaterialWithPurchases) => {
+        return sum + m.purchases.length * Math.floor(m.price * 0.75);
+    }, 0);
+
     const stats = {
         totalUploads: materials.length,
-        pending: materials.filter((m) => m.status === "PENDING").length,
-        approved: materials.filter((m) => m.status === "APPROVED").length,
-        rejected: materials.filter((m) => m.status === "REJECTED").length,
-        totalSales: materials.reduce((sum, m) => sum + m.purchases.length, 0),
-        walletBalance: wallet?.balance || 0,
+        pending: materials.filter((m: MaterialWithPurchases) => m.status === "PENDING").length,
+        approved: materials.filter((m: MaterialWithPurchases) => m.status === "APPROVED").length,
+        rejected: materials.filter((m: MaterialWithPurchases) => m.status === "REJECTED").length,
+        totalSales: materials.reduce((sum: number, m: MaterialWithPurchases) => sum + m.purchases.length, 0),
+        walletBalance: wallet?.balance || calculatedEarnings,
     };
 
     return (
@@ -320,7 +327,7 @@ export default async function TeacherPage({
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {materials.map((material) => (
+                                    {materials.map((material: MaterialWithPurchases) => (
                                         <TableRow key={material.id}>
                                             <TableCell className="font-medium max-w-xs">
                                                 <div className="truncate" title={material.title}>
