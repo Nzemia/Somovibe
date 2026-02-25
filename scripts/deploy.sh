@@ -22,7 +22,7 @@ fi
 
 # Pull latest changes
 echo -e "${YELLOW}📥 Pulling latest changes...${NC}"
-git pull origin main
+git pull origin master
 
 # Stop existing containers
 echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"

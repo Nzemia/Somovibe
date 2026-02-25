@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 jobs:
@@ -11,6 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: 🔍 Validate secrets
+        run: |
+          missing=()
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then missing+=("VPS_HOST"); fi
+          if [ -z "${{ secrets.VPS_USERNAME }}" ]; then missing+=("VPS_USERNAME"); fi
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then missing+=("VPS_SSH_KEY"); fi
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::Missing required secrets: ${missing[*]}. Add them in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
       - name: 🚀 Deploy to VPS
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -20,7 +31,7 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             cd /opt/questy
-            git pull origin main
+            git pull origin master
             docker-compose down
             docker-compose build --no-cache
             docker-compose run --rm app npx prisma migrate deploy

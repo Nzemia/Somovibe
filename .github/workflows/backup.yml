@@ -11,6 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: 🔍 Validate secrets
+        run: |
+          missing=()
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then missing+=("VPS_HOST"); fi
+          if [ -z "${{ secrets.VPS_USERNAME }}" ]; then missing+=("VPS_USERNAME"); fi
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then missing+=("VPS_SSH_KEY"); fi
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::Missing required secrets: ${missing[*]}. Add them in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
       - name: 📦 Create Database Backup
         uses: appleboy/ssh-action@v1.0.0
         with:
