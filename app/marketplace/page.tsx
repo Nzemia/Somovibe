@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
+import Link from "next/link";
 import { getCachedApprovedPdfs, getUserPurchasedPdfIds } from "@/lib/marketplace";
 import { MarketplaceHeader } from "@/components/marketplace/MarketplaceHeader";
 import { MarketplaceClientWrapper } from "@/components/marketplace/MarketplaceClientWrapper";
@@ -16,7 +17,6 @@ export default async function Marketplace({
     type?: string | string[];
     minPrice?: string;
     maxPrice?: string;
-    verifiedOnly?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -27,14 +27,12 @@ export default async function Marketplace({
   const materialTypes = Array.isArray(params.type) ? params.type : params.type ? [params.type] : [];
   const minPrice = params.minPrice ? parseInt(params.minPrice) : undefined;
   const maxPrice = params.maxPrice ? parseInt(params.maxPrice) : undefined;
-  const verifiedOnly = params.verifiedOnly === "true";
 
   const [user, cachedPdfs] = await Promise.all([
     getCurrentUser(),
     getCachedApprovedPdfs({
       take: 50,
       cursor: null,
-      // Server fetches all; client does the filtering for instant UX
       search: "",
       sort: "newest",
       grades: [],
@@ -51,12 +49,36 @@ export default async function Marketplace({
     : new Set<string>();
 
   const userForNavbar = user ? { email: user.email, role: user.role } : null;
+  const dashboardHref =
+    user?.role === "TEACHER" ? "/teacher"
+    : user?.role === "STUDENT" ? "/student"
+    : user?.role === "ADMIN" ? "/admin"
+    : "/";
 
   return (
     <>
       <Navbar user={userForNavbar} />
+      {user && (
+        <div className="sticky top-14 z-40 border-b border-white/10 backdrop-blur-md"
+          style={{ background: "linear-gradient(135deg, rgba(0,20,10,0.97) 0%, rgba(0,60,30,0.94) 50%, rgba(0,120,58,0.91) 100%)" }}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center h-11">
+              <Link
+                href={dashboardHref}
+                className="flex items-center gap-2 text-white/70 hover:text-white text-sm font-semibold transition-colors group"
+              >
+                <svg className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Back to Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
       <main className="min-h-screen bg-[#f5faf7]">
-        <MarketplaceHeader />
+        <MarketplaceHeader userRole={user?.role ?? null} />
         <MarketplaceClientWrapper
           initialPdfs={cachedPdfs.items}
           purchasedPdfIds={purchasedPdfIds}
@@ -68,7 +90,6 @@ export default async function Marketplace({
           initialMaterialTypes={materialTypes}
           initialMinPrice={minPrice}
           initialMaxPrice={maxPrice}
-          initialVerifiedOnly={verifiedOnly}
         />
       </main>
     </>

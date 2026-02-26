@@ -3,7 +3,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { notFound } from "next/navigation";
 import MaterialDetailClient from "./MaterialDetailClient";
-import ReviewSection from "./ReviewSection";
 import { Metadata } from "next";
 import { getAverageRating, maskEmail } from "@/lib/utils";
 
@@ -50,7 +49,11 @@ export default async function MaterialDetailPage({
       },
       _count: { select: { downloads: true, reviews: true, purchases: true, materialViews: true } },
       reviews: {
-        include: { user: { select: { name: true, email: true } } },
+        select: {
+          id: true, rating: true, comment: true, reply: true,
+          repliedAt: true, createdAt: true, userId: true,
+          user: { select: { name: true, email: true } },
+        },
         orderBy: { createdAt: "desc" },
       },
     },

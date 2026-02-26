@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PurchaseButton from "@/app/marketplace/PurchaseButton";
 
 type PdfItem = {
@@ -59,7 +60,9 @@ function computeAvgRating(reviews: { rating: number }[]): number | null {
 }
 
 export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps) {
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
+  const [imgFailed, setImgFailed] = useState(false);
 
   const grad = SUBJECT_GRADIENT[resource.subject] ?? { from: "#006832", to: "#003318" };
   const teacherHandle = resource.teacher.name || resource.teacher.email.split("@")[0];
@@ -70,25 +73,33 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
 
   return (
     <article
-      className={`group flex flex-col rounded-2xl bg-white border-2 shadow-sm transition-all duration-300 overflow-hidden cursor-pointer
+      className={`group flex flex-col rounded-2xl bg-white border-2 shadow-sm transition-all duration-300 overflow-hidden
         ${expanded ? "border-[#008c43] shadow-lg shadow-[#008c43]/10 z-10 relative" : "border-gray-100 hover:shadow-md hover:-translate-y-0.5"}`}
-      onClick={() => setExpanded(v => !v)}
     >
 
-      {/* ── Cover ── */}
+      {/* ── Cover — click navigates to full detail page ── */}
       <div
-        className="relative overflow-hidden shrink-0"
+        className="relative overflow-hidden shrink-0 cursor-pointer"
         style={{ height: "clamp(130px, 38vw, 172px)" }}
+        onClick={() => router.push(`/marketplace/${resource.id}`)}
       >
         {/* Background */}
-        {resource.thumbnailUrl ? (
-          <img src={resource.thumbnailUrl} alt={resource.title}
-            className="absolute inset-0 w-full h-full object-cover" />
+        {resource.thumbnailUrl && !imgFailed ? (
+          <img
+            src={resource.thumbnailUrl}
+            alt={resource.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => setImgFailed(true)}
+          />
         ) : (
           <div className="absolute inset-0"
             style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
             <div className="absolute inset-0 opacity-[0.07]"
               style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+            {/* Subject initials watermark */}
+            <span className="absolute bottom-2 left-3 text-white/10 text-6xl font-black leading-none select-none pointer-events-none">
+              {resource.subject.split(" ").map(w => w[0]).join("").slice(0, 3)}
+            </span>
           </div>
         )}
 
@@ -108,10 +119,10 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
           </span>
         )}
 
-        {/* Expand hint */}
-        <span className={`absolute bottom-2 right-2 w-6 h-6 rounded-full bg-black/30 border border-white/20 backdrop-blur-sm flex items-center justify-center transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}>
+        {/* Navigate hint — arrow in corner */}
+        <span className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-black/30 border border-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
           </svg>
         </span>
 
@@ -126,8 +137,11 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
         </div>
       </div>
 
-      {/* ── Compact body (always visible) ── */}
-      <div className="px-2.5 sm:px-3.5 pt-2.5 pb-3">
+      {/* ── Compact body — click toggles expand ── */}
+      <div
+        className="px-2.5 sm:px-3.5 pt-2.5 pb-3 cursor-pointer"
+        onClick={() => setExpanded(v => !v)}
+      >
 
         {/* Subject + grade chips */}
         <div className="flex flex-wrap items-center gap-1 mb-1.5">
@@ -139,19 +153,25 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
           </span>
         </div>
 
-        {/* Title in body (smaller, descriptive) */}
-        <p className="text-xs font-bold text-gray-800 leading-snug line-clamp-2 mb-1">
-          {resource.title}
-        </p>
+        {/* Title in body (smaller, descriptive) with expand indicator */}
+        <div className="flex items-start justify-between gap-1 mb-1">
+          <p className="text-xs font-bold text-gray-800 leading-snug line-clamp-2 flex-1">
+            {resource.title}
+          </p>
+          <svg className={`w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
 
         {/* Short description */}
         <p className="text-[11px] text-gray-400 line-clamp-1 mb-2 leading-relaxed">
           {resource.description}
         </p>
 
-        {/* Price row (compact, always visible) */}
+        {/* Price row — stop propagation so buy button doesn't toggle expand */}
         <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-gray-100"
-          onClick={e => e.stopPropagation()} // don't let buy-button clicks toggle the card
+          onClick={e => e.stopPropagation()}
         >
           <span className="text-sm font-extrabold text-[#008c43]">
             KES {resource.price.toLocaleString()}
