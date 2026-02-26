@@ -1,6 +1,8 @@
 import Link from "next/link";
 
-export function MarketplaceHeader() {
+export function MarketplaceHeader({ userRole }: { userRole: string | null }) {
+  const showSellButton = userRole !== "STUDENT";
+
   return (
     <div className="w-full border-b border-[#d1e8dc] bg-white">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-5 md:py-6">
@@ -31,18 +33,20 @@ export function MarketplaceHeader() {
               <TrustPill label="M-Pesa secured" />
               <TrustPill label="Instant access" />
             </div>
-            {/* Teacher CTA */}
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-sm shadow-[#008c43]/20 active:scale-95"
-              style={{ background: "linear-gradient(135deg, #006832 0%, #008c43 60%, #00a854 100%)" }}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
-                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-              </svg>
-              Sell your resources
-            </Link>
+            {/* Teacher CTA — hidden for students */}
+            {showSellButton && (
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-sm shadow-[#008c43]/20 active:scale-95"
+                style={{ background: "linear-gradient(135deg, #006832 0%, #008c43 60%, #00a854 100%)" }}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+                Sell your resources
+              </Link>
+            )}
           </div>
 
         </div>

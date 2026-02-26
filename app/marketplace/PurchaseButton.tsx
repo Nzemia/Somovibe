@@ -47,7 +47,7 @@ export default function PurchaseButton({
   const handleBuyClick = () => {
     if (!user) {
       toast.error("Please login to purchase materials");
-      router.push("/login");
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/marketplace/${pdfId}`)}`);
       return;
     }
     setShowModal(true);

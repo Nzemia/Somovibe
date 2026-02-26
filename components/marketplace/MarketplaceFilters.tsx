@@ -9,14 +9,12 @@ type Props = {
   initialMaterialTypes?: string[];
   initialMinPrice?: string;
   initialMaxPrice?: string;
-  initialVerifiedOnly?: boolean;
   initialSort?: string;
   onGradesChange?: (v: string[]) => void;
   onSubjectsChange?: (v: string[]) => void;
   onMaterialTypesChange?: (v: string[]) => void;
   onMinPriceChange?: (v: string) => void;
   onMaxPriceChange?: (v: string) => void;
-  onVerifiedOnlyChange?: (v: boolean) => void;
   onSortChange?: (v: string) => void;
 };
 
@@ -68,14 +66,12 @@ export function MarketplaceFilters({
   initialMaterialTypes = [],
   initialMinPrice = "",
   initialMaxPrice = "",
-  initialVerifiedOnly = false,
   initialSort = "newest",
   onGradesChange,
   onSubjectsChange,
   onMaterialTypesChange,
   onMinPriceChange,
   onMaxPriceChange,
-  onVerifiedOnlyChange,
   onSortChange,
 }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -87,7 +83,6 @@ export function MarketplaceFilters({
   const [draftTypes,   setDraftTypes]   = useState(initialMaterialTypes);
   const [draftMin,     setDraftMin]     = useState(initialMinPrice);
   const [draftMax,     setDraftMax]     = useState(initialMaxPrice);
-  const [draftVerified,setDraftVerified]= useState(initialVerifiedOnly);
   const [draftSort,    setDraftSort]    = useState(initialSort);
 
   // Desktop live state
@@ -96,7 +91,6 @@ export function MarketplaceFilters({
   const [types,    setTypes]    = useState(initialMaterialTypes);
   const [minPrice, setMinPrice] = useState(initialMinPrice);
   const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
-  const [verified, setVerified] = useState(initialVerifiedOnly);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -116,9 +110,8 @@ export function MarketplaceFilters({
   }, [sheetOpen]);
 
   const openSheet = () => {
-    // Seed draft from current desktop state
     setDraftGrades(grades); setDraftSubjects(subjects); setDraftTypes(types);
-    setDraftMin(minPrice);  setDraftMax(maxPrice);      setDraftVerified(verified);
+    setDraftMin(minPrice);  setDraftMax(maxPrice);
     setDraftSort(draftSort);
     setSheetOpen(true);
   };
@@ -129,14 +122,13 @@ export function MarketplaceFilters({
     setTypes(draftTypes);     onMaterialTypesChange?.(draftTypes);
     setMinPrice(draftMin);    onMinPriceChange?.(draftMin);
     setMaxPrice(draftMax);    onMaxPriceChange?.(draftMax);
-    setVerified(draftVerified); onVerifiedOnlyChange?.(draftVerified);
     onSortChange?.(draftSort);
     setSheetOpen(false);
   };
 
   const clearSheet = () => {
     setDraftGrades([]); setDraftSubjects([]); setDraftTypes([]);
-    setDraftMin(""); setDraftMax(""); setDraftVerified(false); setDraftSort("newest");
+    setDraftMin(""); setDraftMax(""); setDraftSort("newest");
   };
 
   const clearDesktop = () => {
@@ -145,7 +137,6 @@ export function MarketplaceFilters({
     setTypes([]); onMaterialTypesChange?.([]);
     setMinPrice(""); onMinPriceChange?.("");
     setMaxPrice(""); onMaxPriceChange?.("");
-    setVerified(false); onVerifiedOnlyChange?.(false);
   };
 
   const handleDesktopGrade   = (v: string) => { const n = toggleItem(grades, v);   setGrades(n);   onGradesChange?.(n); };
@@ -153,11 +144,11 @@ export function MarketplaceFilters({
   const handleDesktopType    = (v: string) => { const n = toggleItem(types, v);    setTypes(n);    onMaterialTypesChange?.(n); };
 
   const draftActiveCount = draftGrades.length + draftSubjects.length + draftTypes.length
-    + (draftMin ? 1 : 0) + (draftMax ? 1 : 0) + (draftVerified ? 1 : 0)
+    + (draftMin ? 1 : 0) + (draftMax ? 1 : 0)
     + (draftSort !== "newest" ? 1 : 0);
 
   const desktopActiveCount = grades.length + subjects.length + types.length
-    + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (verified ? 1 : 0);
+    + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0);
 
   /* ─────────────── DESKTOP sidebar ─────────────── */
   const desktopSidebar = (
@@ -229,14 +220,6 @@ export function MarketplaceFilters({
           </div>
         </SidebarSection>
 
-        {/* Verified */}
-        <div className="flex items-center justify-between py-1">
-          <div>
-            <p className="text-sm font-semibold text-gray-800">Verified teachers only</p>
-            <p className="text-xs text-gray-400 mt-0.5">Active on Somovibe</p>
-          </div>
-          <Toggle on={verified} onToggle={() => { setVerified(!verified); onVerifiedOnlyChange?.(!verified); }} />
-        </div>
       </div>
     </aside>
   );
@@ -361,15 +344,6 @@ export function MarketplaceFilters({
                 onChange={e => setDraftMax(e.target.value)}
                 className={inputCls} />
             </div>
-          </div>
-
-          {/* Verified only */}
-          <div className="flex items-center justify-between pb-2">
-            <div>
-              <p className="text-sm font-bold text-gray-800">Verified teachers only</p>
-              <p className="text-xs text-gray-400 mt-0.5">Materials from active Somovibe teachers</p>
-            </div>
-            <Toggle on={draftVerified} onToggle={() => setDraftVerified(v => !v)} />
           </div>
 
         </div>

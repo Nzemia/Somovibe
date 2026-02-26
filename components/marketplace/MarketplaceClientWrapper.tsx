@@ -35,7 +35,6 @@ type Props = {
   initialMaterialTypes?: string[];
   initialMinPrice?: number;
   initialMaxPrice?: number;
-  initialVerifiedOnly?: boolean;
 };
 
 export function MarketplaceClientWrapper({
@@ -49,7 +48,6 @@ export function MarketplaceClientWrapper({
   initialMaterialTypes = [],
   initialMinPrice,
   initialMaxPrice,
-  initialVerifiedOnly = false,
 }: Props) {
   const [search, setSearch] = useState(initialSearch);
   const [sort, setSort] = useState(initialSort);
@@ -58,7 +56,6 @@ export function MarketplaceClientWrapper({
   const [materialTypes, setMaterialTypes] = useState<string[]>(initialMaterialTypes);
   const [minPrice, setMinPrice] = useState<number | undefined>(initialMinPrice);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(initialMaxPrice);
-  const [verifiedOnly, setVerifiedOnly] = useState(initialVerifiedOnly);
 
   // Sync URL in background (non-blocking)
   useEffect(() => {
@@ -70,10 +67,9 @@ export function MarketplaceClientWrapper({
     materialTypes.forEach((t) => params.append("type", t));
     if (minPrice !== undefined) params.set("minPrice", minPrice.toString());
     if (maxPrice !== undefined) params.set("maxPrice", maxPrice.toString());
-    if (verifiedOnly) params.set("verifiedOnly", "true");
     params.delete("cursor");
     window.history.replaceState({}, "", `/marketplace?${params.toString()}`);
-  }, [search, sort, grades, subjects, materialTypes, minPrice, maxPrice, verifiedOnly]);
+  }, [search, sort, grades, subjects, materialTypes, minPrice, maxPrice]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
@@ -95,14 +91,12 @@ export function MarketplaceClientWrapper({
             initialMaterialTypes={materialTypes}
             initialMinPrice={minPrice?.toString()}
             initialMaxPrice={maxPrice?.toString()}
-            initialVerifiedOnly={verifiedOnly}
             initialSort={sort}
             onGradesChange={setGrades}
             onSubjectsChange={setSubjects}
             onMaterialTypesChange={setMaterialTypes}
             onMinPriceChange={(val) => setMinPrice(val ? parseInt(val) : undefined)}
             onMaxPriceChange={(val) => setMaxPrice(val ? parseInt(val) : undefined)}
-            onVerifiedOnlyChange={setVerifiedOnly}
             onSortChange={setSort}
           />
         </div>
@@ -119,7 +113,7 @@ export function MarketplaceClientWrapper({
             materialTypes={materialTypes}
             minPrice={minPrice}
             maxPrice={maxPrice}
-            verifiedOnly={verifiedOnly}
+            onSearchChange={setSearch}
           />
         </div>
       </div>

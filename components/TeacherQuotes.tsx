@@ -3,14 +3,16 @@
 import { useState, useEffect } from "react";
 
 const QUOTES = [
-  { text: "Your knowledge doesn't expire. Every note you've written is an asset that can earn for you forever.", author: "Somovibe" },
-  { text: "The best teachers don't just change classrooms — they change lives across the entire country.", author: "Educator's Creed" },
-  { text: "Upload once. Earn while you sleep. Your expertise deserves more than a monthly salary.", author: "Somovibe" },
-  { text: "A teacher's impact never stops. Neither should their income.", author: "Somovibe" },
-  { text: "You've spent years building knowledge. It's time that knowledge started building your wealth.", author: "Somovibe" },
-  { text: "Every CBC note you share is a student somewhere finally understanding what clicked for them.", author: "Somovibe" },
-  { text: "Teaching is not just a profession. It is a calling — and callings deserve compensation.", author: "Educator's Creed" },
-  { text: "The notes you wrote last night could be earning you money every morning.", author: "Somovibe" },
+  { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
+  { text: "The mediocre teacher tells. The good teacher explains. The superior teacher demonstrates. The great teacher inspires.", author: "William Arthur Ward" },
+  { text: "In learning you will teach, and in teaching you will learn.", author: "Phil Collins" },
+  { text: "The art of teaching is the art of assisting discovery.", author: "Mark Van Doren" },
+  { text: "It is the supreme art of the teacher to awaken joy in creative expression and knowledge.", author: "Albert Einstein" },
+  { text: "One child, one teacher, one book, one pen can change the world.", author: "Malala Yousafzai" },
+  { text: "The best teachers are those who show you where to look, but don't tell you what to see.", author: "Alexandra K. Trenfor" },
+  { text: "Teaching is the one profession that creates all other professions.", author: "Unknown" },
+  { text: "Education is not the filling of a pail, but the lighting of a fire.", author: "W.B. Yeats" },
+  { text: "To teach is to touch a life forever.", author: "Unknown" },
 ];
 
 export function TeacherQuotes() {

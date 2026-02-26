@@ -44,6 +44,19 @@ function SellIcon({ filled }: { filled?: boolean }) {
   );
 }
 
+function DashboardIcon({ filled }: { filled?: boolean }) {
+  return filled ? (
+    <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+      <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+    </svg>
+  ) : (
+    <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+    </svg>
+  );
+}
+
 function ContactIcon({ filled }: { filled?: boolean }) {
   return filled ? (
     <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -131,14 +144,28 @@ interface NavItem {
 }
 
 /* ── Main component ─────────────────────────────────────── */
-export function QuickNav({ variant = "landing" }: { variant?: "landing" | "dashboard" }) {
+export function QuickNav({
+  variant = "landing",
+  homeToDashboard = false,
+}: {
+  variant?: "landing" | "dashboard";
+  homeToDashboard?: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
   const [showSellModal, setShowSellModal] = useState(false);
 
+  const role = session?.user?.role as string | undefined;
+  const isLoggedIn = Boolean(session?.user);
+
+  const dashboardHref =
+    role === "TEACHER" ? "/teacher"
+    : role === "STUDENT" ? "/student"
+    : role === "ADMIN" ? "/admin"
+    : "/";
+
   const handleSell = () => {
-    const role = session?.user?.role as string | undefined;
     if (role === "TEACHER") {
       router.push("/teacher");
     } else {
@@ -146,12 +173,18 @@ export function QuickNav({ variant = "landing" }: { variant?: "landing" | "dashb
     }
   };
 
+  const homeHref = homeToDashboard && isLoggedIn ? dashboardHref : "/";
+  const homeActiveOn =
+    homeToDashboard && isLoggedIn
+      ? ["/teacher", "/student", "/admin"]
+      : ["/"];
+
   const allNavItems: NavItem[] = [
     {
       id: "home",
       label: "Home",
-      href: "/",
-      activeOn: ["/"],
+      href: homeHref,
+      activeOn: homeActiveOn,
       icon: (filled) => <HomeIcon filled={filled} />,
     },
     {
@@ -175,9 +208,16 @@ export function QuickNav({ variant = "landing" }: { variant?: "landing" | "dashb
       activeOn: ["/contact"],
       icon: (filled) => <ContactIcon filled={filled} />,
     },
+    ...(isLoggedIn ? [{
+      id: "dashboard",
+      label: "Dashboard",
+      href: dashboardHref,
+      activeOn: ["/teacher", "/student", "/admin"],
+      icon: (filled: boolean) => <DashboardIcon filled={filled} />,
+    }] : []),
   ];
 
-  /* Dashboard only shows Buy + Sell */
+  /* Dashboard variant shows only Buy + Sell */
   const navItems =
     variant === "dashboard"
       ? allNavItems.filter((i) => i.id === "buy" || i.id === "sell")

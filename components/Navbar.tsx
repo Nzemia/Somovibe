@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { signOut } from "next-auth/react";
+
+const DASHBOARD_HREF: Record<string, string> = {
+  TEACHER: "/teacher",
+  STUDENT: "/student",
+  ADMIN: "/admin",
+};
 
 export function Navbar({ user }: { user: { email: string; role: string } | null }) {
   const [signingOut, setSigningOut] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -17,6 +24,21 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
       setSigningOut(false);
     }
   };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [dropdownOpen]);
+
+  const dashboardHref = user ? (DASHBOARD_HREF[user.role] ?? "/") : "/";
+  const initial = user?.email?.[0]?.toUpperCase() ?? "U";
 
   return (
     <nav
@@ -28,7 +50,7 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          {/* Text logo — vertically centered, larger */}
+          {/* Logo */}
           <Link href="/" className="shrink-0 flex items-center self-center">
             <Image
               src="/logos/Somovibe text white.png"
@@ -44,19 +66,71 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
           {/* Right side */}
           <div className="flex items-center gap-2 sm:gap-3">
             {user ? (
-              <>
-                {/* Email (desktop only) */}
-                <span className="hidden md:block text-sm text-white/70 truncate max-w-[180px]">
-                  {user.email}
-                </span>
+              <div className="relative" ref={dropdownRef}>
+                {/* Profile button */}
                 <button
-                  onClick={handleSignOut}
-                  disabled={signingOut}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg border border-white/40 text-white hover:bg-white/10 transition-colors disabled:opacity-60"
+                  onClick={() => setDropdownOpen(o => !o)}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-white/10 transition-colors group"
+                  aria-label="Account menu"
                 >
-                  {signingOut ? "Signing out…" : "Sign Out"}
+                  {/* Avatar circle */}
+                  <span
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-extrabold text-[#008c43] shrink-0 ring-2 ring-white/30 group-hover:ring-white/60 transition-all"
+                    style={{ background: "rgba(255,255,255,0.95)" }}
+                  >
+                    {initial}
+                  </span>
+                  {/* Email — desktop only */}
+                  <span className="hidden md:block text-sm text-white/80 truncate max-w-[140px]">
+                    {user.email}
+                  </span>
+                  <svg
+                    className={`w-3.5 h-3.5 text-white/60 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
-              </>
+
+                {/* Dropdown */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    {/* User info header */}
+                    <div className="px-4 py-3 border-b border-gray-100 bg-[#f5faf7]">
+                      <p className="text-xs font-bold text-[#008c43] uppercase tracking-wider">
+                        {user.role.charAt(0) + user.role.slice(1).toLowerCase()}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+                    </div>
+
+                    {/* Dashboard link */}
+                    <Link
+                      href={dashboardHref}
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-[#f5faf7] hover:text-[#008c43] transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-[#008c43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                      </svg>
+                      Go to Dashboard
+                    </Link>
+
+                    {/* Sign out */}
+                    <button
+                      onClick={handleSignOut}
+                      disabled={signingOut}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-60"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                      </svg>
+                      {signingOut ? "Signing out…" : "Sign Out"}
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 {/* Mobile: Login button only */}

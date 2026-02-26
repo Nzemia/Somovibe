@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import Link from "next/link";
 import PurchaseButton from "@/app/marketplace/PurchaseButton";
 import { ResourceCard } from "@/components/marketplace/ResourceCard";
+import ReviewSection from "./ReviewSection";
+import { DownloadSuccessModal } from "./DownloadSuccessModal";
 
 type Review = {
   id: string;
@@ -14,6 +16,7 @@ type Review = {
   reply?: string | null;
   repliedAt?: Date | string | null;
   createdAt: Date | string;
+  userId: string;
   user: { name?: string | null; email: string };
 };
 
@@ -105,12 +108,15 @@ function avgRatingFromReviews(reviews: { rating: number }[]): number | null {
 export default function MaterialDetailClient({ material, isPurchased, user, moreFromTeacher, similarMaterials }: Props) {
   const router = useRouter();
   const [downloading, setDownloading] = useState(false);
+  const [coverImgFailed, setCoverImgFailed] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const grad = SUBJECT_GRADIENT[material.subject] ?? { from: "#006832", to: "#003318" };
   const teacherHandle = material.teacher.name || material.teacher.email.split("@")[0];
   const isVerified = material.teacher.teacherProfile?.isActive === true;
   const avgRating = avgRatingFromReviews(material.reviews);
   const typeLabel = TYPE_LABELS[material.materialType] ?? material.materialType;
+  const isTeacher = !!user && user.id === material.teacher.id;
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -125,6 +131,7 @@ export default function MaterialDetailClient({ material, isPurchased, user, more
       document.body.appendChild(a); a.click();
       URL.revokeObjectURL(url); document.body.removeChild(a);
       toast.success("Download started!", { id: t });
+      setShowSuccessModal(true);
     } catch (err: any) {
       toast.error(err.message || "Download failed", { id: t });
     } finally { setDownloading(false); }
@@ -161,13 +168,18 @@ export default function MaterialDetailClient({ material, isPurchased, user, more
             {/* Cover */}
             <div className="relative rounded-2xl overflow-hidden h-48 sm:h-64"
               style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
-              {material.thumbnailUrl ? (
-                <img src={material.thumbnailUrl} alt={material.title} className="w-full h-full object-cover" />
+              {material.thumbnailUrl && !coverImgFailed ? (
+                <img
+                  src={material.thumbnailUrl}
+                  alt={material.title}
+                  className="w-full h-full object-cover"
+                  onError={() => setCoverImgFailed(true)}
+                />
               ) : (
                 <>
                   <div className="absolute inset-0 opacity-[0.07]"
                     style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-                  {/* Huge subject text watermark */}
+                  {/* Subject initials watermark */}
                   <span className="absolute bottom-2 left-5 text-white/10 text-8xl font-black leading-none select-none pointer-events-none">
                     {material.subject.split(" ").map(w => w[0]).join("").slice(0, 3)}
                   </span>
@@ -261,51 +273,13 @@ export default function MaterialDetailClient({ material, isPurchased, user, more
             </div>
 
             {/* Reviews */}
-            {material.reviews.length > 0 && (
-              <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-bold text-gray-900">
-                    Reviews
-                    <span className="ml-2 text-sm font-semibold text-gray-400">({material.reviews.length})</span>
-                  </h2>
-                  {avgRating !== null && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-2xl font-extrabold text-gray-900">{avgRating.toFixed(1)}</span>
-                      <StarRow rating={avgRating} />
-                    </div>
-                  )}
-                </div>
-                <div className="divide-y divide-gray-50 space-y-0">
-                  {material.reviews.slice(0, 5).map(r => (
-                    <div key={r.id} className="py-3.5 first:pt-0">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">
-                          {(r.user.name || r.user.email)[0].toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-semibold text-gray-800">
-                              {r.user.name || r.user.email.split("@")[0]}
-                            </span>
-                            <StarRow rating={r.rating} />
-                            <span className="text-xs text-gray-400 ml-auto shrink-0">
-                              {new Date(r.createdAt).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 leading-relaxed">{r.comment}</p>
-                          {r.reply && (
-                            <div className="mt-2.5 ml-3 pl-3 border-l-2 border-[#d1e8dc]">
-                              <p className="text-xs font-semibold text-[#006832] mb-0.5">Teacher replied</p>
-                              <p className="text-sm text-gray-600">{r.reply}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <ReviewSection
+              materialId={material.id}
+              initialReviews={material.reviews}
+              isPurchased={isPurchased}
+              user={user ? { id: user.id, email: user.email, role: user.role } : null}
+              isTeacher={isTeacher}
+            />
           </div>
 
           {/* ─── Sidebar ─── */}
@@ -406,6 +380,21 @@ export default function MaterialDetailClient({ material, isPurchased, user, more
         )}
 
       </div>
+
+      {/* ── Post-download celebration modal ── */}
+      <DownloadSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        material={{
+          id: material.id,
+          title: material.title,
+          subject: material.subject,
+          grade: material.grade,
+          teacher: { name: material.teacher.name, email: material.teacher.email },
+        }}
+        moreFromTeacher={moreFromTeacher}
+        similarMaterials={similarMaterials}
+      />
     </div>
   );
 }

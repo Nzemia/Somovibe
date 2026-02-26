@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/auth-helpers";
+import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
 import { CategoriesSection } from "@/components/CategoriesSection";
+import { ScrollToTopButton } from "@/components/ScrollToTopButton";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -70,7 +71,7 @@ export default async function Home() {
 
   return (
     <>
-      <Navbar user={null} />
+      <Navbar user={user ? { email: user.email, role: user.role } : null} />
       <QuickNav />
 
       {/* ── Hero Sections ── */}
@@ -209,6 +210,7 @@ export default async function Home() {
       </section>
 
       <Footer />
+      <ScrollToTopButton />
     </>
   );
 }
