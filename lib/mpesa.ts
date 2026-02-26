@@ -7,20 +7,29 @@ const MPESA_BASE_URL =
         : "https://sandbox.safaricom.co.ke";
 
 export async function getMpesaToken() {
-    const auth = Buffer.from(
-        `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
-    ).toString("base64");
+    const key    = process.env.MPESA_CONSUMER_KEY    ?? "";
+    const secret = process.env.MPESA_CONSUMER_SECRET ?? "";
 
-    const res = await axios.get(
-        `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
-        {
-            headers: {
-                Authorization: `Basic ${auth}`,
-            },
-        }
-    );
+    console.log("[MPESA] ── Token Generation ──────────────────────────────");
+    console.log("[MPESA] Environment  :", process.env.MPESA_ENVIRONMENT);
+    console.log("[MPESA] Base URL     :", MPESA_BASE_URL);
+    console.log("[MPESA] Consumer Key :", key   ? `${key.slice(0,8)}…(${key.length} chars)`    : "❌ MISSING");
+    console.log("[MPESA] Consumer Sec :", secret ? `${secret.slice(0,8)}…(${secret.length} chars)` : "❌ MISSING");
 
-    return res.data.access_token;
+    const auth = Buffer.from(`${key}:${secret}`).toString("base64");
+    const tokenUrl = `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`;
+
+    try {
+        const res = await axios.get(tokenUrl, {
+            headers: { Authorization: `Basic ${auth}` },
+        });
+        const token: string = res.data.access_token ?? "";
+        console.log("[MPESA] Token OK     :", token ? `${token.slice(0,12)}…(${token.length} chars)` : "❌ EMPTY");
+        return token;
+    } catch (err: any) {
+        console.error("[MPESA] Token FAILED :", err.response?.status, err.response?.data ?? err.message);
+        throw err;
+    }
 }
 
 // Helper to get the correct M-Pesa base URL
@@ -36,38 +45,54 @@ export async function initiateB2CPayment(
 ) {
     const token = await getMpesaToken();
 
+    const b2cShortcode      = process.env.MPESA_B2C_SHORTCODE       ?? "";
+    const initiatorName     = process.env.MPESA_INITIATOR_NAME       ?? "";
+    const securityCred      = process.env.MPESA_SECURITY_CREDENTIAL  ?? "";
+    const callbackBase      = process.env.MPESA_CALLBACK_URL         ?? "";
+    const resultURL         = `${callbackBase}/api/mpesa/callback/b2c/result`;
+    const queueTimeoutURL   = `${callbackBase}/api/mpesa/callback/b2c/timeout`;
+
+    console.log("[MPESA] ── B2C Payload ───────────────────────────────────");
+    console.log("[MPESA] B2C Endpoint      :", `${MPESA_BASE_URL}/mpesa/b2c/v1/paymentrequest`);
+    console.log("[MPESA] InitiatorName     :", initiatorName     || "❌ MISSING");
+    console.log("[MPESA] SecurityCredential:", securityCred      ? `${securityCred.slice(0,16)}…(${securityCred.length} chars)` : "❌ MISSING");
+    console.log("[MPESA] PartyA (shortcode):", b2cShortcode      || "❌ MISSING");
+    console.log("[MPESA] PartyB (phone)    :", phone);
+    console.log("[MPESA] Amount            :", amount);
+    console.log("[MPESA] ResultURL         :", resultURL         || "❌ MISSING");
+    console.log("[MPESA] QueueTimeoutURL   :", queueTimeoutURL   || "❌ MISSING");
+    console.log("[MPESA] Token (first 12)  :", token ? `${token.slice(0,12)}…` : "❌ EMPTY");
+    console.log("[MPESA] ─────────────────────────────────────────────────");
+
     try {
         const response = await axios.post(
             `${MPESA_BASE_URL}/mpesa/b2c/v1/paymentrequest`,
             {
-                InitiatorName: process.env.MPESA_INITIATOR_NAME,
-                SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL,
-                CommandID: "BusinessPayment", // or "SalaryPayment" or "PromotionPayment"
-                Amount: amount,
-                PartyA: process.env.MPESA_B2C_SHORTCODE,
-                PartyB: phone,
-                Remarks: remarks,
-                QueueTimeOutURL: `${process.env.MPESA_CALLBACK_URL}/api/mpesa/callback/b2c/timeout`,
-                ResultURL: `${process.env.MPESA_CALLBACK_URL}/api/mpesa/callback/b2c/result`,
-                Occasion: "Withdrawal",
+                InitiatorName:      initiatorName,
+                SecurityCredential: securityCred,
+                CommandID:          "BusinessPayment",
+                Amount:             amount,
+                PartyA:             b2cShortcode,
+                PartyB:             phone,
+                Remarks:            remarks,
+                QueueTimeOutURL:    queueTimeoutURL,
+                ResultURL:          resultURL,
+                Occasion:           "Withdrawal",
             },
             {
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization:  `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
             }
         );
 
-        return {
-            success: true,
-            data: response.data,
-        };
+        console.log("[MPESA] B2C SUCCESS:", response.data);
+        return { success: true, data: response.data };
     } catch (error: any) {
-        console.error("B2C Payment Error:", error.response?.data || error.message);
-        return {
-            success: false,
-            error: error.response?.data || error.message,
-        };
+        const errData = error.response?.data ?? error.message;
+        console.error("[MPESA] B2C ERROR — HTTP", error.response?.status ?? "N/A");
+        console.error("[MPESA] B2C ERROR body  :", JSON.stringify(errData, null, 2));
+        return { success: false, error: errData };
     }
 }
