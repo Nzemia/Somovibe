@@ -9,16 +9,8 @@ import { ResourceCard } from "@/components/marketplace/ResourceCard";
 import ReviewSection from "./ReviewSection";
 import { DownloadSuccessModal } from "./DownloadSuccessModal";
 
-type Review = {
-  id: string;
-  rating: number;
-  comment: string | null;
-  reply?: string | null;
-  repliedAt?: Date | string | null;
-  createdAt: Date | string;
-  userId: string;
-  user: { name?: string | null; email: string };
-};
+import type { Review } from "../types";
+
 
 type RelatedPdf = {
   id: string;
