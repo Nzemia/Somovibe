@@ -26,6 +26,8 @@ export default function MaterialDetailClient({
     const [referenceCode, setReferenceCode] = useState<string | null>(null);
     const [paymentStatus, setPaymentStatus] = useState<string>("PENDING");
     const [pollCount, setPollCount] = useState(0);
+    // Local purchased state — flips instantly when payment confirmed, no page refresh needed
+    const [purchased, setPurchased] = useState(isPurchased);
 
     const materialConfig = getMaterialTypeConfig(material.materialType);
     const avgRating = getAverageRating(material.reviews);
@@ -56,9 +58,9 @@ export default function MaterialDetailClient({
                     clearInterval(interval);
                     setPaymentStatus("COMPLETED");
                     setPaymentPending(false);
+                    setPurchased(true); // swap button instantly
                     toast.success("Payment successful! You can now download the material.");
-                    // Refresh the page to update isPurchased state from the server
-                    router.refresh();
+                    router.refresh(); // sync server state in background
                 } else if (data.status === "FAILED") {
                     clearInterval(interval);
                     setPaymentStatus("FAILED");
@@ -325,7 +327,7 @@ export default function MaterialDetailClient({
                                 </div>
                             )}
 
-                            {isPurchased ? (
+                            {purchased ? (
                                 <>
                                     <div className="mb-4 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md">
                                         <p className="text-sm text-green-700 dark:text-green-300 font-medium">

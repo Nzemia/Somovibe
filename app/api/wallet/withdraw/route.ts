@@ -35,32 +35,9 @@ export async function POST(req: Request) {
             );
         }
 
-        // Auto-reconcile wallet from actual purchases before checking balance
-        // This ensures the wallet DB record reflects real earnings even if M-Pesa callbacks failed
-        const userMaterials = await prisma.pdf.findMany({
-            where: { teacherId: user.id },
-            include: { purchases: { select: { id: true } } },
-        });
-
-        const expectedEarnings = userMaterials.reduce(
-            (sum: number, m: { price: number; purchases: { id: string }[] }) =>
-                sum + m.purchases.length * Math.floor(m.price * 0.75),
-            0
-        );
-
-        let wallet = await prisma.wallet.findUnique({
+        const wallet = await prisma.wallet.findUnique({
             where: { userId: user.id },
         });
-
-        // If wallet doesn't exist or balance is less than expected, credit the difference
-        const currentBalance = wallet?.balance || 0;
-        if (expectedEarnings > currentBalance) {
-            await creditWallet(user.id, expectedEarnings - currentBalance);
-            // Re-fetch the wallet after reconciliation
-            wallet = await prisma.wallet.findUnique({
-                where: { userId: user.id },
-            });
-        }
 
         if (!wallet || wallet.balance < amount) {
             return NextResponse.json(
@@ -137,16 +114,27 @@ export async function POST(req: Request) {
             }
 
             // Update withdrawal with M-Pesa conversation ID
+            // Safaricom may use ConversationID or OriginatorConversationID
+            const conversationId =
+                b2cResult.data.ConversationID ||
+                b2cResult.data.OriginatorConversationID ||
+                null;
+
             await prisma.withdrawalRequest.update({
                 where: { id: withdrawal.id },
                 data: {
-                    mpesaConversationId: b2cResult.data.ConversationID,
+                    mpesaConversationId: conversationId,
                 },
+            });
+
+            // Re-fetch updated withdrawal to return accurate data
+            const updatedWithdrawal = await prisma.withdrawalRequest.findUnique({
+                where: { id: withdrawal.id },
             });
 
             return NextResponse.json({
                 message: "Withdrawal initiated. You will receive the money shortly.",
-                withdrawal,
+                withdrawal: updatedWithdrawal,
             });
         } catch (b2cError: any) {
             // If B2C throws an exception (e.g. token fetch fails), refund the wallet

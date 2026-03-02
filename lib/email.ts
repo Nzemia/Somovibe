@@ -26,17 +26,7 @@ async function sendEmail(options: {
 
         return result;
     } catch (error: any) {
-        console.error(`❌ Failed to send email to ${options.to}:`, error);
-        console.error(`   Error details:`, error.message || error);
-
-        // Log specific Resend errors
-        if (error.statusCode) {
-            console.error(`   Status Code: ${error.statusCode}`);
-        }
-        if (error.name) {
-            console.error(`   Error Name: ${error.name}`);
-        }
-
+        console.error("Email send failed:", error.message || error);
         throw error;
     }
 }
