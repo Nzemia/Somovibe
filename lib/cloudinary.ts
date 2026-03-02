@@ -8,7 +8,8 @@ cloudinary.config({
 
 export async function uploadToCloudinary(
     file: File,
-    folder: string = "thumbnails"
+    folder: string = "thumbnails",
+    resourceType: "image" | "raw" | "video" | "auto" = "image"
 ): Promise<string> {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -18,7 +19,7 @@ export async function uploadToCloudinary(
             .upload_stream(
                 {
                     folder,
-                    resource_type: "image",
+                    resource_type: resourceType,
                 },
                 (error, result) => {
                     if (error) reject(error);
@@ -29,30 +30,7 @@ export async function uploadToCloudinary(
     });
 }
 
-export async function uploadPdfToCloudinary(
-    file: File,
-    folder: string = "materials"
-): Promise<string> {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
-    return new Promise((resolve, reject) => {
-        cloudinary.uploader
-            .upload_stream(
-                {
-                    folder,
-                    resource_type: "raw", // required for PDF/PPT
-                    use_filename: true,
-                    unique_filename: true,
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result!.secure_url);
-                }
-            )
-            .end(buffer);
-    });
-}
 
 export function getDefaultThumbnail(materialType: string): string {
     // Using placeholder images with material type specific colors and icons

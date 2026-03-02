@@ -3,12 +3,8 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.pnp.js
+.yarn/install-state.gz
 
 # testing
 /coverage
@@ -28,19 +24,11 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# local env files
+.env*.local
 .env
-.env.local
 .env.production
-.env.example
-
-
-withdrawal_setup.md
-
-# generated prisma client
-generated/client
 
 # vercel
 .vercel
@@ -49,4 +37,11 @@ generated/client
 *.tsbuildinfo
 next-env.d.ts
 
-/app/generated/prisma
+# Docker
+docker-compose.override.yml
+
+# Backups
+backups/
+
+# SSL certificates
+certbot/

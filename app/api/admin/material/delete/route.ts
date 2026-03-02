@@ -28,3 +28,4 @@ export async function DELETE(req: Request) {
         return handleAuthError(error);
     }
 }
+
