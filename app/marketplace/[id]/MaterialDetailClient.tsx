@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getMaterialTypeConfig } from "@/lib/materialTypes";
@@ -23,81 +23,71 @@ export default function MaterialDetailClient({
     const [downloading, setDownloading] = useState(false);
     const [purchasing, setPurchasing] = useState(false);
     const [paymentPending, setPaymentPending] = useState(false);
-    const [referenceCode, setReferenceCode] = useState<string | null>(null);
-    const [paymentStatus, setPaymentStatus] = useState<string>("PENDING");
-    const [pollCount, setPollCount] = useState(0);
-    // Local purchased state — flips instantly when payment confirmed, no page refresh needed
+    // Local purchased state — flips instantly when purchase record detected, no page refresh needed
     const [purchased, setPurchased] = useState(isPurchased);
+
+    const MAX_POLL_SECONDS = 90; // 90 seconds total wait
 
     const materialConfig = getMaterialTypeConfig(material.materialType);
     const avgRating = getAverageRating(material.reviews);
 
-    const MAX_POLL_ATTEMPTS = 60; // 60 seconds
-
-    // Poll for payment status
+    // Poll the Purchase table directly — the source of truth
+    // Once the M-Pesa callback creates the Purchase record, the next poll catches it
     useEffect(() => {
-        if (!paymentPending || !referenceCode) return;
+        if (!paymentPending) return;
+
+        let elapsed = 0;
 
         const interval = setInterval(async () => {
-            setPollCount((prev) => {
-                if (prev >= MAX_POLL_ATTEMPTS) {
-                    clearInterval(interval);
-                    setPaymentStatus("TIMEOUT");
-                    setPaymentPending(false);
-                    toast.error("Payment verification timed out. If you paid, the material will appear shortly — please refresh the page.");
-                    return prev;
-                }
-                return prev + 1;
-            });
+            elapsed += 2;
+
+            if (elapsed >= MAX_POLL_SECONDS) {
+                clearInterval(interval);
+                setPaymentPending(false);
+                toast.error("Payment verification timed out. If you paid, please refresh the page.");
+                return;
+            }
 
             try {
-                const res = await fetch(`/api/payment/status?referenceCode=${referenceCode}`);
+                const res = await fetch(`/api/purchase/check?pdfId=${material.id}`);
                 const data = await res.json();
 
-                if (data.status === "COMPLETED") {
+                if (data.purchased) {
                     clearInterval(interval);
-                    setPaymentStatus("COMPLETED");
                     setPaymentPending(false);
-                    setPurchased(true); // swap button instantly
+                    setPurchased(true);
                     toast.success("Payment successful! You can now download the material.");
-                    router.refresh(); // sync server state in background
-                } else if (data.status === "FAILED") {
-                    clearInterval(interval);
-                    setPaymentStatus("FAILED");
-                    setPaymentPending(false);
-                    toast.error("Payment failed. Please try again.");
                 }
             } catch (err) {
                 console.error("Polling error:", err);
             }
-        }, 1000);
+        }, 2000); // poll every 2 seconds
 
         return () => clearInterval(interval);
-    }, [paymentPending, referenceCode, router]);
+    }, [paymentPending, material.id]);
 
     const handleDownload = async () => {
         setDownloading(true);
         const loadingToast = toast.loading("Preparing download...");
 
         try {
-            const res = await fetch(`/api/pdf/download?pdfId=${material.id}`);
+            // Check access first (auth + purchase guard), then redirect to file
+            const res = await fetch(`/api/pdf/download?pdfId=${material.id}`, {
+                redirect: "manual", // don't auto-follow, we'll grab the URL
+            });
 
-            if (!res.ok) {
+            if (res.type === "opaqueredirect" || res.status === 0) {
+                // Redirect to the Cloudinary URL by hitting the route in a new tab
+                window.open(`/api/pdf/download?pdfId=${material.id}`, "_blank");
+                toast.success("Download started!", { id: loadingToast });
+            } else if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.error || "Failed to download");
+            } else {
+                // Fallback: should not normally reach here
+                window.open(`/api/pdf/download?pdfId=${material.id}`, "_blank");
+                toast.success("Download started!", { id: loadingToast });
             }
-
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${material.title}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-
-            toast.success("Download started!", { id: loadingToast });
         } catch (err: any) {
             toast.error(err.message || "Failed to download", { id: loadingToast });
         } finally {
@@ -139,11 +129,8 @@ export default function MaterialDetailClient({
 
             toast.success("Check your phone for the M-Pesa prompt!", { id: loadingToast });
 
-            // Start polling for payment status on this same page
-            setReferenceCode(data.referenceCode);
+            // Start polling — just check if Purchase record appears in DB
             setPaymentPending(true);
-            setPaymentStatus("PENDING");
-            setPollCount(0);
         } catch (err: any) {
             toast.error(err.message || "Failed to initiate payment", { id: loadingToast });
         } finally {
@@ -293,39 +280,16 @@ export default function MaterialDetailClient({
                                     <p className="text-sm text-muted-foreground mb-3">
                                         Check your phone for the M-Pesa prompt and enter your PIN
                                     </p>
-                                    <div className="bg-background border border-border rounded-md p-2 mb-2">
-                                        <p className="text-xs text-muted-foreground">Reference</p>
-                                        <p className="font-mono text-xs font-bold text-foreground">{referenceCode}</p>
-                                    </div>
                                     <p className="text-xs text-muted-foreground">
-                                        This may take up to 60 seconds...
+                                        This may take up to 90 seconds...
                                     </p>
                                 </div>
                             )}
 
-                            {/* Payment Failed */}
-                            {paymentStatus === "FAILED" && !paymentPending && (
-                                <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                                    <p className="text-sm text-destructive font-medium">
-                                        ✕ Payment failed. Please try again.
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Payment Timeout */}
-                            {paymentStatus === "TIMEOUT" && !paymentPending && (
-                                <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md">
-                                    <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">
-                                        ⏱ Payment verification timed out. If you completed the payment, please refresh this page.
-                                    </p>
-                                    <button
-                                        onClick={() => router.refresh()}
-                                        className="mt-2 text-sm text-primary hover:underline font-medium"
-                                    >
-                                        Refresh Page
-                                    </button>
-                                </div>
-                            )}
+                        {/* Payment Failed / Timeout (M-Pesa cancelled or declined) */}
+                        {!paymentPending && !purchased && purchasing === false && (
+                            <></>
+                        )}
 
                             {purchased ? (
                                 <>
