@@ -6,8 +6,6 @@ export async function POST(req: Request) {
     try {
         const payload = await req.json();
 
-        console.log("B2C Result Callback:", JSON.stringify(payload, null, 2));
-
         const result = payload.Result;
 
         if (!result) {
@@ -46,7 +44,6 @@ export async function POST(req: Request) {
                 },
             });
 
-            console.log("✅ Withdrawal completed:", withdrawal.id);
         } else {
             // Failed - refund wallet
             await prisma.withdrawalRequest.update({
@@ -61,7 +58,6 @@ export async function POST(req: Request) {
             // Refund the amount
             await refundWallet(withdrawal.userId, withdrawal.amount);
 
-            console.log("❌ Withdrawal failed, refunded:", withdrawal.id);
         }
 
         return NextResponse.json({ ok: true });
