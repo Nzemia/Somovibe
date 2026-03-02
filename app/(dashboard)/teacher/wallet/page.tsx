@@ -61,7 +61,7 @@ export default async function WalletPage() {
     const totalSales = materials.reduce((sum: number, m: MaterialWithPurchases) => sum + m.purchases.length, 0);
 
     // Use wallet balance, or fall back to calculated earnings if wallet hasn't been credited yet
-    const balance = wallet?.balance || totalEarnings;
+    const balance = wallet?.balance ?? totalEarnings;
     const transactions = wallet?.walletTransactions || [];
 
     // Calculate total credits and debits
