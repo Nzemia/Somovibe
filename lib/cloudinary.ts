@@ -30,6 +30,8 @@ export async function uploadToCloudinary(
     });
 }
 
+
+
 export function getDefaultThumbnail(materialType: string): string {
     // Using placeholder images with material type specific colors and icons
     const thumbnails: Record<string, string> = {
