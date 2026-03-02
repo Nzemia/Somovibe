@@ -20,8 +20,6 @@ export async function POST(req: Request) {
         const price = Number(formData.get("price"));
         const materialType = formData.get("materialType") as string;
 
-        //console.log("Upload request from user:", user.email, { title, subject, grade, price, materialType, fileName: file?.name });
-
         if (!file || !title || !description || !subject || !grade || !price || !materialType) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
@@ -33,13 +31,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid material type" }, { status: 400 });
         }
 
-        // Validate file type based on material type
+        // Validate file type
         const allowedTypes = ["application/pdf", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"];
         if (!allowedTypes.includes(file.type)) {
             return NextResponse.json({ error: "Only PDF and PowerPoint files allowed" }, { status: 400 });
         }
 
-        // Handle thumbnail upload
+        // Upload thumbnail
         let thumbnailUrl: string;
         if (thumbnail) {
             try {
@@ -52,15 +50,13 @@ export async function POST(req: Request) {
             thumbnailUrl = getDefaultThumbnail(materialType);
         }
 
-        // Upload PDF to Cloudinary
+        // Upload material file to Cloudinary (raw = PDFs, PPTs, etc.)
         let fileUrl: string;
         try {
             fileUrl = await uploadToCloudinary(file, "materials", "raw");
         } catch (error) {
             console.error("File upload failed:", error);
-            return NextResponse.json({
-                error: "Failed to upload file"
-            }, { status: 500 });
+            return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
         }
 
         // Create PDF record in database
@@ -78,9 +74,7 @@ export async function POST(req: Request) {
             },
         });
 
-        //console.log("PDF created successfully:", pdf.id);
-
-        // Notify admin of new material (await to catch errors)
+        // Notify admin of new material
         try {
             const adminId = await getPlatformAdminId();
             if (adminId) {
@@ -94,7 +88,6 @@ export async function POST(req: Request) {
             }
         } catch (emailError) {
             console.error("Email sending failed, but upload succeeded:", emailError);
-            // Don't fail the request if email fails
         }
 
         return NextResponse.json(pdf);
