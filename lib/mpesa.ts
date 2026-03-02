@@ -64,7 +64,7 @@ export async function initiateB2CPayment(
             data: response.data,
         };
     } catch (error: any) {
-        console.error("B2C Payment Error:", error.response?.data || error.message);
+        console.error("B2C Payment Error:", error.response?.data?.errorMessage || error.message);
         return {
             success: false,
             error: error.response?.data || error.message,
