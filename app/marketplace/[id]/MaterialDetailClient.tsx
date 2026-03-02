@@ -3,15 +3,56 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { getMaterialTypeConfig } from "@/lib/materialTypes";
-import { getAverageRating } from "@/lib/utils";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import PurchaseButton from "@/app/marketplace/PurchaseButton";
+import { ResourceCard } from "@/components/marketplace/ResourceCard";
+import ReviewSection from "./ReviewSection";
+import { DownloadSuccessModal } from "./DownloadSuccessModal";
 
-type MaterialDetailClientProps = {
-    material: any;
-    isPurchased: boolean;
-    user: any;
+import type { Review } from "../types";
+
+
+type RelatedPdf = {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  grade: string;
+  price: number;
+  materialType: string;
+  createdAt: Date | string;
+  teacher: { email: string; teacherProfile?: { isActive: boolean } | null };
+  _count: { purchases: number };
+  reviews: { rating: number }[];
+};
+
+type Material = {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  grade: string;
+  price: number;
+  materialType: string;
+  thumbnailUrl?: string | null;
+  createdAt: Date | string;
+  teacher: {
+    id: string;
+    name?: string | null;
+    email: string;
+    teacherProfile?: { isActive: boolean } | null;
+    _count: { pdfs: number };
+  };
+  _count: { downloads: number; reviews: number; purchases: number; materialViews: number };
+  reviews: Review[];
+};
+
+type Props = {
+  material: Material;
+  isPurchased: boolean;
+  user: { id: string; email: string; phone: string | null; role: string } | null;
+  moreFromTeacher: RelatedPdf[];
+  similarMaterials: RelatedPdf[];
 };
 
 export default function MaterialDetailClient({
@@ -140,133 +181,150 @@ export default function MaterialDetailClient({
 
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
-    const handleShare = async () => {
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: material.title,
-                    text: `Check out this learning material: ${material.title}`,
-                    url: shareUrl,
-                });
-            } catch (err) {
-                // User cancelled or error
-            }
-        } else {
-            navigator.clipboard.writeText(shareUrl);
-            toast.success("Link copied to clipboard!");
-        }
-    };
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try { await navigator.share({ title: material.title, url }); } catch {}
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard!");
+    }
+  };
 
-    return (
-        <div className="min-h-screen bg-background">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Back Button */}
-                <Link
-                    href="/marketplace"
-                    className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
-                >
-                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Back to Marketplace
-                </Link>
+  return (
+    <div className="min-h-screen bg-[#f5faf7]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16">
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Thumbnail */}
-                        <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-                            {material.thumbnailUrl ? (
-                                <img
-                                    src={material.thumbnailUrl}
-                                    alt={material.title}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className={`w-full h-full flex items-center justify-center ${materialConfig.lightColor}`}>
-                                    <span className="text-9xl">{materialConfig.icon}</span>
-                                </div>
-                            )}
-                        </div>
+        {/* Back link */}
+        <Link href="/marketplace"
+          className="inline-flex items-center gap-1.5 text-sm text-[#008c43] font-semibold hover:text-[#006832] mb-6 transition-colors">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Marketplace
+        </Link>
 
-                        {/* Title and Badges */}
-                        <div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <Badge className={materialConfig.textColor}>
-                                    {materialConfig.icon} {materialConfig.label}
-                                </Badge>
-                                <Badge variant="outline">{material.subject}</Badge>
-                                <Badge variant="outline">{material.grade}</Badge>
-                            </div>
-                            <h1 className="text-3xl font-bold text-foreground mb-2">
-                                {material.title}
-                            </h1>
-                            <p className="text-muted-foreground">{material.description}</p>
-                        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                        {/* Stats */}
-                        <div className="flex items-center gap-6 text-sm">
-                            <div className="flex items-center gap-2">
-                                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                                <span className="text-foreground font-medium">{material._count.downloads}</span>
-                                <span className="text-muted-foreground">Downloads</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
-                                <span className="text-foreground font-medium">{material._count.purchases}</span>
-                                <span className="text-muted-foreground">Sales</span>
-                            </div>
-                            {avgRating > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                    <span className="text-foreground font-medium">{avgRating.toFixed(1)}</span>
-                                    <span className="text-muted-foreground">({material._count.reviews} reviews)</span>
-                                </div>
-                            )}
-                        </div>
+          {/* ─── Main column ─── */}
+          <div className="lg:col-span-2 space-y-5">
 
-                        {/* Teacher Info */}
-                        <div className="bg-card border border-border rounded-lg p-4">
-                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Created by</h3>
-                            <Link
-                                href={`/teacher/${material.teacher.id}`}
-                                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-                            >
-                                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <span className="text-xl font-bold text-primary">
-                                        {(material.teacher.name || material.teacher.email)[0].toUpperCase()}
-                                    </span>
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-medium text-foreground">
-                                            {material.teacher.name || material.teacher.email.split("@")[0]}
-                                        </p>
-                                        {material.teacher.teacherProfile?.isActive && (
-                                            <Badge className="bg-green-500 text-white text-xs">
-                                                ✓ Verified
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">View all materials →</p>
-                                </div>
-                            </Link>
-                        </div>
-                    </div>
+            {/* Cover */}
+            <div className="relative rounded-2xl overflow-hidden h-48 sm:h-64"
+              style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
+              {material.thumbnailUrl && !coverImgFailed ? (
+                <img
+                  src={material.thumbnailUrl}
+                  alt={material.title}
+                  className="w-full h-full object-cover"
+                  onError={() => setCoverImgFailed(true)}
+                />
+              ) : (
+                <>
+                  <div className="absolute inset-0 opacity-[0.07]"
+                    style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+                  {/* Subject initials watermark */}
+                  <span className="absolute bottom-2 left-5 text-white/10 text-8xl font-black leading-none select-none pointer-events-none">
+                    {material.subject.split(" ").map(w => w[0]).join("").slice(0, 3)}
+                  </span>
+                </>
+              )}
+              {/* Type badge */}
+              <span className="absolute top-4 left-4 bg-white/15 border border-white/25 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">
+                {typeLabel}
+              </span>
+              {isPurchased && (
+                <span className="absolute top-4 right-4 bg-[#008c43] text-white text-xs font-bold px-3 py-1 rounded-full">
+                  ✓ Owned
+                </span>
+              )}
+            </div>
 
-                    {/* Sidebar */}
-                    <div className="space-y-4">
-                        {/* Purchase Card */}
-                        <div className="bg-card border border-border rounded-lg p-6 sticky top-4">
-                            <div className="text-3xl font-bold text-foreground mb-4">
-                                KES {material.price}
-                            </div>
+            {/* Title + chips */}
+            <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-5">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#f0faf5] text-[#006832] border border-[#d1e8dc]">
+                  {material.subject}
+                </span>
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  {material.grade}
+                </span>
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                  {new Date(material.createdAt).toLocaleDateString("en-KE", { month: "short", year: "numeric" })}
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug mb-2">
+                {material.title}
+              </h1>
+              <p className="text-gray-600 text-sm leading-relaxed">{material.description}</p>
+            </div>
+
+            {/* Stats row */}
+            <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <StatChip value={material._count.purchases.toString()} label="Sales" color="emerald" icon={
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>} />
+                <StatChip value={material._count.downloads.toString()} label="Downloads" color="sky" icon={
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>} />
+                <StatChip value={material._count.materialViews.toString()} label="Views" color="violet" icon={
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>} />
+                <StatChip
+                  value={avgRating !== null ? avgRating.toFixed(1) : "—"}
+                  label={`${material._count.reviews} reviews`}
+                  color="amber"
+                  icon={<svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>}
+                />
+              </div>
+            </div>
+
+            {/* Teacher card */}
+            <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-5">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Created by</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-extrabold text-xl shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
+                  {teacherHandle[0]?.toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-gray-900 truncate">{teacherHandle}</span>
+                    {isVerified && (
+                      <span className="inline-flex items-center gap-1 bg-[#f0faf5] text-[#006832] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#d1e8dc] shrink-0">
+                        <svg className="w-3 h-3" viewBox="0 0 20 20" fill="none">
+                          <path d="M9.99992 2.5L4.16659 5.20833V9.99999C4.16659 13.5417 6.63325 16.8667 9.99992 17.5C13.3666 16.8667 15.8333 13.5417 15.8333 9.99999V5.20833L9.99992 2.5Z"
+                            stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M7.5 9.99999L9.16667 11.6667L12.5 8.33333" stroke="currentColor"
+                            strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {material.teacher._count.pdfs} material{material.teacher._count.pdfs !== 1 ? "s" : ""} on Somovibe
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Reviews */}
+            <ReviewSection
+              materialId={material.id}
+              initialReviews={material.reviews}
+              isPurchased={isPurchased}
+              user={user ? { id: user.id, email: user.email, role: user.role } : null}
+              isTeacher={isTeacher}
+            />
+          </div>
 
                             {/* Payment Pending Overlay */}
                             {paymentPending && (
@@ -326,32 +384,111 @@ export default function MaterialDetailClient({
                                 Share
                             </button>
 
-                            <div className="mt-4 pt-4 border-t border-border">
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li className="flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Instant download after purchase
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Lifetime access
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Quality verified content
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                {/* Guarantees */}
+                <div className="pt-3 border-t border-gray-100 space-y-2.5">
+                  {[
+                    "Instant download after purchase",
+                    "Lifetime access to the file",
+                    "Quality-verified by Somovibe",
+                    "Secure payment via M-Pesa",
+                  ].map(g => (
+                    <div key={g} className="flex items-center gap-2.5 text-xs text-gray-500">
+                      <svg className="w-3.5 h-3.5 text-[#008c43] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {g}
                     </div>
+                  ))}
                 </div>
+              </div>
             </div>
+          </div>
         </div>
-    );
+
+        {/* ─── More from this teacher ─── */}
+        {moreFromTeacher.length > 0 && (
+          <RelatedSection
+            title={`More from ${teacherHandle}`}
+            subtitle="Other materials by this teacher"
+            items={moreFromTeacher}
+            user={user}
+            purchasedIds={new Set()}
+          />
+        )}
+
+        {/* ─── Similar materials ─── */}
+        {similarMaterials.length > 0 && (
+          <RelatedSection
+            title={`More ${material.subject} materials`}
+            subtitle={`Other ${material.subject} resources on Somovibe`}
+            items={similarMaterials}
+            user={user}
+            purchasedIds={new Set()}
+          />
+        )}
+
+      </div>
+
+      {/* ── Post-download celebration modal ── */}
+      <DownloadSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        material={{
+          id: material.id,
+          title: material.title,
+          subject: material.subject,
+          grade: material.grade,
+          teacher: { name: material.teacher.name, email: material.teacher.email },
+        }}
+        moreFromTeacher={moreFromTeacher}
+        similarMaterials={similarMaterials}
+      />
+    </div>
+  );
+}
+
+function StatChip({ value, label, color, icon }: {
+  value: string; label: string; color: "emerald" | "sky" | "violet" | "amber"; icon: React.ReactNode;
+}) {
+  const colors = {
+    emerald: "bg-emerald-50 text-emerald-600",
+    sky:     "bg-sky-50 text-sky-600",
+    violet:  "bg-violet-50 text-violet-600",
+    amber:   "bg-amber-50 text-amber-500",
+  };
+  return (
+    <div className="text-center">
+      <div className={`w-9 h-9 rounded-xl ${colors[color]} flex items-center justify-center mx-auto mb-1.5`}>
+        {icon}
+      </div>
+      <p className="text-lg font-extrabold text-gray-900">{value}</p>
+      <p className="text-xs text-gray-500">{label}</p>
+    </div>
+  );
+}
+
+function RelatedSection({ title, subtitle, items, user, purchasedIds }: {
+  title: string; subtitle: string;
+  items: RelatedPdf[];
+  user: { id: string; email: string; phone: string | null } | null;
+  purchasedIds: Set<string>;
+}) {
+  return (
+    <div className="mt-10">
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <p className="text-xs font-bold text-[#008c43] uppercase tracking-wider mb-0.5">{subtitle}</p>
+          <h2 className="text-lg font-extrabold text-gray-900">{title}</h2>
+        </div>
+        <Link href="/marketplace" className="text-sm text-[#008c43] font-semibold hover:underline">
+          View all →
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {items.map(p => (
+          <ResourceCard key={p.id} resource={p} isPurchased={purchasedIds.has(p.id)} user={user} />
+        ))}
+      </div>
+    </div>
+  );
 }
