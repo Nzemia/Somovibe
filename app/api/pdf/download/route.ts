@@ -22,12 +22,13 @@ export async function GET(req: Request) {
         }
 
         // Admin bypass: Admins can download any material without purchase
-        let fileUrl: string;
+        let purchase = null;
         if (user.role === "ADMIN") {
-            fileUrl = pdf.fileUrl;
+            // Admin can access any material - create a virtual purchase object
+            purchase = { pdf };
         } else {
             // Regular users need to have purchased the material
-            const purchase = await prisma.purchase.findUnique({
+            purchase = await prisma.purchase.findUnique({
                 where: {
                     userId_pdfId: { userId: user.id, pdfId },
                 },
@@ -39,16 +40,26 @@ export async function GET(req: Request) {
             if (!purchase) {
                 return NextResponse.json({ error: "You haven't purchased this material" }, { status: 403 });
             }
-
-            fileUrl = purchase.pdf.fileUrl;
         }
 
-        // Check if it's a placeholder file (legacy check)
-        if (fileUrl.startsWith("placeholder-")) {
+        // Check if it's a placeholder file
+        if (purchase.pdf.fileUrl.startsWith("placeholder-")) {
             return NextResponse.json({
                 error: "This material is not available for download yet. The teacher needs to re-upload the file."
             }, { status: 404 });
         }
+
+        // Cloudinary URLs are direct download links, just fetch and return
+        const response = await fetch(purchase.pdf.fileUrl);
+
+        if (!response.ok) {
+            console.error("Download error: Failed to fetch from Cloudinary");
+            return NextResponse.json({
+                error: "Failed to download file. Please contact support."
+            }, { status: 500 });
+        }
+
+        const data = await response.blob();
 
         // Track download (skip for admin reviews)
         if (user.role !== "ADMIN") {
@@ -60,8 +71,13 @@ export async function GET(req: Request) {
             }).catch(() => { }); // Ignore errors for download tracking
         }
 
-        // Redirect to the Cloudinary URL directly
-        return NextResponse.redirect(fileUrl);
+        // Return the PDF file
+        return new NextResponse(data, {
+            headers: {
+                "Content-Type": "application/pdf",
+                "Content-Disposition": `attachment; filename="${purchase.pdf.title}.pdf"`,
+            },
+        });
     } catch (error: any) {
         console.error("Download error:", error);
         return NextResponse.json({ error: "Failed to download" }, { status: 500 });
