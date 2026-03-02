@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import MaterialDetailClient from "./MaterialDetailClient";
+import ReviewSection from "./ReviewSection";
 import { Metadata } from "next";
+import { getAverageRating, maskEmail } from "@/lib/utils";
 
 export async function generateMetadata({
     params,
@@ -96,6 +98,14 @@ export default async function MaterialDetailPage({
         notFound();
     }
 
+    // Track view (async, don't await)
+    prisma.materialView.create({
+        data: {
+            pdfId: material.id,
+            userId: user?.id || null,
+        },
+    }).catch(() => { }); // Ignore errors for view tracking
+
     // Check if user has purchased
     const purchase = user
         ? await prisma.purchase.findUnique({
@@ -116,6 +126,26 @@ export default async function MaterialDetailPage({
                 isPurchased={!!purchase}
                 user={user}
             />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+                <ReviewSection
+                    materialId={material.id}
+                    reviews={material.reviews.map((r: any) => ({
+                        id: r.id,
+                        rating: r.rating,
+                        comment: r.comment,
+                        reply: r.reply,
+                        repliedAt: r.repliedAt,
+                        createdAt: r.createdAt,
+                        userEmail: maskEmail(r.user.email),
+                        userId: r.userId,
+                    }))}
+                    averageRating={getAverageRating(material.reviews)}
+                    totalReviews={material._count.reviews}
+                    hasPurchased={!!purchase}
+                    isTeacher={user?.id === material.teacherId}
+                    user={user}
+                />
+            </div>
         </>
     );
 }

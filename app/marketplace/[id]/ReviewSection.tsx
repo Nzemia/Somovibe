@@ -53,6 +53,11 @@ export default function ReviewSection({
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyText, setReplyText] = useState("");
     const [deletingReview, setDeletingReview] = useState<string | null>(null);
+    const [showAllReviews, setShowAllReviews] = useState(false);
+
+    const REVIEWS_TO_SHOW = 5;
+    const displayedReviews = showAllReviews ? reviews : reviews.slice(0, REVIEWS_TO_SHOW);
+    const hasMoreReviews = reviews.length > REVIEWS_TO_SHOW;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -239,7 +244,9 @@ export default function ReviewSection({
 
             {/* Reviews List */}
             <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground">Recent Reviews</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                    {totalReviews > 0 ? `All Reviews (${totalReviews})` : "Reviews"}
+                </h3>
                 {reviews.length === 0 ? (
                     <div className="text-center py-8">
                         <svg
@@ -261,125 +268,154 @@ export default function ReviewSection({
                         </p>
                     </div>
                 ) : (
-                    reviews.map((review) => (
-                        <div key={review.id} className="border border-border rounded-lg p-4">
-                            <div className="flex items-start justify-between mb-2">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        {renderStars(review.rating)}
+                    <>
+                        {displayedReviews.map((review) => (
+                            <div key={review.id} className="border border-border rounded-lg p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {renderStars(review.rating)}
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">{review.userEmail}</p>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">{review.userEmail}</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <p className="text-xs text-muted-foreground">
-                                        {new Date(review.createdAt).toLocaleDateString("en-US", {
-                                            year: "numeric",
-                                            month: "short",
-                                            day: "numeric",
-                                        })}
-                                    </p>
-                                    {user && (user.role === "ADMIN" || user.id === review.userId) && (
-                                        <AlertDialog open={deletingReview === review.id} onOpenChange={(open) => !open && setDeletingReview(null)}>
-                                            <AlertDialogTrigger asChild>
-                                                <button
-                                                    onClick={() => setDeletingReview(review.id)}
-                                                    className="text-red-500 hover:text-red-700 transition-colors"
-                                                    title="Delete review"
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Delete Review</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Are you sure you want to delete this review? This action cannot be undone.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={() => handleDeleteReview(review.id)}
-                                                        className="bg-red-500 hover:bg-red-600"
-                                                    >
-                                                        Delete
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    )}
-                                </div>
-                            </div>
-                            {review.comment && (
-                                <p className="text-sm text-foreground mt-2">{review.comment}</p>
-                            )}
-
-                            {/* Teacher Reply */}
-                            {review.reply && (
-                                <div className="mt-3 ml-4 pl-4 border-l-2 border-primary/30 bg-primary/5 p-3 rounded-r-lg">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                                        </svg>
-                                        <span className="text-xs font-medium text-primary">Teacher's Reply</span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {review.repliedAt && new Date(review.repliedAt).toLocaleDateString("en-US", {
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-xs text-muted-foreground">
+                                            {new Date(review.createdAt).toLocaleDateString("en-US", {
+                                                year: "numeric",
                                                 month: "short",
                                                 day: "numeric",
                                             })}
-                                        </span>
+                                        </p>
+                                        {user && (user.role === "ADMIN" || user.id === review.userId) && (
+                                            <AlertDialog open={deletingReview === review.id} onOpenChange={(open) => !open && setDeletingReview(null)}>
+                                                <AlertDialogTrigger asChild>
+                                                    <button
+                                                        onClick={() => setDeletingReview(review.id)}
+                                                        className="text-red-500 hover:text-red-700 transition-colors"
+                                                        title="Delete review"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete Review</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Are you sure you want to delete this review? This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() => handleDeleteReview(review.id)}
+                                                            className="bg-red-500 hover:bg-red-600"
+                                                        >
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        )}
                                     </div>
-                                    <p className="text-sm text-foreground">{review.reply}</p>
                                 </div>
-                            )}
+                                {review.comment && (
+                                    <p className="text-sm text-foreground mt-2">{review.comment}</p>
+                                )}
 
-                            {/* Reply Form for Teacher */}
-                            {isTeacher && !review.reply && (
-                                <div className="mt-3">
-                                    {replyingTo === review.id ? (
-                                        <div className="space-y-2">
-                                            <textarea
-                                                value={replyText}
-                                                onChange={(e) => setReplyText(e.target.value)}
-                                                placeholder="Write your reply..."
-                                                rows={3}
-                                                className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                                            />
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleReplySubmit(review.id)}
-                                                    className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:opacity-90"
-                                                >
-                                                    Submit Reply
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setReplyingTo(null);
-                                                        setReplyText("");
-                                                    }}
-                                                    className="px-3 py-1 text-sm bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            onClick={() => setReplyingTo(review.id)}
-                                            className="text-sm text-primary hover:underline flex items-center gap-1"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                {/* Teacher Reply */}
+                                {review.reply && (
+                                    <div className="mt-3 ml-4 pl-4 border-l-2 border-primary/30 bg-primary/5 p-3 rounded-r-lg">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                                             </svg>
-                                            Reply to this review
-                                        </button>
+                                            <span className="text-xs font-medium text-primary">Teacher's Reply</span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {review.repliedAt && new Date(review.repliedAt).toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                })}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-foreground">{review.reply}</p>
+                                    </div>
+                                )}
+
+                                {/* Reply Form for Teacher */}
+                                {isTeacher && !review.reply && (
+                                    <div className="mt-3">
+                                        {replyingTo === review.id ? (
+                                            <div className="space-y-2">
+                                                <textarea
+                                                    value={replyText}
+                                                    onChange={(e) => setReplyText(e.target.value)}
+                                                    placeholder="Write your reply..."
+                                                    rows={3}
+                                                    className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                                                />
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleReplySubmit(review.id)}
+                                                        className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:opacity-90"
+                                                    >
+                                                        Submit Reply
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setReplyingTo(null);
+                                                            setReplyText("");
+                                                        }}
+                                                        className="px-3 py-1 text-sm bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setReplyingTo(review.id)}
+                                                className="text-sm text-primary hover:underline flex items-center gap-1"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                                </svg>
+                                                Reply to this review
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                        }
+
+                        {/* Show More/Less Button */}
+                        {hasMoreReviews && (
+                            <div className="text-center pt-4">
+                                <button
+                                    onClick={() => setShowAllReviews(!showAllReviews)}
+                                    className="px-6 py-2 text-sm font-medium text-primary hover:text-primary/80 border border-primary/30 rounded-md hover:bg-primary/5 transition-colors"
+                                >
+                                    {showAllReviews ? (
+                                        <>
+                                            Show Less
+                                            <svg className="w-4 h-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                            </svg>
+                                        </>
+                                    ) : (
+                                        <>
+                                            Show All {reviews.length} Reviews
+                                            <svg className="w-4 h-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </>
                                     )}
-                                </div>
-                            )}
-                        </div>
-                    ))
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

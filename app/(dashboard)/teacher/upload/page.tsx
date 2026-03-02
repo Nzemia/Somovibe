@@ -136,6 +136,7 @@ export default function UploadPage() {
             formDataToSend.append("price", formData.price);
             formDataToSend.append("materialType", formData.materialType);
 
+
             const res = await fetch("/api/pdf/upload", {
                 method: "POST",
                 body: formDataToSend,

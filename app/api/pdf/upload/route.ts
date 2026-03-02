@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
 import { sendNewMaterialPendingEmail } from "@/lib/email";
 import { getPlatformAdminId } from "@/lib/platformAdmin";
-import { uploadToCloudinary, uploadPdfToCloudinary, getDefaultThumbnail } from "@/lib/cloudinary";
+import { uploadToCloudinary, getDefaultThumbnail } from "@/lib/cloudinary";
 
 export async function POST(req: Request) {
     try {
@@ -31,17 +31,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid material type" }, { status: 400 });
         }
 
-        // Validate file type based on material type
+        // Validate file type
         const allowedTypes = ["application/pdf", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"];
         if (!allowedTypes.includes(file.type)) {
             return NextResponse.json({ error: "Only PDF and PowerPoint files allowed" }, { status: 400 });
         }
 
-        // Handle thumbnail upload
+        // Upload thumbnail
         let thumbnailUrl: string;
         if (thumbnail) {
             try {
-                thumbnailUrl = await uploadToCloudinary(thumbnail, "material-thumbnails");
+                thumbnailUrl = await uploadToCloudinary(thumbnail, "material-thumbnails", "image");
             } catch (error) {
                 console.error("Thumbnail upload failed:", error);
                 thumbnailUrl = getDefaultThumbnail(materialType);
@@ -50,8 +50,14 @@ export async function POST(req: Request) {
             thumbnailUrl = getDefaultThumbnail(materialType);
         }
 
-        // Upload the material file to Cloudinary
-        const fileUrl = await uploadPdfToCloudinary(file, "materials");
+        // Upload material file to Cloudinary (raw = PDFs, PPTs, etc.)
+        let fileUrl: string;
+        try {
+            fileUrl = await uploadToCloudinary(file, "materials", "raw");
+        } catch (error) {
+            console.error("File upload failed:", error);
+            return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+        }
 
         // Create PDF record in database
         const pdf = await prisma.pdf.create({
