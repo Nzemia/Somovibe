@@ -59,14 +59,12 @@ export async function initiateB2CPayment(
             }
         );
 
-        console.log("✅ B2C Response:", JSON.stringify(response.data, null, 2));
-
         return {
             success: true,
             data: response.data,
         };
     } catch (error: any) {
-        console.error("❌ B2C Payment Error:", JSON.stringify(error.response?.data, null, 2) || error.message);
+        console.error("B2C Payment Error:", error.response?.data?.errorMessage || error.message);
         return {
             success: false,
             error: error.response?.data || error.message,

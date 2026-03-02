@@ -120,9 +120,6 @@ export async function POST(req: Request) {
                 b2cResult.data.OriginatorConversationID ||
                 null;
 
-            console.log("📋 B2C Full Response Data:", JSON.stringify(b2cResult.data, null, 2));
-            console.log("📋 ConversationID captured:", conversationId);
-
             await prisma.withdrawalRequest.update({
                 where: { id: withdrawal.id },
                 data: {
