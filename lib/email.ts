@@ -10,10 +10,6 @@ async function sendEmail(options: {
     html: string;
 }) {
     try {
-        console.log(`📧 Attempting to send email to: ${options.to}`);
-        console.log(`   Subject: ${options.subject}`);
-        console.log(`   From: ${fromEmail}`);
-
         const result = await resend.emails.send({
             from: fromEmail,
             to: options.to,
@@ -21,20 +17,9 @@ async function sendEmail(options: {
             html: options.html,
         });
 
-        console.log(`✅ Email sent successfully to ${options.to}`, result);
         return result;
     } catch (error: any) {
-        console.error(`❌ Failed to send email to ${options.to}:`, error);
-        console.error(`   Error details:`, error.message || error);
-
-        // Log specific Resend errors
-        if (error.statusCode) {
-            console.error(`   Status Code: ${error.statusCode}`);
-        }
-        if (error.name) {
-            console.error(`   Error Name: ${error.name}`);
-        }
-
+        console.error("Email send failed:", error.message || error);
         throw error;
     }
 }
