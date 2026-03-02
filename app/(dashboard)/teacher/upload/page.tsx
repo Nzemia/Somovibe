@@ -14,6 +14,9 @@ const SUBJECTS = [
     "Agriculture",
     "Home Science",
     "Business Studies",
+    "Kindergarten",
+   
+
 ];
 
 const GRADES = [
@@ -26,6 +29,8 @@ const GRADES = [
     "Grade 7",
     "Grade 8",
     "Grade 9",
+    "Grade 10",
+    
 ];
 
 const MATERIAL_TYPES = [
@@ -36,6 +41,8 @@ const MATERIAL_TYPES = [
     { value: "SCHEME_OF_WORK", label: "Scheme of Work", accept: ".pdf,.pptx,.ppt", icon: "📅" },
     { value: "LESSON_PLAN", label: "Lesson Plan", accept: ".pdf,.pptx,.ppt", icon: "📝" },
     { value: "EXAM_QUIZ", label: "Exam/Quiz", accept: ".pdf,.pptx,.ppt", icon: "✍️" },
+    
+
 ];
 
 export default function UploadPage() {

@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/apiAuth";
-import { createClient } from "@supabase/supabase-js";
 
 export async function GET(req: Request) {
     try {
@@ -23,13 +22,12 @@ export async function GET(req: Request) {
         }
 
         // Admin bypass: Admins can download any material without purchase
-        let purchase = null;
+        let fileUrl: string;
         if (user.role === "ADMIN") {
-            // Admin can access any material - create a virtual purchase object
-            purchase = { pdf };
+            fileUrl = pdf.fileUrl;
         } else {
             // Regular users need to have purchased the material
-            purchase = await prisma.purchase.findUnique({
+            const purchase = await prisma.purchase.findUnique({
                 where: {
                     userId_pdfId: { userId: user.id, pdfId },
                 },
@@ -41,41 +39,16 @@ export async function GET(req: Request) {
             if (!purchase) {
                 return NextResponse.json({ error: "You haven't purchased this material" }, { status: 403 });
             }
+
+            fileUrl = purchase.pdf.fileUrl;
         }
 
-        // Check if it's a placeholder file
-        if (purchase.pdf.fileUrl.startsWith("placeholder-")) {
+        // Check if it's a placeholder file (legacy check)
+        if (fileUrl.startsWith("placeholder-")) {
             return NextResponse.json({
                 error: "This material is not available for download yet. The teacher needs to re-upload the file."
             }, { status: 404 });
         }
-
-        // Use service role key for download (same as upload)
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                auth: {
-                    autoRefreshToken: false,
-                    persistSession: false,
-                },
-            }
-        );
-
-        //console.log("Downloading file:", purchase.pdf.fileUrl);
-
-        const { data, error } = await supabase.storage
-            .from("pdfs")
-            .download(purchase.pdf.fileUrl);
-
-        if (error || !data) {
-            console.error("Download error:", error);
-            return NextResponse.json({
-                error: "Failed to download file. Please contact support."
-            }, { status: 500 });
-        }
-
-        //console.log("File downloaded successfully, size:", data.size);
 
         // Track download (skip for admin reviews)
         if (user.role !== "ADMIN") {
@@ -87,13 +60,8 @@ export async function GET(req: Request) {
             }).catch(() => { }); // Ignore errors for download tracking
         }
 
-        // Return the PDF file
-        return new NextResponse(data, {
-            headers: {
-                "Content-Type": "application/pdf",
-                "Content-Disposition": `attachment; filename="${purchase.pdf.title}.pdf"`,
-            },
-        });
+        // Redirect to the Cloudinary URL directly
+        return NextResponse.redirect(fileUrl);
     } catch (error: any) {
         console.error("Download error:", error);
         return NextResponse.json({ error: "Failed to download" }, { status: 500 });

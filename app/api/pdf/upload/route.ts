@@ -1,10 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
-import { createClient } from "@supabase/supabase-js";
 import { sendNewMaterialPendingEmail } from "@/lib/email";
 import { getPlatformAdminId } from "@/lib/platformAdmin";
-import { uploadToCloudinary, getDefaultThumbnail } from "@/lib/cloudinary";
+import { uploadToCloudinary, uploadPdfToCloudinary, getDefaultThumbnail } from "@/lib/cloudinary";
 
 export async function POST(req: Request) {
     try {
@@ -20,8 +19,6 @@ export async function POST(req: Request) {
         const grade = formData.get("grade") as string;
         const price = Number(formData.get("price"));
         const materialType = formData.get("materialType") as string;
-
-        //console.log("Upload request from user:", user.email, { title, subject, grade, price, materialType, fileName: file?.name });
 
         if (!file || !title || !description || !subject || !grade || !price || !materialType) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -53,41 +50,8 @@ export async function POST(req: Request) {
             thumbnailUrl = getDefaultThumbnail(materialType);
         }
 
-        // Use service role key for upload permissions
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                auth: {
-                    autoRefreshToken: false,
-                    persistSession: false,
-                },
-            }
-        );
-
-        const filePath = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-
-        // Convert File to ArrayBuffer for Supabase
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        //console.log("Attempting upload to Supabase:", { filePath, size: buffer.length, type: file.type });
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("pdfs")
-            .upload(filePath, buffer, {
-                contentType: file.type,
-                upsert: false,
-            });
-
-        if (uploadError) {
-            console.error("Supabase upload error:", uploadError);
-            return NextResponse.json({
-                error: `Failed to upload file: ${uploadError.message}`
-            }, { status: 500 });
-        }
-
-        //console.log("File uploaded to Supabase successfully:", uploadData);
+        // Upload the material file to Cloudinary
+        const fileUrl = await uploadPdfToCloudinary(file, "materials");
 
         // Create PDF record in database
         const pdf = await prisma.pdf.create({
@@ -97,16 +61,14 @@ export async function POST(req: Request) {
                 subject,
                 grade,
                 price,
-                fileUrl: filePath,
+                fileUrl,
                 thumbnailUrl,
                 materialType: materialType as "PDF" | "PDF_SLIDES" | "POWERPOINT" | "CLASS_INSTRUCTIONS" | "SCHEME_OF_WORK" | "LESSON_PLAN" | "EXAM_QUIZ",
                 teacherId: user.id,
             },
         });
 
-        //console.log("PDF created successfully:", pdf.id);
-
-        // Notify admin of new material (await to catch errors)
+        // Notify admin of new material
         try {
             const adminId = await getPlatformAdminId();
             if (adminId) {
@@ -120,7 +82,6 @@ export async function POST(req: Request) {
             }
         } catch (emailError) {
             console.error("Email sending failed, but upload succeeded:", emailError);
-            // Don't fail the request if email fails
         }
 
         return NextResponse.json(pdf);

@@ -29,6 +29,31 @@ export async function uploadToCloudinary(
     });
 }
 
+export async function uploadPdfToCloudinary(
+    file: File,
+    folder: string = "materials"
+): Promise<string> {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    return new Promise((resolve, reject) => {
+        cloudinary.uploader
+            .upload_stream(
+                {
+                    folder,
+                    resource_type: "raw", // required for PDF/PPT
+                    use_filename: true,
+                    unique_filename: true,
+                },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result!.secure_url);
+                }
+            )
+            .end(buffer);
+    });
+}
+
 export function getDefaultThumbnail(materialType: string): string {
     // Using placeholder images with material type specific colors and icons
     const thumbnails: Record<string, string> = {
