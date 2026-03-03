@@ -14,9 +14,9 @@ export async function POST(req: Request) {
             );
         }
 
-        // Send email using Resend
+        const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
         const { data, error } = await resend.emails.send({
-            from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+            from: fromEmail.includes("<") ? fromEmail : `SomoVibe <${fromEmail}>`,
             to: "mualukofrank@gmail.com",
             subject: `Contact Form: ${subject}`,
             html: `
