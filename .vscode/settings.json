@@ -1,4 +1,5 @@
 {
-  "typescript.autoClosingTags": false,
-  "postman.settings.dotenv-detection-notification-visibility": false
+    "typescript.autoClosingTags": false,
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "cSpell.words": ["Somovibe"]
 }
