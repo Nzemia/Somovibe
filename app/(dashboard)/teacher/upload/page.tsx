@@ -16,10 +16,11 @@ const SUBJECTS = [
     "Agriculture",
     "Home Science",
     "Business Studies",
-    "Kindergarten",
+    "Computer Studies",
 ];
 
 const GRADES = [
+    "Kindergarten",
     "Grade 1",
     "Grade 2",
     "Grade 3",
@@ -32,16 +33,16 @@ const GRADES = [
     "Grade 10"
 ];
 
-const MATERIAL_TYPES = [
-    { value: "PDF", label: "PDF Document", accept: ".pdf", icon: "📄" },
-    { value: "PDF_SLIDES", label: "PDF Slides", accept: ".pdf", icon: "📊" },
-    { value: "POWERPOINT", label: "PowerPoint Presentation", accept: ".pptx,.ppt", icon: "🎯" },
-    { value: "CLASS_INSTRUCTIONS", label: "Class Instructions", accept: ".pdf", icon: "📋" },
-    { value: "SCHEME_OF_WORK", label: "Scheme of Work", accept: ".pdf,.pptx,.ppt", icon: "📅" },
-    { value: "LESSON_PLAN", label: "Lesson Plan", accept: ".pdf,.pptx,.ppt", icon: "📝" },
-    { value: "EXAM_QUIZ", label: "Exam/Quiz", accept: ".pdf,.pptx,.ppt", icon: "✍️" },
-    
+const PRICE_PRESETS = [50, 100, 200, 500, 1000];
 
+const MATERIAL_TYPES = [
+  { value: "PDF", label: "PDF Document", accept: ".pdf", icon: "📄", desc: "Upload a single PDF document" },
+  { value: "PDF_SLIDES", label: "PDF Slides", accept: ".pdf", icon: "📊", desc: "Upload PDF slides for presentations" },
+  { value: "POWERPOINT", label: "PowerPoint Presentation", accept: ".pptx,.ppt", icon: "🎯", desc: "Upload your presentation slides" },
+  { value: "CLASS_INSTRUCTIONS", label: "Class Instructions", accept: ".pdf", icon: "📋", desc: "Instructions for your class" },
+  { value: "SCHEME_OF_WORK", label: "Scheme of Work", accept: ".pdf,.pptx,.ppt", icon: "📅", desc: "Upload the teaching plan" },
+  { value: "LESSON_PLAN", label: "Lesson Plan", accept: ".pdf,.pptx,.ppt", icon: "📝", desc: "Detailed lesson plan document" },
+  { value: "EXAM_QUIZ", label: "Exam/Quiz", accept: ".pdf,.pptx,.ppt", icon: "✍️", desc: "Exam or quiz materials" },
 ];
 
 function SectionLabel({ num, label, done }: { num: number; label: string; done?: boolean }) {
@@ -263,106 +264,165 @@ export default function UploadPage() {
                 </div>
 
                 {/* ── Step 3: Subject & Grade ── */}
-                <div ref={sectionRefs.target}
-                    className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${highlighted === "target" ? "section-blink" : "border-gray-100"}`}>
-                    <SectionLabel num={3} label="Subject & Grade" done={sectionDone.target} />
+<div
+  ref={sectionRefs.target}
+  className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${
+    highlighted === "target" ? "section-blink" : "border-gray-100"
+  }`}
+>
+  <SectionLabel num={3} label="Subject & Grade" done={sectionDone.target} />
 
-                    {/* Subject pills */}
-                    <div className="mb-5">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                            Subject <span className="text-red-500">*</span>
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {SUBJECTS.map((s) => {
-                                const active = formData.subject === s;
-                                return (
-                                    <button key={s} type="button"
-                                        onClick={() => set("subject", s)}
-                                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
-                                            active
-                                                ? "bg-[#008c43] border-[#008c43] text-white shadow-sm"
-                                                : "bg-gray-50 border-gray-200 text-gray-600 hover:border-[#008c43]/50 hover:text-[#008c43]"
-                                        }`}>
-                                        {s}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
+  {/* Subject pills */}
+  <div className="mb-5">
+    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      Subject <span className="text-red-500">*</span>
+    </p>
 
-                    {/* Grade pills */}
-                    <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                            Grade <span className="text-red-500">*</span>
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {[1,2,3,4,5,6,7,8,9].map((g) => {
-                                const val = `Grade ${g}`;
-                                const active = formData.grade === val;
-                                return (
-                                    <button key={g} type="button"
-                                        onClick={() => set("grade", val)}
-                                        className={`w-12 h-12 rounded-2xl border-2 text-sm font-bold transition-all flex flex-col items-center justify-center gap-0 ${
-                                            active
-                                                ? "bg-[#008c43] border-[#008c43] text-white shadow-sm"
-                                                : "bg-gray-50 border-gray-200 text-gray-600 hover:border-[#008c43]/50 hover:text-[#008c43]"
-                                        }`}>
-                                        <span className="text-[10px] font-semibold leading-none opacity-60">Gr.</span>
-                                        <span className="text-base font-extrabold leading-none">{g}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
+    {/* Pills */}
+    <div className="flex flex-wrap gap-2 mb-2">
+      {SUBJECTS.map((s) => {
+        const active = formData.subject === s;
+        return (
+          <button
+            key={s}
+            type="button"
+            onClick={() => set("subject", s)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
+              active
+                ? "bg-[#008c43] border-[#008c43] text-white shadow-sm"
+                : "bg-gray-50 border-gray-200 text-gray-600 hover:border-[#008c43]/50 hover:text-[#008c43]"
+            }`}
+          >
+            {s}
+          </button>
+        );
+      })}
+    </div>
+
+    {/* Custom subject input */}
+    <input
+      type="text"
+      placeholder="Or type your subject"
+      value={formData.subject || ""}
+      onChange={(e) => set("subject", e.target.value)}
+      className="px-3 py-2 border rounded-xl text-sm w-full"
+    />
+  </div>
+
+  {/* Grade pills */}
+  <div>
+    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      Grade <span className="text-red-500">*</span>
+    </p>
+    <div className="flex flex-wrap gap-2">
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => {
+        const val = `Grade ${g}`;
+        const active = formData.grade === val;
+        return (
+          <button
+            key={g}
+            type="button"
+            onClick={() => set("grade", val)}
+            className={`w-12 h-12 rounded-2xl border-2 text-sm font-bold transition-all flex flex-col items-center justify-center gap-0 ${
+              active
+                ? "bg-[#008c43] border-[#008c43] text-white shadow-sm"
+                : "bg-gray-50 border-gray-200 text-gray-600 hover:border-[#008c43]/50 hover:text-[#008c43]"
+            }`}
+          >
+            <span className="text-[10px] font-semibold leading-none opacity-60">Gr.</span>
+            <span className="text-base font-extrabold leading-none">{g}</span>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+</div>
 
                 {/* ── Step 4: Pricing ── */}
-                <div ref={sectionRefs.price}
-                    className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${highlighted === "price" ? "section-blink" : "border-gray-100"}`}>
-                    <SectionLabel num={4} label="Set your price" done={sectionDone.price} />
+<div
+  ref={sectionRefs.price}
+  className={`bg-white rounded-2xl border-2 shadow-sm p-5 sm:p-6 ${
+    highlighted === "price" ? "section-blink" : "border-gray-100"
+  }`}
+>
+  <SectionLabel num={4} label="Set your price" done={sectionDone.price} />
 
-                    {/* Quick presets */}
-                    <p className="text-xs text-gray-500 mb-3">Quick pick or type a custom amount</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {PRICE_PRESETS.map((p) => {
-                            const active = formData.price === String(p);
-                            return (
-                                <button key={p} type="button"
-                                    onClick={() => set("price", String(p))}
-                                    className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${
-                                        active
-                                            ? "bg-[#008c43] border-[#008c43] text-white shadow-sm"
-                                            : "bg-gray-50 border-gray-200 text-gray-700 hover:border-[#008c43]/50"
-                                    }`}>
-                                    KES {p}
-                                </button>
-                            );
-                        })}
-                    </div>
+  {/* Instruction */}
+  <p className="text-xs text-gray-500 mb-3">
+    Quick pick or type a custom amount
+  </p>
 
-                    <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">KES</span>
-                        <input id="price" type="number" required min="10" max="10000"
-                            placeholder="Custom amount"
-                            value={formData.price}
-                            onChange={(e) => set("price", e.target.value)}
-                            className={inputCls + " pl-[3.25rem]"} />
-                    </div>
+  {/* Optional Quick Presets */}
+  {PRICE_PRESETS?.length > 0 && (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {PRICE_PRESETS.map((p) => {
+        const active = formData.price === String(p);
+        return (
+          <button
+            key={p}
+            type="button"
+            onClick={() => set("price", String(p))}
+            className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${
+              active
+                ? "bg-[#008c43] border-[#008c43] text-white shadow-sm"
+                : "bg-gray-50 border-gray-200 text-gray-700 hover:border-[#008c43]/50"
+            }`}
+          >
+            KES {p}
+          </button>
+        );
+      })}
+    </div>
+  )}
 
-                    {earningsPreview > 0 && (
-                        <div className="mt-3 flex items-center gap-3 bg-[#f0faf5] border border-[#d1e8dc] rounded-xl px-4 py-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-[#008c43]/10 flex items-center justify-center shrink-0">
-                                <svg className="w-4 h-4 text-[#008c43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-500">Your earnings per sale</p>
-                                <p className="text-base font-extrabold text-[#008c43]">KES {earningsPreview} <span className="text-xs font-normal text-gray-500">(75% of KES {formData.price})</span></p>
-                            </div>
-                        </div>
-                    )}
-                </div>
+  {/* Manual Input Field */}
+  <div className="relative">
+    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">
+      KES
+    </span>
+    <input
+      id="price"
+      type="number"
+      required
+      min={10}
+      max={10000}
+      placeholder="Custom amount"
+      value={formData.price || ""}
+      onChange={(e) => set("price", e.target.value)}
+      className={inputCls + " pl-[3.25rem]"}
+    />
+  </div>
+
+  {/* Earnings Preview */}
+  {earningsPreview > 0 && (
+    <div className="mt-3 flex items-center gap-3 bg-[#f0faf5] border border-[#d1e8dc] rounded-xl px-4 py-2.5">
+      <div className="w-8 h-8 rounded-lg bg-[#008c43]/10 flex items-center justify-center shrink-0">
+        <svg
+          className="w-4 h-4 text-[#008c43]"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <div>
+        <p className="text-xs text-gray-500">Your earnings per sale</p>
+        <p className="text-base font-extrabold text-[#008c43]">
+          KES {earningsPreview}{" "}
+          <span className="text-xs font-normal text-gray-500">
+            (75% of KES {formData.price})
+          </span>
+        </p>
+      </div>
+    </div>
+  )}
+</div>
 
                 {/* ── Step 5: File Upload ── */}
                 <div ref={sectionRefs.file}
