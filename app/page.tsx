@@ -81,7 +81,7 @@ export default async function Home() {
       <CategoriesSection />
 
       {/* ── How It Works ── */}
-      <section id="how-it-works" className="bg-white py-14 sm:py-20 scroll-mt-[7.5rem]">
+      <section id="how-it-works" className="bg-white py-14 sm:py-20 scroll-mt-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-14">
             <span className="inline-block bg-[#f0faf5] text-[#008c43] text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border border-[#d1e8dc] mb-4">
@@ -98,7 +98,7 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8 relative">
             {/* Connector line (desktop only) */}
-            <div className="hidden md:block absolute top-16 left-[calc(16.66%+24px)] right-[calc(16.66%+24px)] h-0.5 bg-gradient-to-r from-[#d1e8dc] via-[#008c43] to-[#d1e8dc]" />
+            <div className="hidden md:block absolute top-16 left-[calc(16.66%+24px)] right-[calc(16.66%+24px)] h-0.5 bg-linear-to-r from-[#d1e8dc] via-[#008c43] to-[#d1e8dc]" />
 
             {steps.map((step, i) => (
               <div
@@ -109,10 +109,10 @@ export default async function Home() {
                 <div className="flex items-center gap-4 md:flex-col md:items-center md:gap-0 md:text-center">
                   {/* Icon bubble */}
                   <div className="relative shrink-0 md:mb-6">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#008c43] to-[#00b856] flex items-center justify-center text-white shadow-lg shadow-[#008c43]/30">
+                    <div className="w-14 h-14 rounded-full bg-linear-to-br from-[#008c43] to-[#00b856] flex items-center justify-center text-white shadow-lg shadow-[#008c43]/30">
                       {step.icon}
                     </div>
-                    <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[#004d25] text-white text-xs font-black flex items-center justify-center">
+                    <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-accent-foreground text-white text-xs font-black flex items-center justify-center">
                       {step.step}
                     </div>
                   </div>
@@ -152,7 +152,7 @@ export default async function Home() {
         <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
         {/* Glow blobs */}
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-[#00b856]/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-[#004d25]/40 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-accent-foreground/40 blur-3xl pointer-events-none" />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
@@ -183,7 +183,7 @@ export default async function Home() {
             </div>
 
             {/* Right: action card */}
-            <div className="flex-shrink-0 w-full max-w-sm lg:max-w-xs">
+            <div className="shrink-0 w-full max-w-sm lg:max-w-xs">
               <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 text-center shadow-2xl">
                 <p className="text-white/70 text-sm font-medium uppercase tracking-widest mb-2">Get Started Today</p>
                 <p className="text-white text-2xl font-extrabold mb-6">It&apos;s completely free</p>
