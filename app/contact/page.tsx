@@ -46,7 +46,7 @@ export default async function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-foreground mb-1">Email</h3>
-                                        <p className="text-muted-foreground">mualukofrank@gmail.com</p>
+                                        <p className="text-muted-foreground">support@somovibe.com</p>
                                     </div>
                                 </div>
                             </div>
