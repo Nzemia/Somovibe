@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { getMaterialTypeConfig } from "@/lib/materialTypes";
+import { getAverageRating } from "@/lib/utils";
 import Link from "next/link";
 import PurchaseButton from "@/app/marketplace/PurchaseButton";
 import { ResourceCard } from "@/components/marketplace/ResourceCard";
@@ -10,6 +12,7 @@ import ReviewSection from "./ReviewSection";
 import { DownloadSuccessModal } from "./DownloadSuccessModal";
 
 import type { Review } from "../types";
+import type { ReactNode } from "react";
 
 
 type RelatedPdf = {
@@ -56,14 +59,18 @@ type Props = {
 };
 
 export default function MaterialDetailClient({
-    material,
-    isPurchased,
-    user,
-}: MaterialDetailClientProps) {
+  material,
+  isPurchased,
+  user,
+  moreFromTeacher,
+  similarMaterials,
+}: Props) {
     const router = useRouter();
     const [downloading, setDownloading] = useState(false);
     const [purchasing, setPurchasing] = useState(false);
     const [paymentPending, setPaymentPending] = useState(false);
+  const [coverImgFailed, setCoverImgFailed] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
     // Local purchased state — flips instantly when purchase record detected, no page refresh needed
     const [purchased, setPurchased] = useState(isPurchased);
 
@@ -71,6 +78,47 @@ export default function MaterialDetailClient({
 
     const materialConfig = getMaterialTypeConfig(material.materialType);
     const avgRating = getAverageRating(material.reviews);
+
+    const hasGradient = (cfg: any): cfg is { gradient: { from: string; to: string } } =>
+      !!cfg && typeof cfg === "object" && "gradient" in cfg && cfg.gradient && typeof cfg.gradient.from === "string" && typeof cfg.gradient.to === "string";
+
+    const grad = hasGradient(materialConfig) ? materialConfig.gradient : { from: "#e6f9ee", to: "#cfeede" };
+    const typeLabel = materialConfig?.label ?? material.materialType;
+    const teacherHandle = material.teacher?.name ?? material.teacher?.email?.split("@")[0] ?? "Unknown";
+    const isVerified = !!material.teacher?.teacherProfile?.isActive;
+    const isTeacher = user?.id === material.teacher?.id;
+
+    // helper for download (declared before it's used in effect)
+    async function handleDownload() {
+        setDownloading(true);
+        const loadingToast = toast.loading("Preparing download...");
+
+        try {
+            // Check access first (auth + purchase guard), then redirect to file
+            const res = await fetch(`/api/pdf/download?pdfId=${material.id}`, {
+                redirect: "manual", // don't auto-follow, we'll grab the URL
+            });
+
+            if (res.type === "opaqueredirect" || res.status === 0) {
+                // Redirect to the Cloudinary URL by hitting the route in a new tab
+                window.open(`/api/pdf/download?pdfId=${material.id}`, "_blank");
+                toast.success("Download started!", { id: loadingToast });
+                setShowSuccessModal(true);
+            } else if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Failed to download");
+            } else {
+                // Fallback: should not normally reach here
+                window.open(`/api/pdf/download?pdfId=${material.id}`, "_blank");
+                toast.success("Download started!", { id: loadingToast });
+                setShowSuccessModal(true);
+            }
+        } catch (err: any) {
+            toast.error(err.message || "Failed to download", { id: loadingToast });
+        } finally {
+            setDownloading(false);
+        }
+    }
 
     // Poll the Purchase table directly — the source of truth
     // Once the M-Pesa callback creates the Purchase record, the next poll catches it
@@ -98,6 +146,13 @@ export default function MaterialDetailClient({
                     setPaymentPending(false);
                     setPurchased(true);
                     toast.success("Payment successful! You can now download the material.");
+
+                    // automatically start download after confirmation
+                    try {
+                        await handleDownload();
+                    } catch (err) {
+                        console.error("Auto-download failed:", err);
+                    }
                 }
             } catch (err) {
                 console.error("Polling error:", err);
@@ -105,36 +160,8 @@ export default function MaterialDetailClient({
         }, 2000); // poll every 2 seconds
 
         return () => clearInterval(interval);
-    }, [paymentPending, material.id]);
+    }, [paymentPending, material.id, handleDownload]);
 
-    const handleDownload = async () => {
-        setDownloading(true);
-        const loadingToast = toast.loading("Preparing download...");
-
-        try {
-            // Check access first (auth + purchase guard), then redirect to file
-            const res = await fetch(`/api/pdf/download?pdfId=${material.id}`, {
-                redirect: "manual", // don't auto-follow, we'll grab the URL
-            });
-
-            if (res.type === "opaqueredirect" || res.status === 0) {
-                // Redirect to the Cloudinary URL by hitting the route in a new tab
-                window.open(`/api/pdf/download?pdfId=${material.id}`, "_blank");
-                toast.success("Download started!", { id: loadingToast });
-            } else if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || "Failed to download");
-            } else {
-                // Fallback: should not normally reach here
-                window.open(`/api/pdf/download?pdfId=${material.id}`, "_blank");
-                toast.success("Download started!", { id: loadingToast });
-            }
-        } catch (err: any) {
-            toast.error(err.message || "Failed to download", { id: loadingToast });
-        } finally {
-            setDownloading(false);
-        }
-    };
 
     const handlePurchase = async () => {
         if (!user) {
@@ -326,6 +353,8 @@ export default function MaterialDetailClient({
             />
           </div>
 
+          {/* Right column (purchase / share / guarantees) */}
+          <div className="lg:col-span-1">
                             {/* Payment Pending Overlay */}
                             {paymentPending && (
                                 <div className="mb-4 p-5 bg-primary/5 border-2 border-primary/20 rounded-lg text-center">
@@ -402,8 +431,8 @@ export default function MaterialDetailClient({
                 </div>
               </div>
             </div>
-          </div>
         </div>
+
 
         {/* ─── More from this teacher ─── */}
         {moreFromTeacher.length > 0 && (
@@ -427,9 +456,7 @@ export default function MaterialDetailClient({
           />
         )}
 
-      </div>
-
-      {/* ── Post-download celebration modal ── */}
+{/* ── Post-download celebration modal ── */}
       <DownloadSuccessModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
@@ -443,12 +470,12 @@ export default function MaterialDetailClient({
         moreFromTeacher={moreFromTeacher}
         similarMaterials={similarMaterials}
       />
-    </div>
+      </div>
   );
 }
 
 function StatChip({ value, label, color, icon }: {
-  value: string; label: string; color: "emerald" | "sky" | "violet" | "amber"; icon: React.ReactNode;
+  value: string; label: string; color: "emerald" | "sky" | "violet" | "amber"; icon: ReactNode;
 }) {
   const colors = {
     emerald: "bg-emerald-50 text-emerald-600",
