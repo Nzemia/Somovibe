@@ -27,27 +27,39 @@ export default async function WalletPage() {
         },
     });
 
-    type MaterialWithPurchases = typeof materials[number];
-    type Transaction = typeof transactions[number];
+    const totalEarnings  = materials.reduce((s, m) => s + m.purchases.length * Math.floor(m.price * 0.75), 0);
+    const totalSales     = materials.reduce((s, m) => s + m.purchases.length, 0);
+    const balance        = wallet?.balance ?? 0;
+    const transactions   = wallet?.walletTransactions ?? [];
+    const totalCredits   = transactions.filter(t => t.type === "CREDIT").reduce((s, t) => s + t.amount, 0);
+    const totalWithdrawn = transactions.filter(t => t.type === "DEBIT").reduce((s, t) => s + t.amount, 0);
 
-    const totalEarnings = materials.reduce((sum: number, material: MaterialWithPurchases) => {
-        return sum + material.purchases.length * Math.floor(material.price * 0.75);
-    }, 0);
-
-    const totalSales = materials.reduce((sum: number, m: MaterialWithPurchases) => sum + m.purchases.length, 0);
-
-    // Use wallet balance, or fall back to calculated earnings if wallet hasn't been credited yet
-    const balance = wallet?.balance ?? totalEarnings;
-    const transactions = wallet?.walletTransactions || [];
-
-    // Calculate total credits and debits
-    const totalCredits = transactions
-        .filter((t: Transaction) => t.type === "CREDIT")
-        .reduce((sum: number, t: Transaction) => sum + t.amount, 0);
-
-    const totalDebits = transactions
-        .filter((t: Transaction) => t.type === "DEBIT")
-        .reduce((sum: number, t: Transaction) => sum + t.amount, 0);
+    const heroBannerStats = [
+        {
+            label: "Total Earnings", value: `KES ${totalEarnings.toLocaleString()}`, sub: "75% of sales",
+            gradient: "from-[#008c43] to-[#004d25]", shadow: "shadow-green-900/30",
+            light: "text-green-200", lighter: "text-green-300",
+            icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>),
+        },
+        {
+            label: "Total Sales", value: totalSales.toString(), sub: "all materials",
+            gradient: "from-emerald-500 to-teal-600", shadow: "shadow-teal-900/30",
+            light: "text-emerald-200", lighter: "text-emerald-300",
+            icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>),
+        },
+        {
+            label: "Total Credits", value: `KES ${totalCredits.toLocaleString()}`, sub: "money received",
+            gradient: "from-sky-500 to-blue-600", shadow: "shadow-blue-900/30",
+            light: "text-sky-200", lighter: "text-sky-300",
+            icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>),
+        },
+        {
+            label: "Withdrawn", value: `KES ${totalWithdrawn.toLocaleString()}`, sub: "via M-Pesa",
+            gradient: "from-amber-400 to-orange-500", shadow: "shadow-orange-900/30",
+            light: "text-amber-100", lighter: "text-amber-200",
+            icon: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>),
+        },
+    ];
 
     return (
         <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 sm:pb-10">
