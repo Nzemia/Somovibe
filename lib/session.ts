@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 const COOKIE_NAME = "questy_session";
 const SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET ?? process.env.SESSION_SECRET ?? "questy-dev-secret-change-in-production"
+  process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? process.env.SESSION_SECRET ?? "questy-dev-secret-change-in-production"
 );
 
 export async function createSession(userId: string) {

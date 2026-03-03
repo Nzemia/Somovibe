@@ -12,7 +12,7 @@ export default function AuthLayout({
             <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col justify-between p-12 overflow-hidden">
                 {/* Background image */}
                 <Image
-                    src="/images/teacher happy.jpg"
+                    src="/images/teacher-happy.jpg"
                     alt="Teacher earning with Somovibe"
                     fill
                     className="object-cover object-center"

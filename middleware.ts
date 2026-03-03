@@ -6,7 +6,7 @@ const COOKIE_NAME = "questy_session";
 
 function getSecret() {
   return new TextEncoder().encode(
-    process.env.AUTH_SECRET ?? process.env.SESSION_SECRET ?? "questy-dev-secret-change-in-production"
+    process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? process.env.SESSION_SECRET ?? "questy-dev-secret-change-in-production"
   );
 }
 
