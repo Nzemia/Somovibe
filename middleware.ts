@@ -28,7 +28,9 @@ export async function middleware(req: NextRequest) {
 
   if (path.startsWith("/admin") || path.startsWith("/teacher") || path.startsWith("/student")) {
     if (!userId) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", path);
+      return NextResponse.redirect(loginUrl);
     }
   }
 

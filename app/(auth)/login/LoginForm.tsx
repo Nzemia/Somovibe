@@ -36,8 +36,8 @@ export default function LoginForm() {
 
     const dest =
       data.role === "ADMIN" ? "/admin" :
-      data.role === "TEACHER" ? "/teacher" :
-      callbackUrl || "/marketplace";
+      callbackUrl || 
+      (data.role === "TEACHER" ? "/teacher" : "/marketplace");
 
     router.push(dest);
     router.refresh();
