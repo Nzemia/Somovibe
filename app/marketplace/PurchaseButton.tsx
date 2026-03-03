@@ -47,12 +47,23 @@ export default function PurchaseButton({
   const handleBuyClick = () => {
     if (!user) {
       toast.error("Please login to purchase materials");
-      router.push(`/login?callbackUrl=${encodeURIComponent(`/marketplace/${pdfId}`)}`);
+      // preserve autoBuy flag so flow continues after login
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/marketplace/${pdfId}?autoBuy=1`)}`);
       return;
     }
+
+    if (variant === "secondary") {
+      // open a lightweight modal on the card itself where the user can type a
+      // phone number. after they confirm we will redirect them to the detail
+      // page with the number encoded so the purchase can continue there.
+      setShowModal(true);
+      return;
+    }
+
     setShowModal(true);
   };
 
+  // existing purchase logic for the primary (detail page) button
   const handlePurchase = async () => {
     if (!phone) {
       toast.error("Please enter your M-Pesa phone number");
@@ -96,6 +107,32 @@ export default function PurchaseButton({
     } finally {
       setLoading(false);
     }
+  };
+
+  // new flow triggered when the card's secondary buy button has collected a
+  // phone number and the user confirmed; save to profile and navigate to
+  // detail page with query params so that the detail component will continue
+  // the payment process and show progress.
+  const handleSecondaryConfirm = async () => {
+    if (!phone) {
+      toast.error("Please enter your M-Pesa phone number");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // persist phone to profile (ignore result)
+      await fetch("/api/user/phone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+    } catch {
+      // continue regardless
+    }
+
+    setShowModal(false);
+    router.push(`/marketplace/${pdfId}?autoBuy=1&phone=${encodeURIComponent(phone)}`);
   };
 
   const handleDownload = async () => {
@@ -252,6 +289,7 @@ export default function PurchaseButton({
                   placeholder="254712345678"
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008c43] focus:border-transparent text-gray-900 placeholder:text-gray-400 text-sm"
                   autoFocus
+                  readOnly={variant === "primary" && !!user?.phone}
                 />
               </div>
               <p className="mt-1.5 text-xs text-gray-400">
@@ -273,7 +311,7 @@ export default function PurchaseButton({
                   Cancel
                 </button>
                 <button
-                  onClick={handlePurchase}
+                  onClick={variant === "secondary" ? handleSecondaryConfirm : handlePurchase}
                   disabled={loading || !phone}
                   className="flex-1 px-4 py-2.5 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-md shadow-[#008c43]/20 active:scale-95"
                   style={{ background: "linear-gradient(135deg, #006832 0%, #008c43 60%, #00a854 100%)" }}
@@ -291,7 +329,7 @@ export default function PurchaseButton({
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
-                      Pay with M‑Pesa
+                      {variant === "secondary" ? "Continue" : "Pay with M‑Pesa"}
                     </>
                   )}
                 </button>

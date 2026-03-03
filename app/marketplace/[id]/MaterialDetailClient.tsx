@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { getMaterialTypeConfig } from "@/lib/materialTypes";
 import { getAverageRating } from "@/lib/utils";
@@ -66,11 +67,17 @@ export default function MaterialDetailClient({
   similarMaterials,
 }: Props) {
     const router = useRouter();
+  const searchParams = useSearchParams();
     const [downloading, setDownloading] = useState(false);
     const [purchasing, setPurchasing] = useState(false);
     const [paymentPending, setPaymentPending] = useState(false);
   const [coverImgFailed, setCoverImgFailed] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // new states for phone prompt (no longer require profile storage)
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [phone, setPhone] = useState(user?.phone || "");
+
     // Local purchased state — flips instantly when purchase record detected, no page refresh needed
     const [purchased, setPurchased] = useState(isPurchased);
 
@@ -162,20 +169,73 @@ export default function MaterialDetailClient({
         return () => clearInterval(interval);
     }, [paymentPending, material.id, handleDownload]);
 
+    // helper for saving a phone number in the current user's profile
+    // used when the buyer types a number on either the detail page or the
+    // marketplace card. ignores errors (validation already happened earlier).
+    const updatePhoneProfile = async (phoneNumber: string) => {
+        try {
+            await fetch("/api/user/phone", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: phoneNumber }),
+            });
+            // refresh user data if necessary
+            router.refresh();
+        } catch {
+            // swallow; not fatal
+        }
+    };
 
-    const handlePurchase = async () => {
+    // keep local phone input in sync with whatever is on the user object
+    useEffect(() => {
+        setPhone(user?.phone || "");
+    }, [user]);
+
+    // respond to autoBuy (and optional phone) query parameters passed by the
+    // marketplace grid or by a direct link. if an anonymous visitor arrives we
+    // immediately send them to login with the same URL as callback. once
+    // they're authenticated the normal purchase logic resumes.
+    useEffect(() => {
+        const flag = searchParams.get("autoBuy");
+        if (!flag) return;
+
+        // build current path for redirection (includes any query params)
+        const currentPath = `/marketplace/${material.id}` + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+
         if (!user) {
-            toast.error("Please login to purchase");
-            router.push("/login");
+            router.push(`/login?callbackUrl=${encodeURIComponent(currentPath)}`);
             return;
         }
 
-        if (!user.phone) {
-            toast.error("Please add your phone number in your profile");
-            router.push(`/${user.role.toLowerCase()}/profile`);
-            return;
+        if (user && !purchased) {
+            const incomingPhone = searchParams.get("phone");
+            if (incomingPhone) {
+                // save phone if it differs
+                if (incomingPhone !== user.phone) {
+                    updatePhoneProfile(incomingPhone);
+                    setPhone(incomingPhone);
+                }
+
+                startPurchase(incomingPhone);
+            } else {
+                onBuyClick();
+            }
         }
 
+        // remove the flag and phone from the URL so refreshing doesn't
+        // repeat the action
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("autoBuy");
+        params.delete("phone");
+        const base = `/marketplace/${material.id}`;
+        const suffix = params.toString() ? `?${params.toString()}` : "";
+        router.replace(base + suffix, { scroll: false });
+    }, [searchParams, user, purchased]);
+
+    // kick off a purchase given an arbitrary phone number. this is now
+    // decoupled from the user's profile so we can accept whatever the
+    // visitor types into a modal.
+    const startPurchase = async (phoneNumber: string) => {
         setPurchasing(true);
         const loadingToast = toast.loading("Initiating M-Pesa payment...");
 
@@ -185,7 +245,7 @@ export default function MaterialDetailClient({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     pdfId: material.id,
-                    phone: user.phone,
+                    phone: phoneNumber,
                 }),
             });
 
@@ -204,6 +264,26 @@ export default function MaterialDetailClient({
         } finally {
             setPurchasing(false);
         }
+    };
+
+    function onBuyClick() {
+        if (!user) {
+            toast.error("Please login to purchase");
+            router.push(`/login?callbackUrl=${encodeURIComponent(`/marketplace/${material.id}?autoBuy=1`)}`);
+            return;
+        }
+        setShowPhoneModal(true);
+    }
+
+    const handlePhoneConfirm = async () => {
+        if (!phone) {
+            toast.error("Please enter your M-Pesa phone number");
+            return;
+        }
+        // ensure the profile holds the number
+        await updatePhoneProfile(phone);
+        setShowPhoneModal(false);
+        startPurchase(phone);
     };
 
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -395,7 +475,7 @@ export default function MaterialDetailClient({
                                 </>
                             ) : (
                                 <button
-                                    onClick={handlePurchase}
+                                    onClick={onBuyClick}
                                     disabled={purchasing || paymentPending}
                                     className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50 mb-3"
                                 >
@@ -470,6 +550,102 @@ export default function MaterialDetailClient({
         moreFromTeacher={moreFromTeacher}
         similarMaterials={similarMaterials}
       />
+
+      {/* Phone prompt modal for purchases (same style as PurchaseButton) */}
+      {showPhoneModal && createPortal(
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPhoneModal(false);
+            }
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="relative px-6 pt-5 pb-4"
+              style={{ background: "linear-gradient(135deg, #003318 0%, #006832 50%, #008c43 100%)" }}>
+              <button
+                onClick={() => setShowPhoneModal(false)}
+                className="absolute top-3.5 right-4 p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Close modal"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-0.5">M-Pesa Checkout</p>
+              <h3 className="text-white text-lg font-extrabold pr-8 leading-tight line-clamp-2">{material.title}</h3>
+              <div className="mt-2 inline-flex items-center gap-1.5 bg-white/15 border border-white/20 rounded-xl px-3 py-1.5">
+                <span className="text-white/70 text-xs">Total</span>
+                <span className="text-white text-lg font-extrabold">KES {material.price.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5">
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                M-Pesa Phone Number
+              </label>
+              <div className="relative">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="254712345678"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008c43] focus:border-transparent text-gray-900 placeholder:text-gray-400 text-sm"
+                  autoFocus
+                  readOnly={!!user?.phone}
+                />
+              </div>
+              <p className="mt-1.5 text-xs text-gray-400">
+                Format: <span className="font-mono">254XXXXXXXXX</span> — no spaces or +
+              </p>
+
+              <div className="flex gap-3 mt-5">
+                <button
+                  onClick={() => setShowPhoneModal(false)}
+                  disabled={purchasing}
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePhoneConfirm}
+                  disabled={purchasing || !phone}
+                  className="flex-1 px-4 py-2.5 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-md shadow-[#008c43]/20 active:scale-95"
+                  style={{ background: "linear-gradient(135deg, #006832 0%, #008c43 60%, #00a854 100%)" }}
+                >
+                  {purchasing ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Processing…
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Pay with M‑Pesa
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
       </div>
   );
 }
@@ -501,7 +677,9 @@ function RelatedSection({ title, subtitle, items, user, purchasedIds }: {
   purchasedIds: Set<string>;
 }) {
   return (
-    <div className="mt-10">
+    // give each related block a bit of horizontal breathing room; 13px
+    // from the container edge as requested
+    <div className="mt-10 px-[13px]">
       <div className="flex items-end justify-between mb-4">
         <div>
           <p className="text-xs font-bold text-[#008c43] uppercase tracking-wider mb-0.5">{subtitle}</p>
