@@ -50,7 +50,7 @@ export function HeroSection() {
     >
       {/* Background image */}
       <Image
-        src="/Images/teacher happy.jpg"
+        src="/images/teacher happy.jpg"
         alt="Teacher earning extra income"
         fill
         className="object-cover object-center"
