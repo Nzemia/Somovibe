@@ -1,526 +1,163 @@
 "use client";
 
 import Link from "next/link";
-import { useTheme } from "./ThemeProvider";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
 import { signOut } from "next-auth/react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+
+const DASHBOARD_HREF: Record<string, string> = {
+  TEACHER: "/teacher",
+  STUDENT: "/student",
+  ADMIN: "/admin",
+};
 
 export function Navbar({ user }: { user: { email: string; role: string } | null }) {
-  const { theme, toggleTheme } = useTheme();
-  const pathname = usePathname();
-  const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const isActive = (path: string) => pathname === path;
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSignOut = async () => {
     setSigningOut(true);
-    setMobileMenuOpen(false);
     try {
       await signOut({ callbackUrl: "/" });
-    } catch (error) {
-      console.error("Sign out error:", error);
+    } catch {
       setSigningOut(false);
     }
   };
 
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [dropdownOpen]);
+
+  const dashboardHref = user ? (DASHBOARD_HREF[user.role] ?? "/") : "/";
+  const initial = user?.email?.[0]?.toUpperCase() ?? "U";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/60">
+    <nav
+      className="sticky top-0 z-50 backdrop-blur-md"
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(0,20,10,0.94) 0%, rgba(0,60,30,0.91) 50%, rgba(0,120,58,0.88) 100%)",
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center space-x-4 md:space-x-8">
-            <Link href="/" className="text-2xl font-bold text-primary">
-              Questy
-            </Link>
+        <div className="flex items-center justify-between h-14">
+          {/* Logo */}
+          <Link href="/" className="shrink-0 flex items-center self-center">
+            <Image
+              src="/logos/Somovibe text white.png"
+              alt="Somovibe"
+              width={220}
+              height={62}
+              className="w-auto object-contain"
+              style={{ height: "46px", display: "block" }}
+              priority
+            />
+          </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex space-x-4">
-              {!user && (
-                <>
-                  <Link
-                    href="/"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }`}
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href="/marketplace"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/marketplace")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }`}
-                  >
-                    Marketplace
-                  </Link>
-                  <Link
-                    href="/about"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/about")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }`}
-                  >
-                    About Us
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/contact")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }`}
-                  >
-                    Contact Us
-                  </Link>
-                </>
-              )}
-
-              {user && (
-                <Link
-                  href="/marketplace"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/marketplace")
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    }`}
-                >
-                  Marketplace
-                </Link>
-              )}
-            </div>
-
-            {/* User-specific navigation */}
-            {user && (
-              <div className="hidden md:flex space-x-4">
-                {user.role === "ADMIN" && (
-                  <>
-                    <Link
-                      href="/admin"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/admin")
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                        }`}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/admin/teachers"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/admin/teachers")
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                        }`}
-                    >
-                      Teachers
-                    </Link>
-                    <Link
-                      href="/admin/materials"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/admin/materials")
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                        }`}
-                    >
-                      Materials
-                    </Link>
-                    <Link
-                      href="/admin/approvals"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/admin/approvals")
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                        }`}
-                    >
-                      Approvals
-                    </Link>
-                  </>
-                )}
-
-                {user.role === "TEACHER" && (
-                  <Link
-                    href="/teacher"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname.startsWith("/teacher")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }`}
-                  >
-                    Dashboard
-                  </Link>
-                )}
-
-                {user.role === "STUDENT" && (
-                  <Link
-                    href="/student"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname.startsWith("/student")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }`}
-                  >
-                    Dashboard
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-2 md:space-x-4">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              )}
-            </button>
-
-            {/* Desktop Auth Buttons */}
+          {/* Right side */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {user ? (
-              <div className="hidden md:flex items-center space-x-3">
-                <span className="text-sm text-muted-foreground truncate max-w-[150px]">{user.email}</span>
+              <div className="relative" ref={dropdownRef}>
+                {/* Profile button */}
                 <button
-                  onClick={handleSignOut}
-                  disabled={signingOut}
-                  className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+                  onClick={() => setDropdownOpen(o => !o)}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-white/10 transition-colors group"
+                  aria-label="Account menu"
                 >
-                  {signingOut ? "Signing out..." : "Sign Out"}
+                  {/* Avatar circle */}
+                  <span
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-extrabold text-[#008c43] shrink-0 ring-2 ring-white/30 group-hover:ring-white/60 transition-all"
+                    style={{ background: "rgba(255,255,255,0.95)" }}
+                  >
+                    {initial}
+                  </span>
+                  {/* Email — desktop only */}
+                  <span className="hidden md:block text-sm text-white/80 truncate max-w-[140px]">
+                    {user.email}
+                  </span>
+                  <svg
+                    className={`w-3.5 h-3.5 text-white/60 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
+
+                {/* Dropdown */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    {/* User info header */}
+                    <div className="px-4 py-3 border-b border-gray-100 bg-[#f5faf7]">
+                      <p className="text-xs font-bold text-[#008c43] uppercase tracking-wider">
+                        {user.role.charAt(0) + user.role.slice(1).toLowerCase()}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+                    </div>
+
+                    {/* Dashboard link */}
+                    <Link
+                      href={dashboardHref}
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-[#f5faf7] hover:text-[#008c43] transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-[#008c43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                      </svg>
+                      Go to Dashboard
+                    </Link>
+
+                    {/* Sign out */}
+                    <button
+                      onClick={handleSignOut}
+                      disabled={signingOut}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-60"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                      </svg>
+                      {signingOut ? "Signing out…" : "Sign Out"}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="hidden md:flex space-x-2">
+              <>
+                {/* Mobile: Login button only */}
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-medium text-foreground bg-secondary rounded-md hover:bg-secondary/80 transition-colors"
+                  className="md:hidden px-4 py-1.5 text-sm font-semibold text-white border border-white/50 rounded-lg hover:bg-white/10 active:scale-95 transition-all"
                 >
                   Login
                 </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:opacity-90 transition-opacity"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            )}
 
-            {/* Mobile Menu Button */}
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <button
-                  className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                  aria-label="Open menu"
-                >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <SheetHeader>
-                  <SheetTitle className="text-left">Menu</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col space-y-4 mt-6">
-                  {!user && (
-                    <>
-                      <Link
-                        href="/"
-                        onClick={closeMobileMenu}
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/")
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-accent"
-                          }`}
-                      >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        <span>Home</span>
-                      </Link>
-                      <Link
-                        href="/marketplace"
-                        onClick={closeMobileMenu}
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/marketplace")
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-accent"
-                          }`}
-                      >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <span>Marketplace</span>
-                      </Link>
-                      <Link
-                        href="/about"
-                        onClick={closeMobileMenu}
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/about")
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-accent"
-                          }`}
-                      >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>About Us</span>
-                      </Link>
-                      <Link
-                        href="/contact"
-                        onClick={closeMobileMenu}
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/contact")
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-accent"
-                          }`}
-                      >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span>Contact Us</span>
-                      </Link>
-                    </>
-                  )}
-
-                  {user ? (
-                    <>
-                      {/* User Info */}
-                      <div className="pb-4 border-b border-border">
-                        <p className="text-sm font-medium text-foreground wrap-break-word">{user.email}</p>
-                        <p className="text-xs text-muted-foreground mt-1 capitalize">{user.role.toLowerCase()}</p>
-                      </div>
-
-                      {/* Navigation Links */}
-                      <Link
-                        href="/marketplace"
-                        onClick={closeMobileMenu}
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/marketplace")
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-accent"
-                          }`}
-                      >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <span>Marketplace</span>
-                      </Link>
-
-                      {user.role === "ADMIN" && (
-                        <>
-                          <Link
-                            href="/admin"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/admin")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <span>Dashboard</span>
-                          </Link>
-                          <Link
-                            href="/admin/teachers"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/admin/teachers")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            <span>Teachers</span>
-                          </Link>
-                          <Link
-                            href="/admin/materials"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/admin/materials")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span>Materials</span>
-                          </Link>
-                          <Link
-                            href="/admin/approvals"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/admin/approvals")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Approvals</span>
-                          </Link>
-                        </>
-                      )}
-
-                      {user.role === "TEACHER" && (
-                        <>
-                          <Link
-                            href="/teacher"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/teacher")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <span>Dashboard</span>
-                          </Link>
-                          <Link
-                            href="/teacher/upload"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/teacher/upload")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                            <span>Upload Material</span>
-                          </Link>
-                          <Link
-                            href="/teacher/analytics"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/teacher/analytics")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            <span>Analytics</span>
-                          </Link>
-                          <Link
-                            href="/teacher/wallet"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/teacher/wallet")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                            </svg>
-                            <span>Wallet</span>
-                          </Link>
-                          <Link
-                            href="/teacher/profile"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/teacher/profile")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <span>Profile</span>
-                          </Link>
-                        </>
-                      )}
-
-                      {user.role === "STUDENT" && (
-                        <>
-                          <Link
-                            href="/student"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/student")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <span>Dashboard</span>
-                          </Link>
-                          <Link
-                            href="/student/downloads"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/student/downloads")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            <span>Download History</span>
-                          </Link>
-                          <Link
-                            href="/student/profile"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive("/student/profile")
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-accent"
-                              }`}
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <span>Profile</span>
-                          </Link>
-                        </>
-                      )}
-
-                      {/* Sign Out Button */}
-                      <div className="pt-4 border-t border-border">
-                        <button
-                          onClick={handleSignOut}
-                          disabled={signingOut}
-                          className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-sm font-medium text-destructive-foreground bg-destructive rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
-                        >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          <span>{signingOut ? "Signing out..." : "Sign Out"}</span>
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        href="/login"
-                        onClick={closeMobileMenu}
-                        className="w-full px-4 py-3 text-sm font-medium text-center text-foreground bg-secondary rounded-md hover:bg-secondary/80 transition-colors"
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        href="/register"
-                        onClick={closeMobileMenu}
-                        className="w-full px-4 py-3 text-sm font-medium text-center text-primary-foreground bg-primary rounded-md hover:opacity-90 transition-opacity"
-                      >
-                        Sign Up
-                      </Link>
-                    </>
-                  )}
+                {/* Desktop: Login + Sign Up */}
+                <div className="hidden md:flex items-center gap-2">
+                  <Link
+                    href="/login"
+                    className="px-4 py-2 text-sm font-semibold text-white border border-white/40 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="px-4 py-2 text-sm font-semibold text-[#008c43] bg-white rounded-lg hover:bg-white/90 transition-colors shadow-md"
+                  >
+                    Sign Up
+                  </Link>
                 </div>
-              </SheetContent>
-            </Sheet>
+              </>
+            )}
           </div>
         </div>
       </div>
