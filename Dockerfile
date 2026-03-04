@@ -45,9 +45,6 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/app/generated ./app/generated
 COPY --from=builder /app/prisma ./prisma
 
-# Copy node_modules for prisma CLI (needed for migrate deploy at startup)
-COPY --from=deps /app/node_modules ./node_modules
-
 # Create cache directory for Next.js image optimization
 RUN mkdir -p /app/.next/cache/images
 
