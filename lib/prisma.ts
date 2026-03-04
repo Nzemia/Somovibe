@@ -8,14 +8,9 @@ declare global {
 function getClient(): PrismaClient {
     if (global.__prisma) return global.__prisma;
 
-    const datasourceUrl = process.env.DATABASE_URL;
-    if (!datasourceUrl) {
-        throw new Error(
-            "DATABASE_URL is not set. Make sure it is defined in your environment variables."
-        );
-    }
-
-    const client = new PrismaClient({ datasourceUrl } as any);
+    // Prisma v7 reads DATABASE_URL from prisma.config.ts automatically.
+    // Do NOT pass datasourceUrl to the constructor — it is no longer supported.
+    const client = new PrismaClient();
 
     if (process.env.NODE_ENV !== "production") {
         global.__prisma = client;
@@ -25,10 +20,8 @@ function getClient(): PrismaClient {
 }
 
 /**
- * Lazy Prisma proxy — the real PrismaClient is created only on the first
- * property access, NOT at module-load time.  This lets Next.js import the
- * module during `next build` without requiring DATABASE_URL to be present
- * in the build environment.
+ * Lazy Prisma proxy — PrismaClient is created only on the first property
+ * access, not at module-load time, so Next.js build succeeds without a DB.
  */
 export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
     get(_target, prop) {
