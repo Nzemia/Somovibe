@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 declare global {
     // eslint-disable-next-line no-var
@@ -8,9 +9,17 @@ declare global {
 function getClient(): PrismaClient {
     if (global.__prisma) return global.__prisma;
 
-    // Prisma v7 reads DATABASE_URL from prisma.config.ts automatically.
-    // Do NOT pass datasourceUrl to the constructor — it is no longer supported.
-    const client = new PrismaClient();
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+        throw new Error(
+            "DATABASE_URL is not set. Make sure it is defined in your environment variables."
+        );
+    }
+
+    // Prisma v7 requires a driver adapter — datasourceUrl in the constructor
+    // is no longer accepted. PrismaPg is already installed as a dependency.
+    const adapter = new PrismaPg({ connectionString });
+    const client = new PrismaClient({ adapter } as any);
 
     if (process.env.NODE_ENV !== "production") {
         global.__prisma = client;
@@ -20,8 +29,8 @@ function getClient(): PrismaClient {
 }
 
 /**
- * Lazy Prisma proxy — PrismaClient is created only on the first property
- * access, not at module-load time, so Next.js build succeeds without a DB.
+ * Lazy Prisma proxy — PrismaClient is created only on first property access,
+ * not at module-load time, so Next.js build succeeds without a live DB.
  */
 export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
     get(_target, prop) {
