@@ -52,6 +52,9 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
 
+# Create cache directory for Next.js image optimization
+RUN mkdir -p /app/.next/cache/images
+
 # Set correct permissions
 RUN chown -R nextjs:nodejs /app
 
