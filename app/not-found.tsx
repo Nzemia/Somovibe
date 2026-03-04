@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "next/link"
 
 export default function NotFound() {
     return (
@@ -6,7 +6,9 @@ export default function NotFound() {
             <div className="max-w-2xl w-full text-center">
                 <div className="mb-8">
                     <div className="relative inline-block mb-6">
-                        <h1 className="text-9xl font-bold text-primary opacity-20">404</h1>
+                        <h1 className="text-9xl font-bold text-primary opacity-20">
+                            404
+                        </h1>
                         <div className="absolute inset-0 flex items-center justify-center">
                             <svg
                                 className="w-32 h-32 text-primary"
@@ -27,7 +29,8 @@ export default function NotFound() {
                         Oops! Page Not Found
                     </h2>
                     <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
-                        The page you're looking for doesn't exist or has been moved to a new
+                        The page you're looking for doesn't
+                        exist or has been moved to a new
                         location.
                     </p>
                 </div>
@@ -47,8 +50,12 @@ export default function NotFound() {
                                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                             />
                         </svg>
-                        <h3 className="font-semibold text-foreground text-sm">Home</h3>
-                        <p className="text-xs text-muted-foreground">Start fresh</p>
+                        <h3 className="font-semibold text-foreground text-sm">
+                            Home
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                            Start fresh
+                        </p>
                     </div>
                     <div className="bg-card border border-border rounded-lg p-4">
                         <svg
@@ -64,8 +71,12 @@ export default function NotFound() {
                                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                             />
                         </svg>
-                        <h3 className="font-semibold text-foreground text-sm">Marketplace</h3>
-                        <p className="text-xs text-muted-foreground">Browse materials</p>
+                        <h3 className="font-semibold text-foreground text-sm">
+                            Marketplace
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                            Browse materials
+                        </p>
                     </div>
                     <div className="bg-card border border-border rounded-lg p-4">
                         <svg
@@ -81,8 +92,12 @@ export default function NotFound() {
                                 d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
                             />
                         </svg>
-                        <h3 className="font-semibold text-foreground text-sm">Sign Up</h3>
-                        <p className="text-xs text-muted-foreground">Join Questy</p>
+                        <h3 className="font-semibold text-foreground text-sm">
+                            Sign Up
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                            Join Somovibe
+                        </p>
                     </div>
                 </div>
 
@@ -128,5 +143,5 @@ export default function NotFound() {
                 </div>
             </div>
         </div>
-    );
+    )
 }

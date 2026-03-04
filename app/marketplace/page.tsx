@@ -1,26 +1,31 @@
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
-import { Navbar } from "@/components/Navbar";
-import MarketplaceClient from "./MarketplaceClient";
-import { Metadata } from "next";
+import { prisma } from "@/lib/prisma"
+import { getCurrentUser } from "@/lib/auth"
+import { Navbar } from "@/components/Navbar"
+import MarketplaceClient from "./MarketplaceClient"
+import { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "Questy | Marketplace",
-    description: "Discover quality CBC learning materials from verified teachers. Browse notes, schemes of work, lesson plans, and more for all grades.",
+    title: "Somovibe | Marketplace",
+    description:
+        "Discover quality CBC learning materials from verified teachers. Browse notes, schemes of work, lesson plans, and more for all grades.",
     openGraph: {
-        title: "Questy Marketplace - Quality Learning Materials",
-        description: "Browse and purchase quality learning materials from verified teachers",
-        type: "website",
-    },
-};
+        title: "Somovibe Marketplace - Quality Learning Materials",
+        description:
+            "Browse and purchase quality learning materials from verified teachers",
+        type: "website"
+    }
+}
 
 export default async function Marketplace({
-    searchParams,
+    searchParams
 }: {
-    searchParams: Promise<{ material?: string; teacher?: string }>;
+    searchParams: Promise<{
+        material?: string
+        teacher?: string
+    }>
 }) {
-    const user = await getCurrentUser();
-    const params = await searchParams;
+    const user = await getCurrentUser()
+    const params = await searchParams
 
     const pdfs = await prisma.pdf.findMany({
         where: { status: "APPROVED" },
@@ -28,65 +33,105 @@ export default async function Marketplace({
             teacher: {
                 select: {
                     id: true,
-                    email: true,
-                },
+                    email: true
+                }
             },
             _count: {
                 select: {
                     downloads: true,
-                    reviews: true,
-                },
+                    reviews: true
+                }
             },
             reviews: {
                 select: {
-                    rating: true,
-                },
-            },
+                    rating: true
+                }
+            }
         },
-        orderBy: { createdAt: "desc" },
-    });
+        orderBy: { createdAt: "desc" }
+    })
 
     // Get user's purchases if logged in
     const userPurchases = user
         ? await prisma.purchase.findMany({
-            where: { userId: user.id },
-            select: { pdfId: true },
-        })
-        : [];
+              where: { userId: user.id },
+              select: { pdfId: true }
+          })
+        : []
 
-    const purchasedPdfIds = new Set(userPurchases.map((p) => p.pdfId));
+    const purchasedPdfIds = new Set(
+        userPurchases.map(p => p.pdfId)
+    )
 
     return (
         <>
-            <Navbar user={user ? { email: user.email, role: user.role } : null} />
+            <Navbar
+                user={
+                    user
+                        ? {
+                              email: user.email,
+                              role: user.role
+                          }
+                        : null
+                }
+            />
             <div className="min-h-screen bg-background">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-foreground mb-2">Marketplace</h1>
+                        <h1 className="text-3xl font-bold text-foreground mb-2">
+                            Marketplace
+                        </h1>
                         <p className="text-muted-foreground">
-                            Quality CBC learning materials from verified teachers
+                            Quality CBC learning materials
+                            from verified teachers
                         </p>
                     </div>
 
                     {pdfs.length === 0 ? (
                         <div className="text-center py-16">
-                            <svg className="w-16 h-16 mx-auto text-muted-foreground mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <svg
+                                className="w-16 h-16 mx-auto text-muted-foreground mb-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
                             </svg>
-                            <h3 className="text-xl font-semibold text-foreground mb-2">No materials yet</h3>
-                            <p className="text-muted-foreground">Check back soon for quality learning materials!</p>
+                            <h3 className="text-xl font-semibold text-foreground mb-2">
+                                No materials yet
+                            </h3>
+                            <p className="text-muted-foreground">
+                                Check back soon for quality
+                                learning materials!
+                            </p>
                         </div>
                     ) : (
                         <MarketplaceClient
                             materials={pdfs}
                             purchasedIds={purchasedPdfIds}
-                            user={user ? { id: user.id, email: user.email, role: user.role, phone: user.phone } : null}
-                            highlightMaterialId={params.material}
+                            user={
+                                user
+                                    ? {
+                                          id: user.id,
+                                          email: user.email,
+                                          role: user.role,
+                                          phone: user.phone
+                                      }
+                                    : null
+                            }
+                            highlightMaterialId={
+                                params.material
+                            }
                             filterTeacherId={params.teacher}
                         />
                     )}
                 </div>
             </div>
         </>
-    );
+    )
 }
