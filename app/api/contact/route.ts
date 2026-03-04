@@ -34,7 +34,7 @@ export async function POST(req: Request) {
         <hr />
         <p><small>Reply to: ${email}</small></p>
       `,
-            replyTo: email
+            replyTo: [email]
         })
 
         if (error) {

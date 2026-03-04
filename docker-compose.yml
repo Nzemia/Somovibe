@@ -12,6 +12,7 @@ services:
         environment:
             - NODE_ENV=production
             - AUTH_TRUST_HOST=true
+        command: sh -c "npx prisma migrate deploy && node server.js"
         networks:
             - questy-network
         healthcheck:

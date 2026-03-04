@@ -9,7 +9,6 @@ WORKDIR /app
 # Copy package files and prisma schema
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
-COPY prisma.config.ts ./
 RUN npm ci
 
 # Rebuild the source code only when needed
@@ -17,7 +16,6 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/prisma ./prisma
-COPY --from=deps /app/prisma.config.ts ./prisma.config.ts
 COPY . .
 
 # Build Next.js app (prisma generate runs via postinstall)
@@ -46,11 +44,9 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/app/generated ./app/generated
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
-COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
+
+# Copy node_modules for prisma CLI (needed for migrate deploy at startup)
+COPY --from=deps /app/node_modules ./node_modules
 
 # Create cache directory for Next.js image optimization
 RUN mkdir -p /app/.next/cache/images
