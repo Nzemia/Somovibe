@@ -1,10 +1,7 @@
 version: "3.9"
 services:
   app:
-    build:
-      context: .
-      args:
-        DATABASE_URL: "${DATABASE_URL}"
+    build: .
     image: questy:latest
     restart: unless-stopped
     env_file:
