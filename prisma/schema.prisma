@@ -1,16 +1,11 @@
+
 generator client {
-  provider   = "prisma-client-js"
-  output     = "../app/generated/prisma"
-  engineType = "library"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
-
-
 
 
 enum Role {
@@ -264,3 +259,4 @@ model Review {
   @@unique([userId, pdfId]) // One review per user per material
   @@index([pdfId])
 }
+

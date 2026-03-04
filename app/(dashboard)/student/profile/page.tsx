@@ -1,17 +1,23 @@
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import ProfileForm from "./ProfileForm";
-import PasswordChangeForm from "@/components/PasswordChangeForm";
+import { prisma } from "@/lib/prisma"
+import { getCurrentUser } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import ProfileForm from "./ProfileForm"
+import PasswordChangeForm from "@/components/PasswordChangeForm"
 
 export default async function StudentProfilePage() {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser()
 
     if (!user || user.role !== "STUDENT") {
-        redirect("/");
+        redirect("/")
     }
 
     // Get user stats
@@ -21,14 +27,19 @@ export default async function StudentProfilePage() {
             pdf: {
                 select: {
                     price: true,
-                    subject: true,
-                },
-            },
-        },
-    });
+                    subject: true
+                }
+            }
+        }
+    })
 
-    const totalSpent = purchases.reduce((sum, p) => sum + p.pdf.price, 0);
-    const uniqueSubjects = new Set(purchases.map((p) => p.pdf.subject));
+    const totalSpent = purchases.reduce(
+        (sum, p) => sum + p.pdf.price,
+        0
+    )
+    const uniqueSubjects = new Set(
+        purchases.map(p => p.pdf.subject)
+    )
 
     return (
         <div className="min-h-screen bg-background">
@@ -36,7 +47,9 @@ export default async function StudentProfilePage() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground mb-2">My Profile</h1>
+                        <h1 className="text-3xl font-bold text-foreground mb-2">
+                            My Profile
+                        </h1>
                         <p className="text-muted-foreground">
                             Manage your account information
                         </p>
@@ -67,9 +80,12 @@ export default async function StudentProfilePage() {
                     <div className="lg:col-span-2 space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Account Information</CardTitle>
+                                <CardTitle>
+                                    Account Information
+                                </CardTitle>
                                 <CardDescription>
-                                    Update your personal details
+                                    Update your personal
+                                    details
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -79,9 +95,12 @@ export default async function StudentProfilePage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Change Password</CardTitle>
+                                <CardTitle>
+                                    Change Password
+                                </CardTitle>
                                 <CardDescription>
-                                    Update your password to keep your account secure
+                                    Update your password to
+                                    keep your account secure
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -91,9 +110,12 @@ export default async function StudentProfilePage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Account Details</CardTitle>
+                                <CardTitle>
+                                    Account Details
+                                </CardTitle>
                                 <CardDescription>
-                                    Your account information and status
+                                    Your account information
+                                    and status
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -103,10 +125,13 @@ export default async function StudentProfilePage() {
                                             Account Type
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            Your current role
+                                            Your current
+                                            role
                                         </p>
                                     </div>
-                                    <Badge variant="secondary">Student</Badge>
+                                    <Badge variant="secondary">
+                                        Student
+                                    </Badge>
                                 </div>
 
                                 <div className="flex items-center justify-between py-3 border-b border-border">
@@ -115,15 +140,21 @@ export default async function StudentProfilePage() {
                                             Member Since
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            Account creation date
+                                            Account creation
+                                            date
                                         </p>
                                     </div>
                                     <p className="text-sm font-medium text-foreground">
-                                        {new Date(user.createdAt).toLocaleDateString("en-US", {
-                                            month: "long",
-                                            day: "numeric",
-                                            year: "numeric",
-                                        })}
+                                        {new Date(
+                                            user.createdAt
+                                        ).toLocaleDateString(
+                                            "en-US",
+                                            {
+                                                month: "long",
+                                                day: "numeric",
+                                                year: "numeric"
+                                            }
+                                        )}
                                     </p>
                                 </div>
 
@@ -133,10 +164,13 @@ export default async function StudentProfilePage() {
                                             Account Status
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            Your account is active
+                                            Your account is
+                                            active
                                         </p>
                                     </div>
-                                    <Badge variant="default">Active</Badge>
+                                    <Badge variant="default">
+                                        Active
+                                    </Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -146,8 +180,12 @@ export default async function StudentProfilePage() {
                     <div className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Learning Stats</CardTitle>
-                                <CardDescription>Your progress overview</CardDescription>
+                                <CardTitle>
+                                    Learning Stats
+                                </CardTitle>
+                                <CardDescription>
+                                    Your progress overview
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
@@ -156,7 +194,9 @@ export default async function StudentProfilePage() {
                                             Materials
                                         </p>
                                         <p className="text-2xl font-bold text-foreground">
-                                            {purchases.length}
+                                            {
+                                                purchases.length
+                                            }
                                         </p>
                                     </div>
                                     <svg
@@ -204,7 +244,9 @@ export default async function StudentProfilePage() {
                                             Subjects
                                         </p>
                                         <p className="text-2xl font-bold text-foreground">
-                                            {uniqueSubjects.size}
+                                            {
+                                                uniqueSubjects.size
+                                            }
                                         </p>
                                     </div>
                                     <svg
@@ -226,8 +268,12 @@ export default async function StudentProfilePage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Quick Links</CardTitle>
-                                <CardDescription>Helpful resources</CardDescription>
+                                <CardTitle>
+                                    Quick Links
+                                </CardTitle>
+                                <CardDescription>
+                                    Helpful resources
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <Link
@@ -245,7 +291,9 @@ export default async function StudentProfilePage() {
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
-                                                    strokeWidth={2}
+                                                    strokeWidth={
+                                                        2
+                                                    }
                                                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                                                 />
                                             </svg>
@@ -253,10 +301,12 @@ export default async function StudentProfilePage() {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-foreground">
-                                            Browse Marketplace
+                                            Browse
+                                            Marketplace
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            Find new materials
+                                            Find new
+                                            materials
                                         </p>
                                     </div>
                                 </Link>
@@ -276,7 +326,9 @@ export default async function StudentProfilePage() {
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
-                                                    strokeWidth={2}
+                                                    strokeWidth={
+                                                        2
+                                                    }
                                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                                                 />
                                             </svg>
@@ -287,7 +339,8 @@ export default async function StudentProfilePage() {
                                             Download History
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            View all downloads
+                                            View all
+                                            downloads
                                         </p>
                                     </div>
                                 </Link>
@@ -307,7 +360,9 @@ export default async function StudentProfilePage() {
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
-                                                    strokeWidth={2}
+                                                    strokeWidth={
+                                                        2
+                                                    }
                                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                                 />
                                             </svg>
@@ -315,10 +370,11 @@ export default async function StudentProfilePage() {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-foreground">
-                                            About Questy
+                                            About Somovibe
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            Learn more about us
+                                            Learn more about
+                                            us
                                         </p>
                                     </div>
                                 </Link>
@@ -328,5 +384,5 @@ export default async function StudentProfilePage() {
                 </div>
             </div>
         </div>
-    );
+    )
 }
