@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
     serverExternalPackages: [
         "@prisma/client",
         "prisma",
-        "pg",
-        "@prisma/adapter-pg"
+        "@neondatabase/serverless",
+        "@prisma/adapter-neon"
     ],
     images: {
         remotePatterns: []
