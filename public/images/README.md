@@ -1,6 +1,6 @@
 # Slider Images
 
-This folder contains the hero slider images for the Questy landing page.
+This folder contains the hero slider images for the Somovibe landing page.
 
 ## Current Images
 
@@ -12,6 +12,7 @@ This folder contains the hero slider images for the Questy landing page.
 ## Image Specifications
 
 ### Recommended Dimensions:
+
 - **Width**: 1920px (minimum 1200px)
 - **Height**: 1080px (minimum 600px)
 - **Aspect Ratio**: 16:9 (preferred)
@@ -19,6 +20,7 @@ This folder contains the hero slider images for the Questy landing page.
 - **File Size**: < 500KB (optimized for web)
 
 ### Responsive Sizes:
+
 - **Desktop**: 1200px × 600px (displayed)
 - **Tablet**: 900px × 500px (displayed)
 - **Mobile**: 100vw × 400px (displayed)
@@ -30,42 +32,43 @@ This folder contains the hero slider images for the Questy landing page.
 3. Update the slider component at `components/HeroSlider.tsx`
 
 ### Example:
+
 ```tsx
 const slides = [
     {
         image: "/images/slider1.jpg",
-        alt: "Students learning with quality materials",
+        alt: "Students learning with quality materials"
     },
     {
         image: "/images/slider2.jpg",
-        alt: "Teachers sharing knowledge",
+        alt: "Teachers sharing knowledge"
     },
     // Add your new image here
     {
         image: "/images/slider5.jpg",
-        alt: "Your image description",
-    },
-];
+        alt: "Your image description"
+    }
+]
 ```
 
 ## Image Optimization Tips
 
 1. **Compress images** before uploading:
-   - Use tools like TinyPNG, ImageOptim, or Squoosh
-   - Target file size: 200-500KB per image
+    - Use tools like TinyPNG, ImageOptim, or Squoosh
+    - Target file size: 200-500KB per image
 
 2. **Use appropriate dimensions**:
-   - Don't upload images larger than 1920px wide
-   - Maintain 16:9 aspect ratio for consistency
+    - Don't upload images larger than 1920px wide
+    - Maintain 16:9 aspect ratio for consistency
 
 3. **Choose relevant images**:
-   - Show students, teachers, or learning materials
-   - Use bright, engaging photos
-   - Ensure good contrast for text overlay
+    - Show students, teachers, or learning materials
+    - Use bright, engaging photos
+    - Ensure good contrast for text overlay
 
 4. **Alt text**:
-   - Write descriptive alt text for accessibility
-   - Keep it concise but informative
+    - Write descriptive alt text for accessibility
+    - Keep it concise but informative
 
 ## Current Slider Settings
 
@@ -77,17 +80,20 @@ const slides = [
 ## Troubleshooting
 
 ### Image not showing?
+
 - Check file path is correct: `/images/filename.jpg`
 - Verify file exists in `/public/images/`
 - Check file extension matches (case-sensitive)
 - Clear browser cache
 
 ### Image looks blurry?
+
 - Upload higher resolution image
 - Ensure image is at least 1200px wide
 - Check image compression settings
 
 ### Slider not auto-rotating?
+
 - Check browser console for errors
 - Verify JavaScript is enabled
 - Test in different browser
@@ -95,6 +101,7 @@ const slides = [
 ## License & Attribution
 
 Ensure all images used have proper licensing:
+
 - Own the images
 - Have permission to use them
 - Use royalty-free stock photos
@@ -110,4 +117,4 @@ Ensure all images used have proper licensing:
 ---
 
 **Last Updated**: Implementation Complete
-**Maintained By**: Questy Development Team
+**Maintained By**: Somovibe Development Team
