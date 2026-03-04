@@ -32,7 +32,7 @@ export default function AuthLayout({
                 <div className="relative z-10">
                     <Link href="/">
                         <Image
-                            src="/logos/Somovibe text white.png"
+                            src="/logos/somovibe-text-white.png"
                             alt="Somovibe"
                             width={240}
                             height={68}
@@ -98,7 +98,7 @@ export default function AuthLayout({
                 {/* Mobile logo */}
                 <div className="lg:hidden mb-8">
                     <Image
-                        src="/logos/Somovibe text.png"
+                        src="/logos/somovibe-text.png"
                         alt="Somovibe"
                         width={220}
                         height={60}
