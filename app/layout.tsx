@@ -7,7 +7,11 @@ import { SessionProvider } from "next-auth/react"
 export const metadata: Metadata = {
     title: "Somovibe - CBC Learning Platform",
     description:
-        "Quality learning materials for CBC curriculum"
+        "Quality learning materials for CBC curriculum",
+    icons: {
+        icon: "/somovibe-favicon.png",
+        apple: "/somovibe-favicon.png",
+    },
 }
 
 export default function RootLayout({
