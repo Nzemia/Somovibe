@@ -30,8 +30,13 @@ export const metadata: Metadata = {
             {
                 url: "/logos/somovibe-logo.png",
                 type: "image/png"
+            },
+            {
+                url: "/favicon.png",
+                type: "image/png"
             }
         ],
+        shortcut: "/logos/somovibe-logo.png",
         apple: "/logos/somovibe-logo.png"
     },
     openGraph: {
