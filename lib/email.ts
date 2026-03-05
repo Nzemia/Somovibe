@@ -363,3 +363,35 @@ export async function sendPasswordResetEmail(
         `
     })
 }
+
+export async function sendManualVerificationRequiredEmail(
+    adminEmail: string,
+    teacherEmail: string,
+    teacherPhone: string,
+    receiptNumber: string
+) {
+    return sendEmail({
+        to: adminEmail,
+        subject: "⚠️ Manual Payment Verification Required",
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #f59e0b;">Manual Payment Review Needed</h1>
+                <p>A teacher reported that their verification payment was successful but not automatically activated.</p>
+                
+                <div style="background-color: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                    <p><strong>Teacher Email:</strong> ${teacherEmail}</p>
+                    <p><strong>Teacher Phone:</strong> ${teacherPhone}</p>
+                    <p><strong>Provided M-Pesa Receipt:</strong> ${receiptNumber}</p>
+                    <p><strong>Submitted On:</strong> ${new Date().toLocaleString()}</p>
+                </div>
+                
+                <p>Please log in to your Safaricom portal to verify this receipt number.</p>
+                
+                <a href="${process.env.NEXT_PUBLIC_BASE_URL}/admin/teachers" 
+                   style="display: inline-block; background-color: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                    Go to Admin Dashboard to Activate
+                </a>
+            </div>
+        `
+    })
+}
