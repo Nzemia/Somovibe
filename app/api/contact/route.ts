@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
 export async function POST(req: Request) {
-    // Initialize Resend only when the route is called
-    const resend = new Resend(process.env.RESEND_API_KEY);
     try {
         const apiKey = process.env.RESEND_API_KEY;
         if (!apiKey) {
