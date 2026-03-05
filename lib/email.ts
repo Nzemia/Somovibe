@@ -340,7 +340,7 @@ export async function sendPasswordResetEmail(
     email: string,
     token: string
 ) {
-    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${token}`;
+    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${token}`
     return sendEmail({
         to: email,
         subject: "Reset your Somovibe password",
