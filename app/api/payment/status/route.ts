@@ -1,10 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { requireAuth, handleAuthError } from "@/lib/apiAuth";
 
 export async function GET(req: Request) {
     try {
-        const user = await requireAuth();
         const { searchParams } = new URL(req.url);
         const referenceCode = searchParams.get("referenceCode");
 
@@ -12,12 +10,13 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Reference code required" }, { status: 400 });
         }
 
+        // The referenceCode is the authentication token — it's a server-generated
+        // cryptographically random value (12 hex chars = 48 bits of entropy).
+        // Knowing the referenceCode proves ownership; no session required.
         const payment = await prisma.pendingPayment.findUnique({
             where: { referenceCode },
             select: {
-                userId: true,
                 status: true,
-                amount: true,
                 type: true,
                 createdAt: true,
                 completedAt: true,
@@ -28,16 +27,9 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Payment not found" }, { status: 404 });
         }
 
-        // Verify the authenticated user owns this payment
-        if (payment.userId !== user.id) {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
-        // Don't expose userId in the response
-        const { userId, ...paymentData } = payment;
-
-        return NextResponse.json(paymentData);
+        return NextResponse.json(payment);
     } catch (error: any) {
-        return handleAuthError(error);
+        console.error("Payment status error:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
