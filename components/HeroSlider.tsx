@@ -1,6 +1,5 @@
-"use client"
+"use client";
 
-<<<<<<< HEAD
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -186,59 +185,6 @@ export default function HeroSlider() {
                 <Link
                   href={slide.primaryCta.href}
                   className="inline-flex items-center justify-center px-6 py-3.5 bg-white text-[#008c43] font-bold rounded-xl hover:bg-white/95 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
-=======
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-
-const slides = [
-    {
-        image: "/images/slider1.jpg",
-        alt: "Students learning with quality materials"
-    },
-    {
-        image: "/images/slider2.jpg",
-        alt: "Teachers sharing knowledge"
-    },
-    {
-        image: "/images/slider3.jpg",
-        alt: "CBC curriculum resources"
-    },
-    {
-        image: "/images/slider4.jpg",
-        alt: "Interactive learning experience"
-    }
-]
-
-export default function HeroSlider() {
-    const [currentSlide, setCurrentSlide] = useState(0)
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentSlide(
-                prev => (prev + 1) % slides.length
-            )
-        }, 3000)
-
-        return () => clearInterval(timer)
-    }, [])
-
-    const goToSlide = (index: number) => {
-        setCurrentSlide(index)
-    }
-
-    return (
-        <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden">
-            {/* Slides */}
-            {slides.map((slide, index) => (
-                <div
-                    key={index}
-                    className={`absolute inset-0 transition-opacity duration-1000 ${
-                        index === currentSlide
-                            ? "opacity-100"
-                            : "opacity-0"
-                    }`}
->>>>>>> master
                 >
                   {slide.primaryCta.label}
                   <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -253,42 +199,12 @@ export default function HeroSlider() {
                 </Link>
               </div>
 
-<<<<<<< HEAD
               {/* Stats */}
               <div className="hero-anim grid grid-cols-3 gap-3 sm:gap-6 max-w-sm">
                 {slide.stats.map((stat, i) => (
                   <div key={i} className="text-center">
                     <div className="text-xl sm:text-2xl font-extrabold text-white drop-shadow">
                       {stat.value}
-=======
-            {/* Content Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-                <div className="text-center px-4 sm:px-6 lg:px-8 max-w-5xl">
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 drop-shadow-2xl">
-                        Welcome to{" "}
-                        <span className="text-primary drop-shadow-2xl">
-                            Somovibe
-                        </span>
-                    </h1>
-                    <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 md:mb-10 max-w-3xl mx-auto drop-shadow-lg">
-                        Quality CBC learning materials from
-                        verified teachers. Learn, teach, and
-                        earn.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            href="/marketplace"
-                            className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 text-center shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                        >
-                            Browse Materials
-                        </Link>
-                        <Link
-                            href="/teacher-register"
-                            className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-900 rounded-lg font-semibold hover:bg-white/90 text-center shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                        >
-                            Become a Teacher
-                        </Link>
->>>>>>> master
                     </div>
                     <div className="text-xs text-white/60 mt-0.5 leading-tight">{stat.label}</div>
                   </div>
@@ -296,7 +212,6 @@ export default function HeroSlider() {
               </div>
             </div>
 
-<<<<<<< HEAD
             {/* Right — decorative illustration (desktop only) */}
             <div className="hero-anim hidden lg:flex items-center justify-center">
               <div className="relative">
@@ -321,26 +236,9 @@ export default function HeroSlider() {
                   <div className="text-gray-500 text-xs mt-0.5">{slide.stats[1].label}</div>
                 </div>
               </div>
-=======
-            {/* Dots Indicator */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
-                {slides.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => goToSlide(index)}
-                        className={`h-3 rounded-full transition-all duration-300 ${
-                            index === currentSlide
-                                ? "bg-white w-8 shadow-lg"
-                                : "bg-white/50 hover:bg-white/75 w-3"
-                        }`}
-                        aria-label={`Go to slide ${index + 1}`}
-                    />
-                ))}
->>>>>>> master
             </div>
           </div>
         </div>
-<<<<<<< HEAD
       </div>
 
       {/* Slide indicators */}
@@ -376,7 +274,4 @@ export default function HeroSlider() {
       </div>
     </section>
   );
-=======
-    )
->>>>>>> master
 }
