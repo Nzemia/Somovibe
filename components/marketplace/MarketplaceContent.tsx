@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import Lottie from "lottie-react";
 import { ResourceCard } from "./ResourceCard";
-import emptyAnimation from "@/public/animations/Empty.json";
 import type { PdfItem } from "./MarketplaceClientWrapper";
 import { smartSearch } from "@/lib/search-intelligence";
 import type { SearchSuggestion } from "@/lib/search-intelligence";
@@ -293,8 +291,15 @@ function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      <div className="w-44 h-44 mb-2">
-        <Lottie animationData={emptyAnimation} loop />
+      <div className="w-24 h-24 mb-4 text-gray-300">
+        <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="48" cy="48" r="44" fill="#f3f4f6" />
+          <path d="M32 62V38a2 2 0 012-2h18l10 10v16a2 2 0 01-2 2H34a2 2 0 01-2-2z" fill="white" stroke="#d1d5db" strokeWidth="2" />
+          <path d="M52 36v10h10" stroke="#d1d5db" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <line x1="38" y1="50" x2="58" y2="50" stroke="#e5e7eb" strokeWidth="2" strokeLinecap="round" />
+          <line x1="38" y1="55" x2="54" y2="55" stroke="#e5e7eb" strokeWidth="2" strokeLinecap="round" />
+          <line x1="38" y1="60" x2="50" y2="60" stroke="#e5e7eb" strokeWidth="2" strokeLinecap="round" />
+        </svg>
       </div>
 
       <h3 className="text-lg font-bold text-gray-900 mb-1.5">
