@@ -178,7 +178,7 @@ export default function TeacherRegisterPage() {
 
                             <div className="bg-accent/50 border border-border rounded-md p-4">
                                 <h3 className="font-semibold text-foreground mb-2">One-time Verification Fee</h3>
-                                <p className="text-2xl font-bold text-primary mb-2">KES 1</p>
+                                <p className="text-2xl font-bold text-primary mb-2">KES 100</p>
                                 <p className="text-sm text-muted-foreground">
                                     This helps us verify genuine teachers and maintain quality on our platform.
                                 </p>
