@@ -80,7 +80,9 @@ export default function TeacherRegisterPage() {
             attempts++;
 
             try {
-                const res = await fetch(`/api/payment/status?referenceCode=${referenceCode}`);
+                const res = await fetch(`/api/payment/status?referenceCode=${referenceCode}&_t=${Date.now()}`, {
+                    cache: "no-store",
+                });
                 const data = await res.json();
 
                 if (data.status === "COMPLETED") {

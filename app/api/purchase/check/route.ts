@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAuth, handleAuthError } from "@/lib/apiAuth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // Lightweight endpoint: checks if the current user has a Purchase record for a given PDF
 // Polled by the client after initiating M-Pesa payment to detect when payment completes
 export async function GET(req: Request) {
