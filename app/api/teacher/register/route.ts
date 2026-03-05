@@ -116,7 +116,7 @@ export async function POST(req: Request) {
             data: {
                 userId: user.id,
                 phone: formattedPhone, // Always store normalized 254XXXXXXXXX format
-                amount: 100,
+                amount: 1, // Testing amount
                 type: "TEACHER_VERIFICATION",
                 referenceCode
             }

@@ -145,7 +145,9 @@ export default function MaterialDetailClient({
             }
 
             try {
-                const res = await fetch(`/api/purchase/check?pdfId=${material.id}`);
+                const res = await fetch(`/api/purchase/check?pdfId=${material.id}&_t=${Date.now()}`, {
+                    cache: "no-store",
+                });
                 const data = await res.json();
 
                 if (data.purchased) {
