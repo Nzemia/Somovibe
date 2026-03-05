@@ -76,7 +76,7 @@ export async function POST(req: Request) {
             data: {
                 userId: user.id,
                 phone,
-                amount: 100, // Testing amount 
+                amount: 1, // Testing amount 
                 type: "TEACHER_VERIFICATION",
                 referenceCode,
             },
