@@ -81,7 +81,7 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
                     {initial}
                   </span>
                   {/* Email — desktop only */}
-                  <span className="hidden md:block text-sm text-white/80 truncate max-w-[140px]">
+                  <span className="hidden md:block text-sm text-white/80 truncate max-w-35">
                     {user.email}
                   </span>
                   <svg

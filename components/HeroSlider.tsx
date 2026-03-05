@@ -129,12 +129,12 @@ export default function HeroSlider() {
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative w-full h-[calc(100vh-4rem)] overflow-hidden min-h-[580px]">
-      {/* Background gradients with crossfade */}
+    <section className="relative w-full h-[calc(100vh-4rem)] overflow-hidden min-h-145">
+      {/* Background gradients with cross fade */}
       {slides.map((s, i) => (
         <div
           key={s.id}
-          className={`absolute inset-0 bg-gradient-to-br ${s.bgGradient} transition-opacity duration-700 ease-in-out ${
+          className={`absolute inset-0 bg-linear-to-br ${s.bgGradient} transition-opacity duration-700 ease-in-out ${
             i === currentSlide ? "opacity-100" : "opacity-0"
           }`}
         />
@@ -152,8 +152,8 @@ export default function HeroSlider() {
 
       {/* Decorative blurs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-white/5 blur-[80px]" />
-        <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full bg-white/5 blur-[80px]" />
+        <div className="absolute -top-40 -right-40 w-125 h-125 rounded-full bg-white/5 blur-[80px]" />
+        <div className="absolute -bottom-40 -left-40 w-150 h-150 rounded-full bg-white/5 blur-[80px]" />
       </div>
 
       {/* Main content */}
