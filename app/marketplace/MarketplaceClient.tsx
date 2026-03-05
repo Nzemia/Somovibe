@@ -316,7 +316,7 @@ export default function MarketplaceClient({ materials, purchasedIds, user, highl
                             setCurrentPage(1);
                         }}
                     >
-                        <SelectTrigger className="w-[200px]">
+                        <SelectTrigger className="w-50">
                             <SelectValue placeholder="All Material Types" />
                         </SelectTrigger>
                         <SelectContent>
