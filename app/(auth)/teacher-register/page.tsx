@@ -6,10 +6,11 @@ import Link from "next/link";
 
 export default function TeacherRegisterPage() {
     const router = useRouter();
-    const [step, setStep] = useState<"form" | "payment" | "checking">("form");
+    const [step, setStep] = useState<"form" | "payment" | "checking" | "manual-verification">("form");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [referenceCode, setReferenceCode] = useState("");
+    const [mpesaReceipt, setMpesaReceipt] = useState("");
 
     const [formData, setFormData] = useState({
         email: "",
@@ -94,13 +95,45 @@ export default function TeacherRegisterPage() {
                     setStep("payment");
                 } else if (attempts >= maxAttempts) {
                     clearInterval(interval);
-                    setError("Payment verification timeout. Please check your teacher dashboard.");
-                    setStep("payment");
+                    setError("Payment verification timeout. If you have been deducted, please provide your M-Pesa receipt below.");
+                    setStep("manual-verification");
                 }
             } catch (err) {
                 console.error("Polling error:", err);
             }
         }, 1000);
+    };
+
+    const handleManualVerification = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        try {
+            const res = await fetch("/api/teacher/verify-manual", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    referenceCode,
+                    mpesaReceipt
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Submission failed");
+            }
+
+            // Success message or redirect
+            setError("");
+            alert("Receipt submitted! The admin will review it and activate your account shortly.");
+            router.push("/");
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -255,6 +288,67 @@ export default function TeacherRegisterPage() {
                                     </p>
                                 </div>
                             </div>
+                            
+                            <div className="pt-6 border-t border-border mt-4">
+                                <p className="text-sm text-muted-foreground mb-3">
+                                    Took too long? If you have already paid, you can verify manually.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        setError("");
+                                        setStep("manual-verification");
+                                    }}
+                                    className="text-sm text-primary hover:underline font-medium"
+                                >
+                                    Enter M-Pesa Receipt Number
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Manual Verification Entry */}
+                    {step === "manual-verification" && (
+                        <div className="space-y-6">
+                            <div className="text-center mb-6">
+                                <h3 className="text-xl font-bold text-foreground mb-2">
+                                    Verify Payment Manually
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    If your payment was deducted but your account wasn't activated, enter the M-Pesa Message/Receipt Number below.
+                                </p>
+                            </div>
+
+                            <form onSubmit={handleManualVerification} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-1">
+                                        M-Pesa Receipt Number
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={mpesaReceipt}
+                                        onChange={(e) => setMpesaReceipt(e.target.value.toUpperCase())}
+                                        className="w-full px-4 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground font-mono uppercase"
+                                        placeholder="e.g. QWE123RTY4"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading || mpesaReceipt.length < 5}
+                                    className="w-full py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                                >
+                                    {loading ? "Submitting..." : "Submit Receipt for Review"}
+                                </button>
+                                
+                                <button
+                                    type="button"
+                                    onClick={() => setStep("payment")}
+                                    className="w-full py-2 text-muted-foreground hover:text-foreground transition-colors mt-2"
+                                >
+                                    Try M-Pesa Payment Again
+                                </button>
+                            </form>
                         </div>
                     )}
 
