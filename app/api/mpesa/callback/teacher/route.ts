@@ -5,6 +5,9 @@ import { getPlatformAdminId } from "@/lib/platformAdmin";
 
 export async function POST(req: Request) {
     try {
+        const { searchParams } = new URL(req.url);
+        let referenceCode = searchParams.get("ref");
+
         const payload = await req.json();
 
         const stkCallback = payload.Body?.stkCallback;
@@ -16,8 +19,10 @@ export async function POST(req: Request) {
 
         const resultCode = stkCallback.ResultCode;
 
-        // Try multiple possible locations for reference code
-        let referenceCode = stkCallback.AccountReference;
+        // Try multiple possible locations for reference code if not in URL
+        if (!referenceCode) {
+            referenceCode = stkCallback.AccountReference;
+        }
 
         // If not in AccountReference, try CallbackMetadata
         if (!referenceCode) {

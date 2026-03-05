@@ -604,7 +604,6 @@ export default function MaterialDetailClient({
                   placeholder="254712345678"
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008c43] focus:border-transparent text-gray-900 placeholder:text-gray-400 text-sm"
                   autoFocus
-                  readOnly={!!user?.phone}
                 />
               </div>
               <p className="mt-1.5 text-xs text-gray-400">

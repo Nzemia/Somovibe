@@ -97,7 +97,7 @@ export async function POST(req: Request) {
                     PartyA: formattedPhone,
                     PartyB: process.env.MPESA_SHORTCODE,
                     PhoneNumber: formattedPhone,
-                    CallBackURL: `${process.env.MPESA_CALLBACK_URL}/api/mpesa/callback/purchase`,
+                    CallBackURL: `${process.env.MPESA_CALLBACK_URL}/api/mpesa/callback/purchase?ref=${referenceCode}`,
                     AccountReference: referenceCode,
                     TransactionDesc: `Purchase: ${pdf.title}`,
                 },
