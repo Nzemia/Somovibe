@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* Content */}
         <div className="relative z-10">
           <Link href="/">
-            <Image src="/logos/somovibe-text-white.png" alt="Somovibe" width={240} height={68} className="h-[60px] w-auto object-contain" />
+            <Image src="/logos/somovibe-text-white.png" alt="Somovibe" width={240} height={68} className="h-15 w-auto object-contain" />
           </Link>
         </div>
 
@@ -59,7 +59,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="flex-1 flex flex-col items-center justify-center p-5 sm:p-8 bg-[#f5faf7] min-h-screen">
         {/* Mobile logo */}
         <div className="lg:hidden mb-8">
-          <Image src="/logos/somovibe-text.png" alt="Somovibe" width={220} height={60} className="h-[60px] w-auto object-contain" />
+          <Image src="/logos/somovibe-text.png" alt="Somovibe" width={220} height={60} className="h-15 w-auto object-contain" />
         </div>
 
         <div className="w-full max-w-md">

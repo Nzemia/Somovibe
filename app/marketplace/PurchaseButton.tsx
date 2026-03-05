@@ -1,12 +1,3 @@
-/**
- * PurchaseButton - Client Component for interactive purchase actions
- * 
- * This is the ONLY interactive part of the PDF card that needs hydration.
- * Separated from PdfCardContent to keep the grid lightweight.
- * 
- * The modal, form handling, and API calls stay isolated in this component.
- */
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -109,11 +100,7 @@ export default function PurchaseButton({
     }
   };
 
-  // new flow triggered when the card's secondary buy button has collected a
-  // phone number and the user confirmed; save to profile and navigate to
-  // detail page with query params so that the detail component will continue
-  // the payment process and show progress.
-  const handleSecondaryConfirm = async () => {
+    const handleSecondaryConfirm = async () => {
     if (!phone) {
       toast.error("Please enter your M-Pesa phone number");
       return;
@@ -241,7 +228,7 @@ export default function PurchaseButton({
       {/* Purchase Modal - Rendered via Portal to avoid clipping */}
       {showModal && mounted && createPortal(
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-9999 p-4"
           style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {

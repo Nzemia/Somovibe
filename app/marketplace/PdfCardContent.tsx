@@ -1,11 +1,3 @@
-/**
- * PdfCardContent - Server Component for static/read-only PDF data
- * 
- * This component receives PDF data as a prop and renders it.
- * Keeps the expensive data-heavy part on the server to avoid hydration bloat.
- * Only the purchase button (interactive) is in a client component.
- */
-
 type PdfCardContentProps = {
   pdf: {
     id: string;
