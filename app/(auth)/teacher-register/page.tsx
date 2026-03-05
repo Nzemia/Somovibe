@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function TeacherRegisterPage() {
     const router = useRouter();
@@ -127,7 +128,7 @@ export default function TeacherRegisterPage() {
 
             // Success message or redirect
             setError("");
-            alert("Receipt submitted! The admin will review it and activate your account shortly.");
+            toast.success("Receipt submitted! The admin will review it and activate your account shortly.");
             router.push("/");
         } catch (err: any) {
             setError(err.message);
