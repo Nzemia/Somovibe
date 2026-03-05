@@ -335,3 +335,31 @@ export async function sendNewReviewNotificationEmail(
         `
     })
 }
+
+export async function sendPasswordResetEmail(
+    email: string,
+    token: string
+) {
+    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${token}`;
+    return sendEmail({
+        to: email,
+        subject: "Reset your Somovibe password",
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #006832;">Reset Your Password</h1>
+                <p>We received a request to reset the password for your Somovibe account.</p>
+                <p>Click the button below to set a new password. This link expires in <strong>1 hour</strong>.</p>
+                <a href="${resetUrl}"
+                   style="display: inline-block; background-color: #008c43; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                    Reset Password
+                </a>
+                <p style="color: #6b7280; font-size: 14px;">
+                    If you didn't request a password reset, you can safely ignore this email.
+                </p>
+                <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
+                    Or copy this link: ${resetUrl}
+                </p>
+            </div>
+        `
+    })
+}
