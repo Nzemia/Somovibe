@@ -78,16 +78,6 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
-model PasswordResetToken {
-  id        String   @id @default(uuid())
-  email     String
-  token     String   @unique
-  expires   DateTime
-  createdAt DateTime @default(now())
-
-  @@index([email])
-}
-
 model TeacherProfile {
   id        String   @id @default(uuid())
   userId    String   @unique
@@ -159,10 +149,6 @@ model Pdf {
   downloads     Download[]
   materialViews MaterialView[]
   reviews       Review[]
-
-  // Index for marketplace queries: filter by status, order by createdAt
-  // Enables fast pagination of approved PDFs without full table scan
-  @@index([status, createdAt])
 }
 
 model Wallet {
@@ -227,9 +213,6 @@ model Purchase {
   user User @relation(fields: [userId], references: [id])
   pdf  Pdf  @relation(fields: [pdfId], references: [id])
 
-  // Composite index for efficient user purchase lookups
-  // Used when querying: WHERE userId = ? AND pdfId IN (...)
-  @@index([userId, pdfId])
   @@unique([userId, pdfId])
 }
 

@@ -1,43 +1,42 @@
-import { Resend } from "resend";
+import { Resend } from "resend"
 
-// Lazy initialization - only create Resend instance when needed
-function getResendClient() {
-    return new Resend(process.env.RESEND_API_KEY);
+let resend: Resend | null = null
+const fromEmail =
+    process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev"
+
+function getResend() {
+    if (!resend) {
+        const apiKey = process.env.RESEND_API_KEY
+        if (!apiKey) {
+            throw new Error("RESEND_API_KEY not configured")
+        }
+        resend = new Resend(apiKey)
+    }
+    return resend
 }
-
-const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
 // Helper function to safely send emails with better error handling
 async function sendEmail(options: {
-    to: string;
-    subject: string;
-    html: string;
+    to: string
+    subject: string
+    html: string
 }) {
     try {
-      
-
-        const resend = getResendClient();
-        const result = await resend.emails.send({
+        const client = getResend()
+        const result = await client.emails.send({
             from: fromEmail,
             to: options.to,
             subject: options.subject,
-            html: options.html,
-        });
+            html: options.html
+        })
 
-        return result;
+        return result
     } catch (error: any) {
-        console.error(`❌ Failed to send email to ${options.to}:`, error);
-        console.error(`   Error details:`, error.message || error);
-
-        // Log specific Resend errors
-        if (error.statusCode) {
-            console.error(`   Status Code: ${error.statusCode}`);
-        }
-        if (error.name) {
-            console.error(`   Error Name: ${error.name}`);
-        }
-
-        throw error;
+        console.error(
+            "Email send failed:",
+            error.message || error
+        )
+        throw error
     }
 }
 
@@ -75,8 +74,8 @@ export async function sendMaterialApprovedEmail(
                     Keep creating quality content and watch your earnings grow!
                 </p>
             </div>
-        `,
-    });
+        `
+    })
 }
 
 export async function sendMaterialRejectedEmail(
@@ -92,12 +91,16 @@ export async function sendMaterialRejectedEmail(
                 <h1 style="color: #ef4444;">Material Not Approved</h1>
                 <p>Unfortunately, your material "<strong>${materialTitle}</strong>" was not approved for the marketplace.</p>
                 
-                ${reason ? `
+                ${
+                    reason
+                        ? `
                     <div style="background-color: #fef2f2; padding: 20px; border-left: 4px solid #ef4444; margin: 20px 0;">
                         <p style="margin: 0; color: #991b1b;"><strong>Reason:</strong></p>
                         <p style="margin-top: 10px; color: #991b1b;">${reason}</p>
                     </div>
-                ` : ''}
+                `
+                        : ""
+                }
                 
                 <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
                     <p style="margin: 0;"><strong>What you can do:</strong></p>
@@ -117,8 +120,8 @@ export async function sendMaterialRejectedEmail(
                     We appreciate your effort and look forward to your next submission!
                 </p>
             </div>
-        `,
-    });
+        `
+    })
 }
 
 export async function sendNewSaleEmail(
@@ -141,7 +144,7 @@ export async function sendNewSaleEmail(
                     <p><strong>Material:</strong> ${materialTitle}</p>
                     <p><strong>Sale Price:</strong> KES ${price}</p>
                     <p><strong>Your Earnings (75%):</strong> <span style="color: #10b981; font-size: 24px; font-weight: bold;">KES ${earnings}</span></p>
-                    <p style="font-size: 14px; color: #6b7280;">Buyer: ${buyerEmail.split('@')[0]}***</p>
+                    <p style="font-size: 14px; color: #6b7280;">Buyer: ${buyerEmail.split("@")[0]}***</p>
                 </div>
                 
                 <a href="${process.env.NEXT_PUBLIC_BASE_URL}/teacher/analytics" 
@@ -153,8 +156,8 @@ export async function sendNewSaleEmail(
                     Your earnings have been credited to your wallet. You can withdraw anytime!
                 </p>
             </div>
-        `,
-    });
+        `
+    })
 }
 
 export async function sendTeacherVerificationCompleteEmail(
@@ -162,10 +165,11 @@ export async function sendTeacherVerificationCompleteEmail(
 ) {
     return sendEmail({
         to: teacherEmail,
-        subject: "✅ Teacher Verification Complete - Start Earning!",
+        subject:
+            "✅ Teacher Verification Complete - Start Earning!",
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #10b981;">Welcome to Questy Teachers! 🎓</h1>
+                <h1 style="color: #10b981;">Welcome to Somovibe Teachers! 🎓</h1>
                 <p>Your teacher verification payment has been confirmed. You're now ready to start earning!</p>
                 
                 <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -187,8 +191,8 @@ export async function sendTeacherVerificationCompleteEmail(
                     Start sharing your knowledge and earning today!
                 </p>
             </div>
-        `,
-    });
+        `
+    })
 }
 
 // Student Emails
@@ -222,8 +226,8 @@ export async function sendPurchaseConfirmationEmail(
                     You can download this material anytime from your dashboard.
                 </p>
             </div>
-        `,
-    });
+        `
+    })
 }
 
 // Admin Emails
@@ -256,8 +260,8 @@ export async function sendNewMaterialPendingEmail(
                     Please review and approve/reject as soon as possible.
                 </p>
             </div>
-        `,
-    });
+        `
+    })
 }
 
 export async function sendNewTeacherRegistrationEmail(
@@ -284,8 +288,8 @@ export async function sendNewTeacherRegistrationEmail(
                     View All Teachers
                 </a>
             </div>
-        `,
-    });
+        `
+    })
 }
 
 export async function sendNewReviewNotificationEmail(
@@ -296,7 +300,7 @@ export async function sendNewReviewNotificationEmail(
     comment: string | null,
     materialId: string
 ) {
-    const stars = "⭐".repeat(rating);
+    const stars = "⭐".repeat(rating)
     return sendEmail({
         to: teacherEmail,
         subject: `${stars} New Review on "${materialTitle}"`,
@@ -307,12 +311,16 @@ export async function sendNewReviewNotificationEmail(
                 
                 <div style="background-color: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
                     <p><strong>Rating:</strong> ${stars} (${rating}/5)</p>
-                    <p><strong>Reviewer:</strong> ${reviewerEmail.split('@')[0]}***</p>
-                    ${comment ? `
+                    <p><strong>Reviewer:</strong> ${reviewerEmail.split("@")[0]}***</p>
+                    ${
+                        comment
+                            ? `
                         <div style="background-color: white; padding: 15px; border-radius: 6px; margin-top: 15px;">
                             <p style="margin: 0; color: #374151; font-style: italic;">"${comment}"</p>
                         </div>
-                    ` : ''}
+                    `
+                            : ""
+                    }
                 </div>
                 
                 <a href="${process.env.NEXT_PUBLIC_BASE_URL}/marketplace/${materialId}" 
@@ -324,38 +332,6 @@ export async function sendNewReviewNotificationEmail(
                     You can reply to this review to engage with your students!
                 </p>
             </div>
-        `,
-    });
-}
-
-// Password Reset Email
-export async function sendPasswordResetEmail(email: string, token: string) {
-    const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
-
-    return sendEmail({
-        to: email,
-        subject: "Reset Your Password - Questy",
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #3b82f6;">Reset Your Password</h1>
-                <p>You requested to reset your password. Click the button below to reset it:</p>
-                
-                <a href="${resetLink}" 
-                   style="display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0;">
-                    Reset Password
-                </a>
-                
-                <p>Or copy and paste this link into your browser:</p>
-                <p style="color: #666; word-break: break-all; background-color: #f3f4f6; padding: 10px; border-radius: 4px;">${resetLink}</p>
-                
-                <div style="background-color: #fef2f2; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ef4444;">
-                    <p style="margin: 0; color: #991b1b;"><strong>⏰ This link will expire in 1 hour.</strong></p>
-                </div>
-                
-                <p style="color: #6b7280; font-size: 14px;">
-                    If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
-                </p>
-            </div>
-        `,
-    });
+        `
+    })
 }

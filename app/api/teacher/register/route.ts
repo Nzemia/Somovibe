@@ -26,11 +26,26 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Already an active teacher" }, { status: 400 });
         }
 
+        // Normalize phone to 254XXXXXXXXX format before any lookups or storage
+        let formattedPhone = phone.replace(/\s+/g, '');
+        if (formattedPhone.startsWith('+')) {
+            formattedPhone = formattedPhone.substring(1);
+        }
+        if (formattedPhone.startsWith('0')) {
+            formattedPhone = '254' + formattedPhone.substring(1);
+        }
+        if (!/^254\d{9}$/.test(formattedPhone)) {
+            return NextResponse.json(
+                { error: "Invalid phone number format. Use 254XXXXXXXXX" },
+                { status: 400 }
+            );
+        }
+
         // Update user phone if not set
         if (!user.phone) {
             // Check if phone is already taken by another user
             const existingPhone = await prisma.user.findUnique({
-                where: { phone },
+                where: { phone: formattedPhone },
             });
 
             if (existingPhone && existingPhone.id !== user.id) {
@@ -42,9 +57,9 @@ export async function POST(req: Request) {
 
             user = await prisma.user.update({
                 where: { id: user.id },
-                data: { phone },
+                data: { phone: formattedPhone },
             });
-        } else if (user.phone !== phone) {
+        } else if (user.phone !== formattedPhone) {
             // User has a phone but trying to use a different one
             return NextResponse.json(
                 { error: "Phone number mismatch. Please use your registered phone number." },
@@ -75,8 +90,8 @@ export async function POST(req: Request) {
         await prisma.pendingPayment.create({
             data: {
                 userId: user.id,
-                phone,
-                amount: 1, // Testing amount 
+                phone: formattedPhone, // Always store normalized 254XXXXXXXXX format
+                amount: 100,
                 type: "TEACHER_VERIFICATION",
                 referenceCode,
             },
