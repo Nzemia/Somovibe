@@ -53,7 +53,7 @@ export function Navbar({ user }: { user: { email: string; role: string } | null 
           {/* Logo */}
           <Link href="/" className="shrink-0 flex items-center self-center">
             <Image
-              src="/logos/Somovibe text white.png"
+              src="/logos/somovibe-text-white.png"
               alt="Somovibe"
               width={220}
               height={62}

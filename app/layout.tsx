@@ -26,9 +26,9 @@ export const metadata: Metadata = {
   description: "Quality CBC learning materials from verified teachers. Learn, teach, and earn with Somovibe — Kenya's premier educational marketplace.",
   icons: {
     icon: [
-      { url: "/logos/Somovibe logo.png", type: "image/png" },
+      { url: "/logos/somovibe-logo.png", type: "image/png" },
     ],
-    apple: "/logos/Somovibe logo.png",
+    apple: "/logos/somovibe-logo.png",
   },
   openGraph: {
     title: "Somovibe - CBC Learning Platform",

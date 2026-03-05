@@ -160,7 +160,7 @@ export default async function Home() {
             {/* Left: branding + copy */}
             <div className="flex-1 text-center lg:text-left">
               <div className="flex justify-center lg:justify-start mb-6">
-                <Image src="/logos/Somovibe logo white.png" alt="Somovibe" width={64} height={64} className="h-14 w-auto object-contain" />
+                <Image src="/logos/somovibe-logo-white.png" alt="Somovibe" width={64} height={64} className="h-14 w-auto object-contain" />
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-5">
                 Kenya&apos;s Teachers<br className="hidden sm:block" /> Deserve to Earn More.
