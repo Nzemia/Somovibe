@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -95,8 +95,8 @@ export default function MaterialDetailClient({
     const isVerified = !!material.teacher?.teacherProfile?.isActive;
     const isTeacher = user?.id === material.teacher?.id;
 
-    // helper for download (declared before it's used in effect)
-    async function handleDownload() {
+    // helper for download (stable reference via useCallback to avoid restarting the polling effect)
+    const handleDownload = useCallback(async () => {
         setDownloading(true);
         const loadingToast = toast.loading("Preparing download...");
 
@@ -125,7 +125,7 @@ export default function MaterialDetailClient({
         } finally {
             setDownloading(false);
         }
-    }
+    }, [material.id]);
 
     // Poll the Purchase table directly — the source of truth
     // Once the M-Pesa callback creates the Purchase record, the next poll catches it
