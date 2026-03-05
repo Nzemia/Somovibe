@@ -213,7 +213,7 @@ export default function TeacherRegisterPage() {
                                     <p className="font-mono text-sm font-bold text-foreground">{referenceCode}</p>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                    Amount: <span className="font-bold text-primary">KES 1</span>
+                                    Amount: <span className="font-bold text-primary">KES 100</span>
                                 </p>
                             </div>
 
