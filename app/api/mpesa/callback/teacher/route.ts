@@ -95,20 +95,20 @@ export async function POST(req: Request) {
             }
 
             // Update payment status and activate teacher in a transaction
-            await prisma.$transaction(async (tx) => {
-                await tx.pendingPayment.update({
+            // Using sequential transaction array to avoid P2028 interactive timeout on VPS
+            await prisma.$transaction([
+                prisma.pendingPayment.update({
                     where: { id: payment.id },
                     data: {
                         status: "COMPLETED",
                         completedAt: new Date(),
                     },
-                });
-
-                await tx.teacherProfile.update({
+                }),
+                prisma.teacherProfile.update({
                     where: { userId: payment.userId },
                     data: { isActive: true },
-                });
-            });
+                })
+            ]);
 
             // Send email notifications (non-blocking, don't fail the callback)
             try {
