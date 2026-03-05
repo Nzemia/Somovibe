@@ -19,8 +19,8 @@ export function Footer() {
           {/* ── Brand column ── */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3 mb-5">
-              <Image src="/logos/Somovibe logo white.png" alt="Somovibe" width={44} height={44} className="h-10 w-auto object-contain" />
-              <Image src="/logos/Somovibe text white.png" alt="Somovibe" width={140} height={38} className="h-9 w-auto object-contain" />
+              <Image src="/logos/somovibe-logo-white.png" alt="Somovibe" width={44} height={44} className="h-10 w-auto object-contain" />
+              <Image src="/logos/somovibe-text-white.png" alt="Somovibe" width={140} height={38} className="h-9 w-auto object-contain" />
             </Link>
             <p className="text-white/60 leading-relaxed text-sm sm:text-base max-w-xs">
               Kenya&apos;s premier CBC educational marketplace. Quality materials from verified teachers — empowering students and educators nationwide.

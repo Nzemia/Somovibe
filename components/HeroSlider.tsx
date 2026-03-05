@@ -265,7 +265,7 @@ export default function HeroSlider() {
       {/* Somovibe watermark logo */}
       <div className="absolute top-4 sm:top-6 right-4 sm:right-6 z-10 opacity-15 pointer-events-none">
         <Image
-          src="/logos/Somovibe logo white.png"
+          src="/logos/somovibe-logo-white.png"
           alt=""
           width={52}
           height={52}
