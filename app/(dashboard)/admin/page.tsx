@@ -210,6 +210,23 @@ export default async function AdminDashboard() {
                             </Link>
 
                             <Link
+                                href="/admin/students"
+                                className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors group"
+                            >
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-foreground">Manage Students</h3>
+                                        <p className="text-sm text-muted-foreground">View all student accounts</p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            <Link
                                 href="/admin/materials"
                                 className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors group"
                             >
