@@ -113,32 +113,49 @@ export async function POST(req: Request) {
             const expectedAmount = payment.amount;
             const teacherShare = Math.floor(expectedAmount * 0.75);
             const platformShare = expectedAmount - teacherShare;
-
-            // Create purchase record
-            await prisma.purchase.create({
-                data: {
-                    userId: payment.userId,
-                    pdfId,
-                },
-            });
-
-            // Credit teacher wallet
-            await creditWallet(pdf.teacherId, teacherShare);
-
-            // Credit platform admin wallet
             const platformAdminId = await getPlatformAdminId();
-            if (platformAdminId) {
-                await creditWallet(platformAdminId, platformShare);
-            }
 
-            // Update payment status
-            await prisma.pendingPayment.update({
-                where: { id: payment.id },
-                data: {
-                    status: "COMPLETED",
-                    completedAt: new Date(),
-                },
-            });
+            // Perform all Ledger operations atomically
+            try {
+                await prisma.$transaction(async (tx) => {
+                    // Create purchase record
+                    // Use upsert to be safe during retries and avoid Unique Constraint crashing
+                    await tx.purchase.upsert({
+                        where: {
+                            userId_pdfId: {
+                                userId: payment.userId,
+                                pdfId,
+                            }
+                        },
+                        update: {}, // Do nothing if already exists
+                        create: {
+                            userId: payment.userId,
+                            pdfId,
+                        },
+                    });
+
+                    // Credit teacher wallet
+                    const { creditWalletTx } = await import("@/lib/wallet");
+                    await creditWalletTx(tx, pdf.teacherId, teacherShare);
+
+                    // Credit platform admin wallet
+                    if (platformAdminId) {
+                        await creditWalletTx(tx, platformAdminId, platformShare);
+                    }
+
+                    // Update payment status
+                    await tx.pendingPayment.update({
+                        where: { id: payment.id },
+                        data: {
+                            status: "COMPLETED",
+                            completedAt: new Date(),
+                        },
+                    });
+                });
+            } catch (txError: any) {
+                console.error("Wallet transaction failed, rolling back. Error:", txError);
+                return NextResponse.json({ ok: false, error: txError.message });
+            }
 
             // Send email notifications (non-blocking, don't fail the callback)
             try {

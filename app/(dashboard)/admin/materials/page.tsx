@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import MaterialActions from "./MaterialActions";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -55,11 +56,22 @@ export default async function AllMaterialsPage({
     return (
         <div className="min-h-screen bg-background">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-foreground mb-2">All Materials</h1>
-                    <p className="text-muted-foreground">
-                        View and manage all uploaded learning materials
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-foreground mb-2">All Materials</h1>
+                        <p className="text-muted-foreground">
+                            View and manage all uploaded learning materials
+                        </p>
+                    </div>
+                    <Link
+                        href="/admin"
+                        className="px-6 py-3 bg-secondary text-secondary-foreground rounded-md font-medium hover:bg-secondary/80 transition-colors inline-flex items-center justify-center space-x-2"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Back to Dashboard</span>
+                    </Link>
                 </div>
 
                 {/* Filter */}
