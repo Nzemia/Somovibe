@@ -16,6 +16,8 @@ type Props = {
   onMinPriceChange?: (v: string) => void;
   onMaxPriceChange?: (v: string) => void;
   onSortChange?: (v: string) => void;
+  externalForceOpen?: boolean;
+  onExternalForceClose?: () => void;
 };
 
 const GRADE_GROUPS = [
@@ -73,6 +75,8 @@ export function MarketplaceFilters({
   onMinPriceChange,
   onMaxPriceChange,
   onSortChange,
+  externalForceOpen,
+  onExternalForceClose,
 }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -93,6 +97,13 @@ export function MarketplaceFilters({
   const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
 
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (externalForceOpen) {
+      openSheet();
+      onExternalForceClose?.();
+    }
+  }, [externalForceOpen, onExternalForceClose]);
 
   // Lock body scroll when sheet is open
   useEffect(() => {
@@ -224,27 +235,6 @@ export function MarketplaceFilters({
     </aside>
   );
 
-  /* ─────────────── MOBILE trigger button ─────────────── */
-  const mobileTrigger = (
-    <div className="lg:hidden mb-3">
-      <button
-        onClick={openSheet}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-gray-200 bg-white text-sm font-bold text-gray-800 shadow-sm hover:border-[#008c43] hover:text-[#008c43] transition-colors active:scale-95"
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-        </svg>
-        Filters &amp; Sort
-        {(desktopActiveCount > 0 || draftSort !== "newest") && (
-          <span className="bg-[#008c43] text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
-            {desktopActiveCount + (draftSort !== "newest" ? 1 : 0)}
-          </span>
-        )}
-      </button>
-    </div>
-  );
-
   /* ─────────────── BOTTOM SHEET ─────────────── */
   const bottomSheet = mounted && sheetOpen && createPortal(
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
@@ -369,7 +359,6 @@ export function MarketplaceFilters({
 
   return (
     <>
-      {mobileTrigger}
       {bottomSheet}
       {desktopSidebar}
     </>
