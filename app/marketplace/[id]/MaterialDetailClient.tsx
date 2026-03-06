@@ -680,7 +680,7 @@ function RelatedSection({ title, subtitle, items, user, purchasedIds }: {
   return (
     // give each related block a bit of horizontal breathing room; 13px
     // from the container edge as requested
-    <div className="mt-10 px-[13px]">
+    <div className="mt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="flex items-end justify-between mb-4">
         <div>
           <p className="text-xs font-bold text-[#008c43] uppercase tracking-wider mb-0.5">{subtitle}</p>

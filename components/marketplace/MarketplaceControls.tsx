@@ -17,7 +17,8 @@ export function MarketplaceControls({
   onSearchChange,
   onSortChange,
   totalCount,
-}: Props) {
+  mobileTriggerRender,
+}: Props & { mobileTriggerRender?: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(initialSearch);
@@ -51,14 +52,16 @@ export function MarketplaceControls({
 
   return (
     <div className="pt-5 pb-1">
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full">
 
         {/* Search */}
-        <div className="flex-1">
-          <label className="sr-only" htmlFor="marketplace-search">Search resources</label>
-          <div className={`flex items-center gap-2.5 rounded-xl border-2 bg-white transition-all duration-200 ${
-            focused ? "border-[#008c43] ring-2 ring-[#008c43]/15" : "border-gray-200 hover:border-gray-300"
-          }`}>
+        <div className="flex-1 flex gap-2">
+          {mobileTriggerRender}
+          <div className="flex-1">
+            <label className="sr-only" htmlFor="marketplace-search">Search resources</label>
+            <div className={`flex items-center gap-2.5 rounded-xl border-2 bg-white transition-all duration-200 h-full ${
+              focused ? "border-[#008c43] ring-2 ring-[#008c43]/15" : "border-gray-200 hover:border-gray-300"
+            }`}>
             <span className="pl-3.5 text-gray-400 shrink-0">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round"
@@ -85,8 +88,9 @@ export function MarketplaceControls({
             )}
           </div>
         </div>
+      </div>
 
-        {/* Sort + count — hidden on mobile (sort lives in the Filter & Sort sheet) */}
+      {/* Sort + count — hidden on mobile (sort lives in the Filter & Sort sheet) */}
         <div className="hidden sm:flex items-center gap-3 shrink-0">
           {totalCount !== undefined && (
             <span className="hidden sm:inline text-xs text-gray-400 font-medium whitespace-nowrap">

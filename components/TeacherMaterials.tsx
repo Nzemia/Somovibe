@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ShareButton from "@/components/ShareButton";
 
@@ -33,6 +34,33 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export function TeacherMaterials({ materials }: { materials: MaterialRow[] }) {
+  const router = useRouter();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${title}"?\nThis action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setDeletingId(id);
+      const res = await fetch(`/api/teacher/material/delete?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete material");
+      }
+
+      router.refresh();
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const [query, setQuery]               = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [subjectFilter, setSubjectFilter] = useState("ALL");
@@ -219,9 +247,28 @@ export function TeacherMaterials({ materials }: { materials: MaterialRow[] }) {
                       {new Date(m.createdAt).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
                     </td>
                     <td className="px-4 py-3.5">
-                      {m.status === "APPROVED" && (
-                        <ShareButton url={`/marketplace/${m.id}`} title={m.title} description={m.description} variant="icon" />
-                      )}
+                      <div className="flex items-center gap-2 justify-end">
+                        {m.status === "APPROVED" && (
+                          <ShareButton url={`/marketplace/${m.id}`} title={m.title} description={m.description} variant="icon" />
+                        )}
+                        <button
+                          onClick={() => handleDelete(m.id, m.title)}
+                          disabled={deletingId === m.id}
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="Delete Material"
+                        >
+                          {deletingId === m.id ? (
+                            <svg className="animate-spin w-4 h-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -259,6 +306,22 @@ export function TeacherMaterials({ materials }: { materials: MaterialRow[] }) {
                   {m.status === "APPROVED" && (
                     <ShareButton url={`/marketplace/${m.id}`} title={m.title} description={m.description} variant="icon" />
                   )}
+                  <button
+                    onClick={() => handleDelete(m.id, m.title)}
+                    disabled={deletingId === m.id}
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {deletingId === m.id ? (
+                      <svg className="animate-spin w-4 h-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
             ))}

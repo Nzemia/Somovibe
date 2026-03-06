@@ -277,7 +277,7 @@ function SearchSuggestionBanner({
   );
 }
 
-/* ── Empty state ──────────────────────────────────────────── */
+/* ── Empty state ──── */
 function EmptyState({
   hasActiveFilters,
   searchTerm,
