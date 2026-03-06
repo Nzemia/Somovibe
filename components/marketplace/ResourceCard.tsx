@@ -78,10 +78,11 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
     >
 
       {/* ── Cover — click navigates to full detail page ── */}
-      <div
-        className="relative overflow-hidden shrink-0 cursor-pointer"
+      <Link
+        className="relative overflow-hidden shrink-0 cursor-pointer block"
         style={{ height: "clamp(130px, 38vw, 172px)" }}
-        onClick={() => router.push(`/marketplace/${resource.id}`)}
+        href={`/marketplace/${resource.id}`}
+        prefetch={true}
       >
         {/* Background */}
         {resource.thumbnailUrl && !imgFailed ? (
@@ -135,7 +136,7 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
             {resource.title}
           </h3>
         </div>
-      </div>
+      </Link>
 
       {/* ── Compact body — click toggles expand ── */}
       <div
