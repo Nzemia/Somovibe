@@ -20,6 +20,14 @@ export const metadata: Metadata = {
     description:
       "Quality CBC learning materials from verified teachers. Learn, teach, and earn.",
     type: "website",
+    images: [
+      {
+        url: "/logos/somovibe-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Somovibe - CBC Learning Platform",
+      },
+    ],
   },
 };
 
@@ -61,16 +69,42 @@ const steps = [
 ];
 
 export default async function Home() {
-    const user = await getCurrentUser()
+  const user = await getCurrentUser()
 
-    if (user) {
-        if (user.role === "ADMIN") redirect("/admin")
-        if (user.role === "TEACHER") redirect("/teacher")
-        if (user.role === "STUDENT") redirect("/student")
+  if (user) {
+    if (user.role === "ADMIN") redirect("/admin")
+    if (user.role === "TEACHER") redirect("/teacher")
+    if (user.role === "STUDENT") redirect("/student")
+  }
+
+  // JSON-LD structured data for SEO
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "Somovibe",
+    "url": "https://somovibe.com",
+    "logo": "https://somovibe.com/logos/somovibe-logo.png",
+    "description": "Quality CBC learning materials from verified teachers. Students access premium notes & past papers. Teachers earn 75% commission.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "KE"
+    },
+    "sameAs": [
+      "https://somovibe.com"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "category": "Educational Materials",
+      "availability": "https://schema.org/InStock"
     }
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar user={user ? { email: user.email, role: user.role } : null} />
       <QuickNav />
 
