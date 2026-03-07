@@ -4,6 +4,30 @@ import Link from "next/link";
 import { getCachedApprovedPdfs, getUserPurchasedPdfIds } from "@/lib/marketplace";
 import { MarketplaceHeader } from "@/components/marketplace/MarketplaceHeader";
 import { MarketplaceClientWrapper } from "@/components/marketplace/MarketplaceClientWrapper";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Marketplace - Browse CBC Learning Materials",
+  description:
+    "Browse our extensive collection of CBC learning materials. Find lesson plans, schemes of work, exam materials, and educational resources for all grades and subjects.",
+  keywords: [
+    "CBC materials marketplace",
+    "learning resources Kenya",
+    "teaching materials",
+    "lesson plans",
+    "schemes of work",
+    "educational resources",
+  ],
+  openGraph: {
+    title: "Marketplace - Browse CBC Learning Materials | Somovibe",
+    description:
+      "Browse our extensive collection of CBC learning materials for all grades and subjects.",
+    type: "website",
+  },
+  alternates: {
+    canonical: "/marketplace",
+  },
+};
 
 export default async function Marketplace({
   searchParams,
@@ -51,9 +75,9 @@ export default async function Marketplace({
   const userForNavbar = user ? { email: user.email, role: user.role } : null;
   const dashboardHref =
     user?.role === "TEACHER" ? "/teacher"
-    : user?.role === "STUDENT" ? "/student"
-    : user?.role === "ADMIN" ? "/admin"
-    : "/";
+      : user?.role === "STUDENT" ? "/student"
+        : user?.role === "ADMIN" ? "/admin"
+          : "/";
 
   return (
     <>

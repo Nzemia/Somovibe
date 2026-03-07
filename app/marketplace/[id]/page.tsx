@@ -4,7 +4,6 @@ import { Navbar } from "@/components/Navbar";
 import { notFound } from "next/navigation";
 import MaterialDetailClient from "./MaterialDetailClient";
 import { Metadata } from "next";
-import { getAverageRating, maskEmail } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -14,17 +13,60 @@ export async function generateMetadata({
   const { id } = await params;
   const material = await prisma.pdf.findUnique({
     where: { id, status: "APPROVED" },
-    select: { title: true, description: true, thumbnailUrl: true, subject: true, grade: true },
+    select: {
+      title: true,
+      description: true,
+      thumbnailUrl: true,
+      subject: true,
+      grade: true,
+      materialType: true,
+    },
   });
-  if (!material) return { title: "Material Not Found" };
+
+  if (!material) {
+    return {
+      title: "Material Not Found | Somovibe",
+      description: "The requested learning material could not be found."
+    };
+  }
+
+  const pageTitle = `${material.title} — ${material.subject} ${material.grade}`;
+  const pageDescription = material.description || `${material.materialType} for ${material.subject} ${material.grade}. Quality CBC learning material available on Somovibe.`;
+
   return {
-    title: `${material.title} — ${material.subject} ${material.grade} | Somovibe`,
-    description: material.description,
+    title: pageTitle,
+    description: pageDescription,
+    keywords: [
+      material.title,
+      material.subject,
+      material.grade,
+      material.materialType,
+      "CBC",
+      "learning materials",
+      "Somovibe"
+    ],
     openGraph: {
-      title: material.title,
-      description: material.description,
-      images: material.thumbnailUrl ? [material.thumbnailUrl] : [],
+      title: pageTitle,
+      description: pageDescription,
+      images: material.thumbnailUrl ? [
+        {
+          url: material.thumbnailUrl,
+          width: 1200,
+          height: 630,
+          alt: material.title,
+        }
+      ] : [],
       type: "website",
+      siteName: "Somovibe",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: pageDescription,
+      images: material.thumbnailUrl ? [material.thumbnailUrl] : [],
+    },
+    alternates: {
+      canonical: `/marketplace/${id}`,
     },
   };
 }
@@ -64,7 +106,7 @@ export default async function MaterialDetailPage({
   // Track view (async, don't await)
   prisma.materialView.create({
     data: { pdfId: material.id, userId: user?.id || null },
-  }).catch(() => {});
+  }).catch(() => { });
 
   // Fetch related data in parallel
   const [purchase, moreFromTeacher, similarMaterials] = await Promise.all([
