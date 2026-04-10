@@ -1,0 +1,45 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC (5 AM EAT)
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Create Database Backup via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT != '' && secrets.VPS_PORT || '22' }}
+          script: |
+            cd /opt/somovibe
+            chmod +x scripts/backup-db.sh
+            ./scripts/backup-db.sh
+            
+      - name:  Backup Complete
+        if: success()
+        run: |
+          echo " Database backup successful!"
+          echo "Backup created at $(date)"
+        
+      - name: ❌ Backup Failed
+        if: failure()
+        run: |
+          echo "❌ Database backup failed!"
+          echo "Please check the logs and verify:"
+          echo "1. VPS_HOST secret is set correctly"
+          echo "2. VPS_USERNAME secret is set correctly"
+          echo "3. VPS_SSH_KEY secret is set correctly"
+          echo "4. VPS_PORT secret is set (default: 22)"
+          echo "5. The backup script exists at /opt/somovibe/scripts/backup-db.sh"
+

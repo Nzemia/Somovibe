@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Disallow private routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /teacher/
+Disallow: /student/
+
+# Sitemap
+Sitemap: https://somovibe.com/sitemap.xml
