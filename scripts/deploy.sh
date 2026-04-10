@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Questy Deployment Script
+# Somovibe Deployment Script
 # Usage: ./scripts/deploy.sh
 
 set -e
@@ -22,34 +22,34 @@ fi
 
 # Pull latest changes
 echo -e "${YELLOW}📥 Pulling latest changes...${NC}"
-git pull origin main
+git pull origin master
 
 # Stop existing containers
 echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"
-docker-compose down
+docker compose down
 
 # Build new images
 echo -e "${YELLOW}🔨 Building Docker images...${NC}"
-docker-compose build --no-cache
+docker compose build --no-cache
 
 # Run database migrations
 echo -e "${YELLOW}🗄️  Running database migrations...${NC}"
-docker-compose run --rm app npx prisma migrate deploy
+docker compose run --rm app npx prisma migrate deploy
 
 # Start containers
 echo -e "${YELLOW}🚀 Starting containers...${NC}"
-docker-compose up -d
+docker compose up -d
 
 # Wait for health check
 echo -e "${YELLOW}⏳ Waiting for application to be healthy...${NC}"
 sleep 10
 
 # Check if app is running
-if docker-compose ps | grep -q "Up"; then
+if docker compose ps | grep -q "Up"; then
     echo -e "${GREEN} Deployment successful!${NC}"
     echo -e "${GREEN}🌐 Application is running at http://localhost${NC}"
 else
-    echo -e "${RED}❌ Deployment failed. Check logs with: docker-compose logs${NC}"
+    echo -e "${RED}❌ Deployment failed. Check logs with: docker compose logs${NC}"
     exit 1
 fi
 
