@@ -91,6 +91,7 @@ const SUBJECT_COLOR: Record<string, string> = {
 /* ── Types ────────────────────────────────────────────────── */
 type RelatedItem = {
   id: string;
+  slug?: string | null;
   title: string;
   subject: string;
   grade: string;
@@ -104,6 +105,7 @@ type Props = {
   onClose: () => void;
   material: {
     id: string;
+    slug?: string | null;
     title: string;
     subject: string;
     grade: string;
@@ -123,7 +125,7 @@ function MiniCard({ item }: { item: RelatedItem }) {
 
   return (
     <Link
-      href={`/marketplace/${item.id}`}
+      href={`/marketplace/${item.slug ?? item.id}`}
       className="flex gap-3 items-start p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors group border border-gray-100"
     >
       {/* Color swatch */}
@@ -184,8 +186,8 @@ export function DownloadSuccessModal({
 
   const shareUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/marketplace/${material.id}`
-      : `/marketplace/${material.id}`;
+      ? `${window.location.origin}/marketplace/${material.slug ?? material.id}`
+      : `/marketplace/${material.slug ?? material.id}`;
 
   const teacherHandle = material.teacher.name || material.teacher.email.split("@")[0];
 

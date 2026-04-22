@@ -4,6 +4,11 @@ import { requireRole, handleAuthError } from "@/lib/apiAuth";
 import { sendNewMaterialPendingEmail } from "@/lib/email";
 import { getPlatformAdminId } from "@/lib/platformAdmin";
 import { uploadToCloudinary, getDefaultThumbnail } from "@/lib/cloudinary";
+import { generateSlug, makeSlugUnique } from "@/lib/slug";
+
+// Raise the Next.js App Router body size limit (default is 1 MB).
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
     try {
@@ -73,6 +78,12 @@ export async function POST(req: Request) {
             }, { status: 500 });
         }
 
+        // Generate a slug from title + grade + subject
+        let slug = generateSlug(title, grade, subject);
+        // Check for uniqueness; if collision, append a random suffix
+        const existing = await prisma.pdf.findUnique({ where: { slug } });
+        if (existing) slug = makeSlugUnique(slug);
+
         // Create PDF record in database
         const pdf = await prisma.pdf.create({
             data: {
@@ -83,6 +94,7 @@ export async function POST(req: Request) {
                 price,
                 fileUrl,
                 thumbnailUrl,
+                slug,
                 materialType: materialType as "PDF" | "PDF_SLIDES" | "POWERPOINT" | "CLASS_INSTRUCTIONS" | "SCHEME_OF_WORK" | "LESSON_PLAN" | "EXAM_QUIZ",
                 teacherId: user.id,
             },

@@ -131,6 +131,7 @@ enum MaterialType {
 
 model Pdf {
   id           String       @id @default(uuid())
+  slug         String?      @unique
   title        String
   description  String
   subject      String

@@ -192,7 +192,6 @@ export default function UploadPage() {
                 throw new Error(data.error || "Upload failed");
             }
 
-            toast.success("Material uploaded successfully! Awaiting approval");
             router.push("/teacher?upload=success");
         } catch (err: unknown) {
             // Errors are already shown via toast notifications above

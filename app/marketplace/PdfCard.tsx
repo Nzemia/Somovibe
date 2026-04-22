@@ -10,6 +10,7 @@ import Link from "next/link";
 type PdfCardProps = {
     pdf: {
         id: string;
+        slug?: string | null;
         title: string;
         description: string;
         subject: string;
@@ -72,7 +73,7 @@ export default function PdfCard({ pdf, isPurchased, user }: PdfCardProps) {
     };
 
     return (
-        <Link href={`/marketplace/${pdf.id}`} className="block group">
+        <Link href={`/marketplace/${pdf.slug ?? pdf.id}`} className="block group">
             <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-muted overflow-hidden">

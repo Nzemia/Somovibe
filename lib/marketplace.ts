@@ -115,6 +115,7 @@ export const getCachedApprovedPdfs = unstable_cache(
       where,
       select: {
         id: true,
+        slug: true,
         title: true,
         description: true,
         subject: true,

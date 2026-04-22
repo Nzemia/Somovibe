@@ -19,6 +19,7 @@ import type { ReactNode } from "react";
 
 type RelatedPdf = {
   id: string;
+  slug?: string | null;
   title: string;
   description: string;
   subject: string;
@@ -34,6 +35,7 @@ type RelatedPdf = {
 
 type Material = {
   id: string;
+  slug?: string | null;
   title: string;
   description: string;
   subject: string;
@@ -248,7 +250,7 @@ export default function MaterialDetailClient({
     if (!flag) return;
 
     // build current path for redirection (includes any query params)
-    const currentPath = `/marketplace/${material.id}` + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+    const currentPath = `/marketplace/${material.slug ?? material.id}` + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
     if (!user) {
       router.push(`/login?callbackUrl=${encodeURIComponent(currentPath)}`);
@@ -275,7 +277,7 @@ export default function MaterialDetailClient({
     const params = new URLSearchParams(searchParams.toString());
     params.delete("autoBuy");
     params.delete("phone");
-    const base = `/marketplace/${material.id}`;
+    const base = `/marketplace/${material.slug ?? material.id}`;
     const suffix = params.toString() ? `?${params.toString()}` : "";
     router.replace(base + suffix, { scroll: false });
   }, [searchParams, user, purchased]);
@@ -317,7 +319,7 @@ export default function MaterialDetailClient({
   function onBuyClick() {
     if (!user) {
       toast.error("Please login to purchase");
-      router.push(`/login?callbackUrl=${encodeURIComponent(`/marketplace/${material.id}?autoBuy=1`)}`);
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/marketplace/${material.slug ?? material.id}?autoBuy=1`)}`);
       return;
     }
     setShowPhoneModal(true);

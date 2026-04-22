@@ -7,6 +7,7 @@ import PurchaseButton from "@/app/marketplace/PurchaseButton";
 
 type PdfItem = {
   id: string;
+  slug?: string | null;
   title: string;
   description: string;
   subject: string;
@@ -81,7 +82,7 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
       <Link
         className="relative overflow-hidden shrink-0 cursor-pointer block"
         style={{ height: "clamp(130px, 38vw, 172px)" }}
-        href={`/marketplace/${resource.id}`}
+        href={`/marketplace/${resource.slug ?? resource.id}`}
         prefetch={true}
       >
         {/* Background */}
@@ -252,7 +253,7 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
 
           {/* View full details link */}
           <Link
-            href={`/marketplace/${resource.id}`}
+            href={`/marketplace/${resource.slug ?? resource.id}`}
             className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl border-2 border-[#008c43] text-[#008c43] text-xs font-bold hover:bg-[#f0faf5] transition-colors"
             onClick={e => e.stopPropagation()}
           >
