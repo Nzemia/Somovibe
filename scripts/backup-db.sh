@@ -101,7 +101,7 @@ if command -v pg_dump >/dev/null 2>&1; then
     echo -e "${YELLOW}🛠️  Using local pg_dump binary${NC}"
 elif command -v docker >/dev/null 2>&1; then
     DUMP_METHOD="docker"
-    echo -e "${YELLOW}🛠️  Local pg_dump not found; using postgres:15-alpine container${NC}"
+    echo -e "${YELLOW}🛠️  Local pg_dump not found; using postgres:17-alpine container${NC}"
 else
     echo -e "${RED}❌ Neither pg_dump nor docker is available on this host${NC}"
     exit 1
@@ -114,7 +114,7 @@ else
     docker run --rm \
         -e DATABASE_URL="$DB_URL" \
         -e PGSSLMODE=require \
-        postgres:15-alpine \
+        postgres:17-alpine \
         sh -c 'pg_dump "$DATABASE_URL" --no-owner --no-acl' \
         > "$BACKUP_FILE" 2>"$ERROR_LOG"
     DUMP_EXIT=$?
