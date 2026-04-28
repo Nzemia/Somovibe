@@ -95,15 +95,23 @@ echo -e "${YELLOW}📂 Backup directory: $BACKUP_DIR${NC}"
 echo -e "${YELLOW}📄 Backup file: $BACKUP_FILE${NC}"
 echo -e "${YELLOW}🔗 Target database: $TARGET${NC}"
 
-# Ensure we can run pg_dump either locally or in Docker
-if command -v pg_dump >/dev/null 2>&1; then
-    DUMP_METHOD="local"
-    echo -e "${YELLOW}🛠️  Using local pg_dump binary${NC}"
-elif command -v docker >/dev/null 2>&1; then
+# Prefer Docker so the backup always uses pg_dump from Postgres 17.
+if command -v docker >/dev/null 2>&1; then
     DUMP_METHOD="docker"
-    echo -e "${YELLOW}🛠️  Local pg_dump not found; using postgres:17-alpine container${NC}"
+    echo -e "${YELLOW}🛠️  Using postgres:17-alpine via Docker${NC}"
+elif command -v pg_dump >/dev/null 2>&1; then
+    PG_DUMP_VERSION=$(pg_dump --version | awk '{print $3}')
+    PG_DUMP_MAJOR=${PG_DUMP_VERSION%%.*}
+
+    if [ "$PG_DUMP_MAJOR" != "17" ]; then
+        echo -e "${RED}❌ Docker is unavailable and local pg_dump is version ${PG_DUMP_VERSION}; expected 17.x${NC}"
+        exit 1
+    fi
+
+    DUMP_METHOD="local"
+    echo -e "${YELLOW}🛠️  Docker not available; using local pg_dump ${PG_DUMP_VERSION}${NC}"
 else
-    echo -e "${RED}❌ Neither pg_dump nor docker is available on this host${NC}"
+    echo -e "${RED}❌ Neither Docker nor a PostgreSQL 17 pg_dump is available on this host${NC}"
     exit 1
 fi
 
@@ -112,10 +120,9 @@ if [ "$DUMP_METHOD" = "local" ]; then
     DUMP_EXIT=$?
 else
     docker run --rm \
-        -e DATABASE_URL="$DB_URL" \
         -e PGSSLMODE=require \
         postgres:17-alpine \
-        sh -c 'pg_dump "$DATABASE_URL" --no-owner --no-acl' \
+        pg_dump "$DB_URL" --no-owner --no-acl \
         > "$BACKUP_FILE" 2>"$ERROR_LOG"
     DUMP_EXIT=$?
 fi
