@@ -1,15 +1,12 @@
 import { MetadataRoute } from 'next';
 import { CBC_SUBJECTS } from '@/lib/search-intelligence';
+import { subjectSlug } from '@/lib/slug';
 
 const BASE_URL = 'https://somovibe.com';
 
-function slugify(str: string) {
-  return str.toLowerCase().replace(/\s+/g, '-');
-}
-
 export default function sitemap(): MetadataRoute.Sitemap {
   const subjectUrls = CBC_SUBJECTS.map((subject) => ({
-    url: `${BASE_URL}/subjects/${slugify(subject)}`,
+    url: `${BASE_URL}/subjects/${subjectSlug(subject)}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
