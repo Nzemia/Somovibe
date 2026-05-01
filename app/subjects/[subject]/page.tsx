@@ -4,43 +4,53 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getCurrentUser } from "@/lib/auth";
 import { CBC_SUBJECTS } from "@/lib/search-intelligence";
-import { notFound } from "next/navigation";
+import { subjectSlug, LEGACY_SUBJECT_SLUG_ALIASES } from "@/lib/slug";
+import { notFound, redirect } from "next/navigation";
 
 type Props = {
   params: Promise<{ subject: string }>;
 };
 
-function slugify(str: string) {
-  return str.toLowerCase().replace(/\s+/g, '-');
-}
+function resolveSubject(rawSlug: string): { canonical: string; canonicalSlug: string } | null {
+  const slug = decodeURIComponent(rawSlug).toLowerCase().replace(/\s+/g, "-");
 
-function getCanonicalSubject(slug: string) {
-  return CBC_SUBJECTS.find((s) => slugify(s) === slug) || null;
+  const direct = CBC_SUBJECTS.find((s) => subjectSlug(s) === slug);
+  if (direct) return { canonical: direct, canonicalSlug: subjectSlug(direct) };
+
+  const aliasTarget = LEGACY_SUBJECT_SLUG_ALIASES[slug];
+  if (aliasTarget) {
+    const canonical = CBC_SUBJECTS.find((s) => subjectSlug(s) === aliasTarget);
+    if (canonical) return { canonical, canonicalSlug: aliasTarget };
+  }
+
+  return null;
 }
 
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
   const resolvedParams = await params;
-  const subjectName = getCanonicalSubject(resolvedParams.subject);
-  
-  if (!subjectName) {
+  const resolved = resolveSubject(resolvedParams.subject);
+
+  if (!resolved) {
     return { title: "Subject Not Found" };
   }
 
+  const { canonical: subjectName, canonicalSlug } = resolved;
+
   return {
     title: {
-      absolute: `Buy CBC ${subjectName} Notes Kenya | Somovibe`
+      absolute: `Buy CBC ${subjectName} Notes Kenya | Somovibe`,
     },
     description: `Get the best CBC ${subjectName} notes, past papers, and learning materials in Kenya. Access premium resources created by verified teachers.`,
     keywords: [`CBC ${subjectName} notes`, `buy ${subjectName} CBC materials`, `Kenya CBC ${subjectName}`],
     alternates: {
-      canonical: `https://somovibe.com/subjects/${resolvedParams.subject}`,
+      canonical: `https://somovibe.com/subjects/${canonicalSlug}`,
     },
     openGraph: {
       title: `Buy CBC ${subjectName} Notes Kenya | Somovibe`,
       description: `Get the best CBC ${subjectName} notes, past papers, and learning materials in Kenya.`,
-      url: `https://somovibe.com/subjects/${resolvedParams.subject}`,
+      url: `https://somovibe.com/subjects/${canonicalSlug}`,
       type: "website",
     },
   };
@@ -48,10 +58,18 @@ export async function generateMetadata(
 
 export default async function SubjectPage({ params }: Props) {
   const resolvedParams = await params;
-  const subjectName = getCanonicalSubject(resolvedParams.subject);
-  
-  if (!subjectName) {
+  const resolved = resolveSubject(resolvedParams.subject);
+
+  if (!resolved) {
     notFound();
+  }
+
+  const { canonical: subjectName, canonicalSlug } = resolved;
+
+  // Redirect legacy/alias slugs to the canonical URL (301)
+  const incomingSlug = decodeURIComponent(resolvedParams.subject).toLowerCase().replace(/\s+/g, "-");
+  if (incomingSlug !== canonicalSlug) {
+    redirect(`/subjects/${canonicalSlug}`);
   }
 
   const user = await getCurrentUser();
