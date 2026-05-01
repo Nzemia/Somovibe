@@ -5,9 +5,21 @@ import { Toaster } from "sonner"
 import { SessionProvider } from "next-auth/react"
 
 export const metadata: Metadata = {
-    title: "Somovibe - CBC Learning Platform",
-    description:
-        "Quality learning materials for CBC curriculum"
+    metadataBase: new URL("https://somovibe.com"),
+    title: {
+        default: "Somovibe - CBC Learning Platform",
+        template: "%s | Somovibe",
+    },
+    description: "Quality learning materials for CBC curriculum",
+    openGraph: {
+        siteName: "Somovibe",
+        type: "website",
+        locale: "en_KE",
+    },
+    twitter: {
+        card: "summary_large_image",
+        site: "@somovibe",
+    },
 }
 
 export default function RootLayout({

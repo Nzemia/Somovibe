@@ -6,13 +6,18 @@ import ContactForm from "@/app/contact/ContactForm"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "Questy | Contact Us - Get in Touch",
+    title: "Contact Somovibe Kenya | Get in Touch",
     description:
-        "Have questions about Questy? Contact our support team for help with CBC learning materials, teacher verification, or platform assistance.",
+        "Have questions about Somovibe? Contact our support team for help with CBC learning materials, teacher verification, or platform assistance.",
+    keywords: ["contact Somovibe Kenya", "Somovibe support"],
+    alternates: {
+        canonical: "https://somovibe.com/contact",
+    },
     openGraph: {
-        title: "Contact Questy - We're Here to Help",
+        title: "Contact Somovibe Kenya | Get in Touch",
         description:
-            "Get in touch with our support team for any questions or assistance",
+            "Get in touch with our support team for any questions or assistance.",
+        url: "https://somovibe.com/contact",
         type: "website"
     }
 }

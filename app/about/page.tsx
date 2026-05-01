@@ -4,13 +4,18 @@ import { getCurrentUser } from "@/lib/auth"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "Somovibe | About Us - CBC Learning Platform",
+    title: "About Somovibe | Kenya's CBC Learning Platform",
     description:
         "Learn about Somovibe, Kenya's premier CBC learning platform connecting students with verified teachers and quality educational materials.",
+    keywords: ["about Somovibe", "Kenya CBC teacher platform"],
+    alternates: {
+        canonical: "https://somovibe.com/about",
+    },
     openGraph: {
-        title: "About Somovibe - CBC Learning Platform",
+        title: "About Somovibe | Kenya's CBC Learning Platform",
         description:
-            "Connecting students with verified teachers and quality educational materials",
+            "Connecting students with verified teachers and quality educational materials.",
+        url: "https://somovibe.com/about",
         type: "website"
     }
 }
