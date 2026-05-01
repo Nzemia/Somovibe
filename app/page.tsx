@@ -15,11 +15,30 @@ export const metadata: Metadata = {
   title: "Somovibe | CBC Learning Platform — Learn, Teach & Earn",
   description:
     "Quality CBC learning materials from verified teachers. Students access premium notes & past papers. Teachers earn 75% commission. Powered by M-Pesa.",
+  keywords: [
+    "CBC notes",
+    "grade 1", "grade 2", "grade 3", "grade 4", "grade 5", "grade 6", "grade 7", "grade 8", "grade 9",
+    "CBC learning materials",
+    "buy CBC notes online Kenya",
+    "CBC teacher marketplace"
+  ],
+  alternates: {
+    canonical: "https://somovibe.com",
+  },
   openGraph: {
-    title: "Somovibe — CBC Learning Platform",
+    title: "Somovibe | CBC Learning Platform — Learn, Teach & Earn",
     description:
-      "Quality CBC learning materials from verified teachers. Learn, teach, and earn.",
+      "Quality CBC learning materials from verified teachers. Students access premium notes & past papers. Teachers earn 75% commission. Powered by M-Pesa.",
+    url: "https://somovibe.com",
     type: "website",
+    images: [
+      {
+        url: "https://somovibe.com/logos/somovibe-favicon.png",
+        width: 800,
+        height: 600,
+        alt: "Somovibe CBC Learning Platform",
+      },
+    ],
   },
 };
 
@@ -69,8 +88,102 @@ export default async function Home() {
         if (user.role === "STUDENT") redirect("/student")
     }
 
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Somovibe",
+    "url": "https://somovibe.com",
+    "logo": "https://somovibe.com/logos/somovibe-favicon.png",
+    "sameAs": [
+      "https://www.tiktok.com/@somovibe.resources",
+      "https://www.instagram.com/somovibe_resources"
+    ]
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Somovibe",
+    "url": "https://somovibe.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://somovibe.com/marketplace?search={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I become a teacher on Somovibe?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simply click 'Become a Teacher', complete the registration form, and pay the one-time KES 100 verification fee via M-Pesa. Once verified, you can start uploading and selling your CBC teaching materials immediately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much can I earn as a teacher?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You earn 75% commission on every sale — one of the highest rates in the industry. There is no cap on your earnings. The more quality materials you upload and the more you promote your profile, the more you earn. Many teachers on Somovibe earn over KES 10,000 per month."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What payment methods are accepted?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We support M-Pesa STK Push, making payments instant and secure for all users in Kenya. Simply enter your M-Pesa phone number and confirm the prompt on your phone — no card details required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are all materials CBC-aligned?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Every material submitted is reviewed against the CBC curriculum framework before being published. Our verification process ensures that content is accurate, grade-appropriate, and aligned with Kenya's 8-4-4 successor curriculum."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I access materials I've purchased?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "After a successful M-Pesa payment, your materials are instantly available for download from your student dashboard under 'My Downloads'. You can download them at any time — there are no expiry limits."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I sell materials for any grade level?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Absolutely. Teachers can upload materials for all CBC levels — from Pre-Primary (PP1 & PP2) through Lower Primary (Grades 1–3), Upper Primary (Grades 4–6), and Junior Secondary (Grades 7–9)."
+        }
+      }
+    ]
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Navbar user={user ? { email: user.email, role: user.role } : null} />
       <QuickNav />
 

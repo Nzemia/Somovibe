@@ -4,6 +4,22 @@ import Link from "next/link";
 import { getCachedApprovedPdfs, getUserPurchasedPdfIds } from "@/lib/marketplace";
 import { MarketplaceHeader } from "@/components/marketplace/MarketplaceHeader";
 import { MarketplaceClientWrapper } from "@/components/marketplace/MarketplaceClientWrapper";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "CBC Marketplace - Buy Notes & Past Papers",
+  description: "Browse and buy CBC notes online in Kenya. Find quality CBC materials for all grades.",
+  keywords: ["buy CBC notes online Kenya", "CBC materials"],
+  alternates: {
+    canonical: "https://somovibe.com/marketplace",
+  },
+  openGraph: {
+    title: "CBC Marketplace | Somovibe",
+    description: "Browse and buy quality CBC notes online in Kenya.",
+    url: "https://somovibe.com/marketplace",
+    type: "website",
+  },
+};
 
 export default async function Marketplace({
   searchParams,
@@ -55,8 +71,31 @@ export default async function Marketplace({
     : user?.role === "ADMIN" ? "/admin"
     : "/";
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://somovibe.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Marketplace",
+        "item": "https://somovibe.com/marketplace"
+      }
+    ]
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <Navbar user={userForNavbar} />
       {user && (
         <div className="sticky top-14 z-40 border-b border-white/10 backdrop-blur-md"
