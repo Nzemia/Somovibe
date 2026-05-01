@@ -3,26 +3,35 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getCurrentUser } from "@/lib/auth";
+import { CBC_SUBJECTS } from "@/lib/search-intelligence";
+import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{ subject: string }>;
 };
 
-// Helper to format subject string (e.g., "social-studies" -> "Social Studies")
-function formatSubject(subject: string) {
-  return subject
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+function slugify(str: string) {
+  return str.toLowerCase().replace(/\s+/g, '-');
+}
+
+function getCanonicalSubject(slug: string) {
+  return CBC_SUBJECTS.find((s) => slugify(s) === slug) || null;
 }
 
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
   const resolvedParams = await params;
-  const subjectName = formatSubject(resolvedParams.subject);
+  const subjectName = getCanonicalSubject(resolvedParams.subject);
+  
+  if (!subjectName) {
+    return { title: "Subject Not Found" };
+  }
+
   return {
-    title: `Buy CBC ${subjectName} Notes Kenya | Somovibe`,
+    title: {
+      absolute: `Buy CBC ${subjectName} Notes Kenya | Somovibe`
+    },
     description: `Get the best CBC ${subjectName} notes, past papers, and learning materials in Kenya. Access premium resources created by verified teachers.`,
     keywords: [`CBC ${subjectName} notes`, `buy ${subjectName} CBC materials`, `Kenya CBC ${subjectName}`],
     alternates: {
@@ -39,7 +48,12 @@ export async function generateMetadata(
 
 export default async function SubjectPage({ params }: Props) {
   const resolvedParams = await params;
-  const subjectName = formatSubject(resolvedParams.subject);
+  const subjectName = getCanonicalSubject(resolvedParams.subject);
+  
+  if (!subjectName) {
+    notFound();
+  }
+
   const user = await getCurrentUser();
 
   return (

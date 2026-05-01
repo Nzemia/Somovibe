@@ -1,26 +1,15 @@
 import { MetadataRoute } from 'next';
+import { CBC_SUBJECTS } from '@/lib/search-intelligence';
 
 const BASE_URL = 'https://somovibe.com';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const subjects = [
-    'agriculture',
-    'english',
-    'kiswahili',
-    'mathematics',
-    'science',
-    'social-studies',
-    'ict',
-    'cre',
-    'ire',
-    'homescience',
-    'art-and-craft',
-    'music',
-    'physical-education'
-  ];
+function slugify(str: string) {
+  return str.toLowerCase().replace(/\s+/g, '-');
+}
 
-  const subjectUrls = subjects.map((subject) => ({
-    url: `${BASE_URL}/subjects/${subject}`,
+export default function sitemap(): MetadataRoute.Sitemap {
+  const subjectUrls = CBC_SUBJECTS.map((subject) => ({
+    url: `${BASE_URL}/subjects/${slugify(subject)}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.8,

@@ -12,7 +12,9 @@ import { ScrollToTopButton } from "@/components/ScrollToTopButton";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Somovibe | CBC Learning Platform — Learn, Teach & Earn",
+  title: {
+    absolute: "Somovibe | CBC Learning Platform — Learn, Teach & Earn",
+  },
   description:
     "Quality CBC learning materials from verified teachers. Students access premium notes & past papers. Teachers earn 75% commission. Powered by M-Pesa.",
   keywords: [
