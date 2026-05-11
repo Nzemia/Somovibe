@@ -60,11 +60,10 @@ export default async function AdminDashboard() {
     return (
         <div className="min-h-screen bg-background">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div>
+                    <div>
                         <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
                         <p className="text-muted-foreground">Manage your platform</p>
                     </div>
-                </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -284,5 +283,6 @@ export default async function AdminDashboard() {
                     </div>
                 </div>
             </div>
+        </div>
     );
 }
