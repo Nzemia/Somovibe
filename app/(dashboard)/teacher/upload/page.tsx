@@ -585,9 +585,9 @@ export default function UploadPage() {
                     {/* Info */}
                     <div className="bg-[#f0faf5] border border-[#d1e8dc] rounded-xl px-4 py-3 mb-5 text-xs text-gray-600 space-y-1">
                         <p className="font-bold text-[#006832] mb-1.5">After you submit:</p>
-                        <p>• Our team will review your material within 24–48 hours</p>
-                        <p>• Only high-quality, original content is approved</p>
-                        <p>• You&apos;ll be notified once your material goes live</p>
+                        <p>• Your material goes live on the marketplace immediately</p>
+                        <p>• Only high-quality, original content is allowed</p>
+                        <p>• You&apos;ll start earning 75% from every sale right away</p>
                     </div>
 
                     <div className="flex gap-3">

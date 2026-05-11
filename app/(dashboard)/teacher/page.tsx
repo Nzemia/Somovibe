@@ -32,7 +32,6 @@ export default async function TeacherPage({
 
     const stats = {
         totalUploads: materials.length,
-        pending: materials.filter((m) => m.status === "PENDING").length,
         approved: materials.filter((m) => m.status === "APPROVED").length,
         totalSales: materials.reduce((sum, m) => sum + m.purchases.length, 0),
         walletBalance: wallet?.balance ?? 0,
@@ -144,7 +143,7 @@ export default async function TeacherPage({
                         <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-purple-900/30">
                             <p className="text-violet-200 text-xs mb-1">Total Uploads</p>
                             <p className="text-2xl font-extrabold text-white">{stats.totalUploads}</p>
-                            <p className="text-violet-300 text-xs mt-0.5">{stats.pending} pending</p>
+                            <p className="text-violet-300 text-xs mt-0.5">All live on marketplace</p>
                         </div>
 
                         {/* Approved — emerald */}

@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   title: "CBC Marketplace - Buy Notes & Past Papers",
   description: "Browse and buy CBC notes online in Kenya. Find quality CBC materials for all grades.",
   keywords: ["buy CBC notes online Kenya", "CBC materials"],
+  // Explicitly allow indexing. Even though parameterized variants (?search=...) are
+  // blocked in robots.txt, the canonical /marketplace page itself must be indexed.
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   alternates: {
     canonical: "https://somovibe.com/marketplace",
   },

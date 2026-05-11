@@ -36,11 +36,14 @@ export default function LoginForm() {
 
     const dest =
       data.role === "ADMIN" ? "/admin" :
-      callbackUrl || 
+      callbackUrl ||
       (data.role === "TEACHER" ? "/teacher" : "/marketplace");
 
-    router.push(dest);
-    router.refresh();
+    // Use a hard navigation instead of router.push + router.refresh.
+    // router.refresh() races with push() and can re-render the login page
+    // with stale (logged-out) state before the new session cookie is read,
+    // causing the spinner to hang indefinitely on login-after-logout.
+    window.location.href = dest;
   }
 
   return (

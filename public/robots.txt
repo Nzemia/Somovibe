@@ -7,5 +7,9 @@ Disallow: /admin/
 Disallow: /teacher/
 Disallow: /student/
 
+# Disallow parameterized marketplace pages (search/filter variants should not be indexed)
+# These pages get noindex from Next.js because they are filtered views, not canonical content
+Disallow: /marketplace?*
+
 # Sitemap
 Sitemap: https://somovibe.com/sitemap.xml
