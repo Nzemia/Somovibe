@@ -18,7 +18,7 @@ export default function SuccessToast({
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 5000);
         } else if (uploaded === "success") {
-            setSuccessMessage("Material uploaded successfully! Awaiting admin approval");
+            setSuccessMessage("Material uploaded successfully!");
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 5000);
         } else if (uploaded === "updated") {
