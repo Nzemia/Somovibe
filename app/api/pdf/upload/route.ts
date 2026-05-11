@@ -1,10 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireRole, handleAuthError } from "@/lib/apiAuth";
-import { sendNewMaterialPendingEmail } from "@/lib/email";
-import { getPlatformAdminId } from "@/lib/platformAdmin";
 import { uploadToCloudinary, getDefaultThumbnail } from "@/lib/cloudinary";
 import { generateSlug, makeSlugUnique } from "@/lib/slug";
+import { revalidatePath } from "next/cache";
 
 // Raise the Next.js App Router body size limit (default is 1 MB).
 export const maxDuration = 60;
@@ -84,7 +83,8 @@ export async function POST(req: Request) {
         const existing = await prisma.pdf.findUnique({ where: { slug } });
         if (existing) slug = makeSlugUnique(slug);
 
-        // Create PDF record in database
+        // Create PDF record — auto-approved so it goes live immediately.
+        // No admin review step is needed anymore.
         const pdf = await prisma.pdf.create({
             data: {
                 title,
@@ -95,29 +95,14 @@ export async function POST(req: Request) {
                 fileUrl,
                 thumbnailUrl,
                 slug,
+                status: "APPROVED",
                 materialType: materialType as "PDF" | "PDF_SLIDES" | "POWERPOINT" | "CLASS_INSTRUCTIONS" | "SCHEME_OF_WORK" | "LESSON_PLAN" | "EXAM_QUIZ",
                 teacherId: user.id,
             },
         });
 
-        //console.log("PDF created successfully:", pdf.id);
-
-        // Notify admin of new material (await to catch errors)
-        try {
-            const adminId = await getPlatformAdminId();
-            if (adminId) {
-                const admin = await prisma.user.findUnique({
-                    where: { id: adminId },
-                    select: { email: true },
-                });
-                if (admin) {
-                    await sendNewMaterialPendingEmail(admin.email, pdf.title, user.email, pdf.id);
-                }
-            }
-        } catch (emailError) {
-            console.error("Email sending failed, but upload succeeded:", emailError);
-            // Don't fail the request if email fails
-        }
+        // Bust the marketplace page cache so the new material appears immediately.
+        revalidatePath("/marketplace");
 
         return NextResponse.json(pdf);
     } catch (error: any) {

@@ -11,6 +11,21 @@ export const metadata: Metadata = {
         template: "%s | Somovibe",
     },
     description: "Quality learning materials for CBC curriculum",
+    // Explicitly allow indexing so Next.js never inherits noindex from framework internals.
+    // Individual pages that should NOT be indexed must override this themselves.
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+        },
+    },
+    // Point to the canonical HTTPS non-www version so Google doesn't treat
+    // http://somovibe.com and http://www.somovibe.com as alternate pages.
+    alternates: {
+        canonical: "https://somovibe.com",
+    },
     openGraph: {
         siteName: "Somovibe",
         type: "website",

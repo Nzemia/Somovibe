@@ -15,7 +15,6 @@ export default async function AdminDashboard() {
         totalTeachers,
         activeTeachers,
         totalPdfs,
-        pendingPdfs,
         totalStudents,
         platformWallet,
         totalPurchases,
@@ -25,7 +24,6 @@ export default async function AdminDashboard() {
         prisma.teacherProfile.count(),
         prisma.teacherProfile.count({ where: { isActive: true } }),
         prisma.pdf.count(),
-        prisma.pdf.count({ where: { status: "PENDING" } }),
         prisma.user.count({ where: { role: "STUDENT" } }),
         prisma.wallet.findUnique({
             where: { userId: user.id },
@@ -62,22 +60,10 @@ export default async function AdminDashboard() {
     return (
         <div className="min-h-screen bg-background">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex items-center justify-between mb-8">
-                    <div>
+                <div>
                         <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
                         <p className="text-muted-foreground">Manage your platform</p>
                     </div>
-                    {pendingPdfs > 0 && (
-                        <Link
-                            href="/admin/approvals"
-                            className="px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity flex items-center space-x-2"
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Review Pending ({pendingPdfs})</span>
-                        </Link>
-                    )}
                 </div>
 
                 {/* Stats Grid */}
@@ -112,7 +98,7 @@ export default async function AdminDashboard() {
                             </svg>
                         </div>
                         <p className="text-3xl font-bold text-foreground">{totalPdfs}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{pendingPdfs} pending approval</p>
+                        <p className="text-xs text-muted-foreground mt-1">All live on marketplace</p>
                     </div>
 
                     <Link href="/admin/wallet" className="bg-card border border-border rounded-lg p-6 hover:bg-accent transition-colors block">
@@ -122,8 +108,9 @@ export default async function AdminDashboard() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <p className="text-3xl font-bold text-primary">KES {platformWallet?.balance || expectedPlatformEarnings}</p>
-                        <p className="text-xs text-muted-foreground mt-1">Click to manage</p>
+                        {/* Always show real wallet balance — this is actual M-Pesa money received */}
+                        <p className="text-3xl font-bold text-primary">KES {(platformWallet?.balance ?? 0).toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Real balance · Click to manage</p>
                     </Link>
                 </div>
 
@@ -149,7 +136,7 @@ export default async function AdminDashboard() {
                         </div>
                         <p className="text-2xl font-bold text-primary">KES {expectedPlatformEarnings.toLocaleString()}</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                            Sales: KES {Math.floor(totalRevenue * 0.25)} + Verifications: KES {teacherVerifications * 100}
+                            Lifetime estimate (incl. test data) · Sales: KES {Math.floor(totalRevenue * 0.25)} + Verifications: KES {teacherVerifications * 100}
                         </p>
                     </div>
 
@@ -170,28 +157,6 @@ export default async function AdminDashboard() {
                     <div className="bg-card border border-border rounded-lg p-6">
                         <h2 className="text-xl font-bold text-foreground mb-4">Quick Actions</h2>
                         <div className="space-y-3">
-                            <Link
-                                href="/admin/approvals"
-                                className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors group"
-                            >
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold text-foreground">Review Materials</h3>
-                                        <p className="text-sm text-muted-foreground">Approve or reject uploads</p>
-                                    </div>
-                                </div>
-                                {pendingPdfs > 0 && (
-                                    <span className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
-                                        {pendingPdfs}
-                                    </span>
-                                )}
-                            </Link>
-
                             <Link
                                 href="/admin/teachers"
                                 className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors group"
@@ -319,6 +284,5 @@ export default async function AdminDashboard() {
                     </div>
                 </div>
             </div>
-        </div>
     );
 }

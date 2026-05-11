@@ -3,7 +3,6 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
-import { signOut } from "next-auth/react"
 import {
     Sheet,
     SheetTrigger,
@@ -31,19 +30,13 @@ export function Navbar({
     const handleSignOut = async () => {
         setSigningOut(true)
         try {
-            // Call our API to clear server-side session
-            await fetch("/api/auth/signout", {
-                method: "POST"
-            })
-
-            // Clear NextAuth client-side session and redirect
-            await signOut({
-                callbackUrl: "/",
-                redirect: true
-            })
+            // Clear the custom session cookie
+            await fetch("/api/auth/signout", { method: "POST" })
         } catch {
-            setSigningOut(false)
+            // proceed regardless
         }
+        // Hard redirect — ensures stale Next.js router cache is bypassed
+        window.location.href = "/"
     }
 
     // Close dropdown on outside click
