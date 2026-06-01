@@ -318,7 +318,10 @@ export default function RegisterPage() {
           {/* Google Sign Up */}
           <button
             type="button"
-            onClick={() => signIn("google", { callbackUrl: "/auth/callback" })}
+            onClick={() => {
+              const dest = `/auth/callback?role=${role}`;
+              signIn("google", { callbackUrl: dest });
+            }}
             className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs bg-white hover:bg-gray-50 transition-all duration-200 active:scale-95 shadow-xs hover:shadow-sm cursor-pointer"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
