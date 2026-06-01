@@ -14,6 +14,7 @@ export default function MaterialsFilter({ currentStatus }: { currentStatus?: str
         } else {
             params.delete("status");
         }
+        params.delete("page"); // Reset page to 1 on filter switch
         router.push(`/admin/materials?${params.toString()}`);
     };
 

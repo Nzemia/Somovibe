@@ -17,7 +17,7 @@ import MaterialsFilter from "./MaterialsFilter";
 export default async function AllMaterialsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ status?: string }>;
+    searchParams: Promise<{ status?: string; page?: string }>;
 }) {
     const params = await searchParams;
     const user = await getCurrentUser();
@@ -27,7 +27,30 @@ export default async function AllMaterialsPage({
     }
 
     const statusFilter = params.status;
+    const page = Math.max(1, parseInt(params.page || "1", 10));
+    const LIMIT = 10;
+    const skip = (page - 1) * LIMIT;
 
+    // 1. Fetch unpaginated lightweight list for exact stats
+    const allMaterialsForStats = await prisma.pdf.findMany({
+        where: statusFilter ? { status: statusFilter as any } : undefined,
+        select: {
+            status: true,
+            purchases: {
+                select: { id: true }
+            }
+        }
+    });
+
+    const stats = {
+        total: allMaterialsForStats.length,
+        approved: allMaterialsForStats.filter((m) => m.status === "APPROVED").length,
+        pending: allMaterialsForStats.filter((m) => m.status === "PENDING").length,
+        rejected: allMaterialsForStats.filter((m) => m.status === "REJECTED").length,
+        totalSales: allMaterialsForStats.reduce((sum, m) => sum + m.purchases.length, 0),
+    };
+
+    // 2. Fetch the paginated list of materials for the page view
     const materials = await prisma.pdf.findMany({
         where: statusFilter ? { status: statusFilter as any } : undefined,
         include: {
@@ -43,15 +66,11 @@ export default async function AllMaterialsPage({
             },
         },
         orderBy: { createdAt: "desc" },
+        take: LIMIT,
+        skip: skip,
     });
 
-    const stats = {
-        total: materials.length,
-        approved: materials.filter((m) => m.status === "APPROVED").length,
-        pending: materials.filter((m) => m.status === "PENDING").length,
-        rejected: materials.filter((m) => m.status === "REJECTED").length,
-        totalSales: materials.reduce((sum, m) => sum + m.purchases.length, 0),
-    };
+    const totalPages = Math.ceil(stats.total / LIMIT);
 
     return (
         <div className="min-h-screen bg-background">
@@ -183,6 +202,112 @@ export default async function AllMaterialsPage({
                         </div>
                     )}
                 </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between border-t border-border bg-card px-4 py-3 sm:px-6 mt-6 rounded-lg shadow-sm">
+                        <div className="flex flex-1 justify-between sm:hidden">
+                            {page > 1 ? (
+                                <Link
+                                    href={`/admin/materials?page=${page - 1}${statusFilter ? `&status=${statusFilter}` : ""}`}
+                                    className="relative inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                                >
+                                    Previous
+                                </Link>
+                            ) : (
+                                <span className="relative inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground opacity-50 cursor-not-allowed">
+                                    Previous
+                                </span>
+                            )}
+                            {page < totalPages ? (
+                                <Link
+                                    href={`/admin/materials?page=${page + 1}${statusFilter ? `&status=${statusFilter}` : ""}`}
+                                    className="relative ml-3 inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                                >
+                                    Next
+                                </Link>
+                            ) : (
+                                <span className="relative ml-3 inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground opacity-50 cursor-not-allowed">
+                                    Next
+                                </span>
+                            )}
+                        </div>
+                        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">
+                                    Showing <span className="font-semibold text-foreground">{skip + 1}</span> to{" "}
+                                    <span className="font-semibold text-foreground">
+                                        {Math.min(skip + LIMIT, stats.total)}
+                                    </span>{" "}
+                                    of <span className="font-semibold text-foreground">{stats.total}</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <nav className="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
+                                    {/* Previous */}
+                                    {page > 1 ? (
+                                        <Link
+                                            href={`/admin/materials?page=${page - 1}${statusFilter ? `&status=${statusFilter}` : ""}`}
+                                            className="relative inline-flex items-center rounded-l-md px-3 py-2 text-muted-foreground border border-border hover:bg-accent hover:text-foreground text-sm font-medium transition-colors"
+                                        >
+                                            <span className="sr-only">Previous</span>
+                                            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                                            </svg>
+                                        </Link>
+                                    ) : (
+                                        <span className="relative inline-flex items-center rounded-l-md px-3 py-2 text-muted-foreground border border-border opacity-40 cursor-not-allowed text-sm font-medium">
+                                            <span className="sr-only">Previous</span>
+                                            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    )}
+
+                                    {/* Page Numbers */}
+                                    {Array.from({ length: totalPages }).map((_, index) => {
+                                        const p = index + 1;
+                                        const isCurrent = p === page;
+                                        return (
+                                            <Link
+                                                key={p}
+                                                href={`/admin/materials?page=${p}${statusFilter ? `&status=${statusFilter}` : ""}`}
+                                                aria-current={isCurrent ? "page" : undefined}
+                                                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold border border-border transition-colors ${
+                                                    isCurrent
+                                                        ? "z-10 bg-[#008c43] text-white border-[#008c43]"
+                                                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                }`}
+                                            >
+                                                {p}
+                                            </Link>
+                                        );
+                                    })}
+
+                                    {/* Next */}
+                                    {page < totalPages ? (
+                                        <Link
+                                            href={`/admin/materials?page=${page + 1}${statusFilter ? `&status=${statusFilter}` : ""}`}
+                                            className="relative inline-flex items-center rounded-r-md px-3 py-2 text-muted-foreground border border-border hover:bg-accent hover:text-foreground text-sm font-medium transition-colors"
+                                        >
+                                            <span className="sr-only">Next</span>
+                                            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                                            </svg>
+                                        </Link>
+                                    ) : (
+                                        <span className="relative inline-flex items-center rounded-r-md px-3 py-2 text-muted-foreground border border-border opacity-40 cursor-not-allowed text-sm font-medium">
+                                            <span className="sr-only">Next</span>
+                                            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    )}
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
