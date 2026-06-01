@@ -25,10 +25,7 @@ export function Footer() {
             <p className="text-white/60 leading-relaxed text-sm sm:text-base max-w-xs">
               Kenya&apos;s premier CBC educational marketplace. Quality materials from verified teachers — empowering students and educators nationwide.
             </p>
-            <div className="mt-6 flex items-center gap-2 text-white/40 text-xs">
-              <span className="w-2 h-2 rounded-full bg-[#00e676] inline-block animate-pulse" />
-              Platform online · M-Pesa active
-            </div>
+
           </div>
 
           {/* ── Links column ── */}

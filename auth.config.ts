@@ -4,6 +4,7 @@ import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { createSession } from "@/lib/session";
 
 export default {
     providers: [
@@ -61,6 +62,13 @@ export default {
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
+                if (user.id) {
+                    try {
+                        await createSession(user.id);
+                    } catch (e) {
+                        console.error("Failed to set custom session in jwt callback:", e);
+                    }
+                }
             }
 
             // Handle session updates
@@ -124,19 +132,6 @@ export default {
                             },
                         });
                     }
-
-                    return true;
-                } else {
-                    // Create new user with STUDENT role by default
-                    await prisma.user.create({
-                        data: {
-                            email: user.email!,
-                            name: user.name,
-                            image: user.image,
-                            role: "STUDENT",
-                            emailVerified: new Date(),
-                        },
-                    });
                 }
             }
 
