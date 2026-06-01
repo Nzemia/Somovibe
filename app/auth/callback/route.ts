@@ -27,21 +27,22 @@ export async function GET(request: Request) {
   // Upgrade user to TEACHER if they selected TEACHER during Google registration
   const targetRole = requestUrl.searchParams.get("role");
   if (targetRole === "TEACHER" && user.role === "STUDENT") {
-    user = await prisma.user.update({
-      where: { id: user.id },
-      data: { role: "TEACHER" },
-    });
-
-    const existingProfile = await prisma.teacherProfile.findUnique({
-      where: { userId: user.id },
-    });
-    if (!existingProfile) {
-      await prisma.teacherProfile.create({
+    try {
+      user = await prisma.user.update({
+        where: { id: user.id },
         data: {
-          userId: user.id,
-          isActive: false,
-        },
+          role: "TEACHER",
+          teacherProfile: {
+            upsert: {
+              create: { isActive: false },
+              update: {} // do nothing if it already exists
+            }
+          }
+        }
       });
+    } catch (dbError) {
+      console.error("Failed to upgrade user to TEACHER in callback:", dbError);
+      // Fallback: continue flow to let user log in, even if upgrade encountered a DB issue
     }
   }
 
