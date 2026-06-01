@@ -9,5 +9,6 @@ export async function POST() {
 export async function GET(request: Request) {
   await deleteSession();
   const requestUrl = new URL(request.url);
-  return NextResponse.redirect(new URL("/login", requestUrl.origin));
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || requestUrl.origin;
+  return NextResponse.redirect(new URL("/login", baseUrl));
 }

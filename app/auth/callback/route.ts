@@ -5,13 +5,14 @@ import { createSession } from "@/lib/session";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || requestUrl.origin;
   
   // 1. Get the NextAuth session
   const session = await auth();
   
   if (!session?.user?.email) {
     // Not authenticated, redirect to login
-    return NextResponse.redirect(new URL("/login", requestUrl.origin));
+    return NextResponse.redirect(new URL("/login", baseUrl));
   }
 
   // 2. Find the user in the database
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
   });
 
   if (!user) {
-    return NextResponse.redirect(new URL("/login", requestUrl.origin));
+    return NextResponse.redirect(new URL("/login", baseUrl));
   }
 
   // Upgrade user to TEACHER if they selected TEACHER during Google registration
@@ -59,5 +60,5 @@ export async function GET(request: Request) {
       "/student";
   }
 
-  return NextResponse.redirect(new URL(dest, requestUrl.origin));
+  return NextResponse.redirect(new URL(dest, baseUrl));
 }
