@@ -15,12 +15,33 @@ export async function GET(request: Request) {
   }
 
   // 2. Find the user in the database
-  const user = await prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: { email: session.user.email },
   });
 
   if (!user) {
     return NextResponse.redirect(new URL("/login", requestUrl.origin));
+  }
+
+  // Upgrade user to TEACHER if they selected TEACHER during Google registration
+  const targetRole = requestUrl.searchParams.get("role");
+  if (targetRole === "TEACHER" && user.role === "STUDENT") {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { role: "TEACHER" },
+    });
+
+    const existingProfile = await prisma.teacherProfile.findUnique({
+      where: { userId: user.id },
+    });
+    if (!existingProfile) {
+      await prisma.teacherProfile.create({
+        data: {
+          userId: user.id,
+          isActive: false,
+        },
+      });
+    }
   }
 
   // 3. Ensure they have the questy_session cookie set
