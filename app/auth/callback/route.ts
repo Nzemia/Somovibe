@@ -1,6 +1,42 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { createSession } from "@/lib/session";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  return NextResponse.redirect(new URL("/", requestUrl.origin));
+  
+  // 1. Get the NextAuth session
+  const session = await auth();
+  
+  if (!session?.user?.email) {
+    // Not authenticated, redirect to login
+    return NextResponse.redirect(new URL("/login", requestUrl.origin));
+  }
+
+  // 2. Find the user in the database
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  if (!user) {
+    return NextResponse.redirect(new URL("/login", requestUrl.origin));
+  }
+
+  // 3. Ensure they have the questy_session cookie set
+  await createSession(user.id);
+
+  // 4. Handle dynamic callbackUrl redirection if provided, otherwise role-based
+  const callbackUrl = requestUrl.searchParams.get("callbackUrl");
+  let dest = callbackUrl || "";
+  
+  // Validate redirect destination safety (relative path only to prevent open redirects)
+  if (!dest || !dest.startsWith("/")) {
+    dest =
+      user.role === "ADMIN" ? "/admin" :
+      user.role === "TEACHER" ? "/teacher" :
+      "/student";
+  }
+
+  return NextResponse.redirect(new URL(dest, requestUrl.origin));
 }

@@ -18,6 +18,12 @@ const DASHBOARD_HREF: Record<string, string> = {
     ADMIN: "/admin"
 }
 
+const PROFILE_HREF: Record<string, string> = {
+    TEACHER: "/teacher/profile",
+    STUDENT: "/student/profile",
+    ADMIN: "/admin"
+}
+
 export function Navbar({
     user
 }: {
@@ -62,6 +68,9 @@ export function Navbar({
 
     const dashboardHref = user
         ? (DASHBOARD_HREF[user.role] ?? "/")
+        : "/"
+    const profileHref = user
+        ? (PROFILE_HREF[user.role] ?? "/")
         : "/"
     const initial = user?.email?.[0]?.toUpperCase() ?? "U"
 
@@ -192,6 +201,36 @@ export function Navbar({
                                             Go to Dashboard
                                         </Link>
 
+                                        {/* Profile link */}
+                                        <Link
+                                            href={
+                                                profileHref
+                                            }
+                                            onClick={() =>
+                                                setDropdownOpen(
+                                                    false
+                                                )
+                                            }
+                                            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-[#f5faf7] hover:text-[#008c43] transition-colors border-t border-gray-100"
+                                        >
+                                            <svg
+                                                className="w-4 h-4 text-[#008c43]"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={
+                                                        2
+                                                    }
+                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                />
+                                            </svg>
+                                            My Profile
+                                        </Link>
+
                                         {/* Theme toggle row (temporarily disabled)
                     <div className="flex items-center gap-3 px-4 py-3 border-t border-gray-100 hover:bg-[#f5faf7] transition-colors">
                       <ThemeToggle className="text-gray-600 hover:bg-gray-100" />
@@ -259,10 +298,10 @@ export function Navbar({
                                     </SheetTrigger>
                                     <SheetContent
                                         side="right"
-                                        className="w-72 p-0"
+                                        className="w-72 p-0 bg-[#0f1a14] border-l border-[#263d2f] text-white"
                                     >
-                                        <SheetHeader className="px-5 pt-5 pb-4 border-b border-gray-100">
-                                            <SheetTitle className="text-left text-lg font-extrabold text-gray-900">
+                                        <SheetHeader className="px-5 pt-5 pb-4 border-b border-[#263d2f]">
+                                            <SheetTitle className="text-left text-lg font-extrabold text-white">
                                                 Menu
                                             </SheetTitle>
                                         </SheetHeader>
@@ -308,7 +347,7 @@ export function Navbar({
                                                         href={
                                                             item.href
                                                         }
-                                                        className="px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-[#f5faf7] hover:text-[#008c43] transition-colors"
+                                                        className="px-5 py-3 text-sm font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-colors"
                                                     >
                                                         {
                                                             item.label
@@ -318,20 +357,20 @@ export function Navbar({
                                             ))}
 
                                             {/* Theme toggle (temporarily disabled)
-                      <div className="mx-5 mt-2 mb-2 pt-3 border-t border-gray-100 flex items-center gap-3">
-                        <ThemeToggle className="text-gray-600 hover:bg-gray-100" />
-                        <span className="text-sm font-semibold text-gray-700">Toggle Theme</span>
-                      </div>
-                      */}
+                                            <div className="mx-5 mt-2 mb-2 pt-3 border-t border-gray-100 flex items-center gap-3">
+                                                <ThemeToggle className="text-gray-600 hover:bg-gray-100" />
+                                                <span className="text-sm font-semibold text-gray-700">Toggle Theme</span>
+                                            </div>
+                                            */}
 
                                             {/* Login */}
-                                            <div className="px-5 pt-2 pb-3 border-t border-gray-100 space-y-2 mt-1">
+                                            <div className="px-5 pt-2 pb-3 border-t border-[#263d2f] space-y-2 mt-1">
                                                 <SheetClose
                                                     asChild
                                                 >
                                                     <Link
                                                         href="/login"
-                                                        className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-[#008c43] border-2 border-[#008c43] rounded-xl hover:bg-[#f0faf5] transition-colors"
+                                                        className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-white border-2 border-white/20 rounded-xl hover:bg-white/10 transition-colors"
                                                     >
                                                         Login
                                                     </Link>
@@ -343,8 +382,7 @@ export function Navbar({
                                                         href="/register"
                                                         className="block w-full text-center px-4 py-2.5 text-sm font-bold text-white bg-[#008c43] rounded-xl hover:bg-[#006832] transition-colors"
                                                     >
-                                                        Sign
-                                                        Up
+                                                        Sign Up
                                                     </Link>
                                                 </SheetClose>
                                             </div>
@@ -354,7 +392,7 @@ export function Navbar({
 
                                 {/* Desktop: Login + Sign Up */}
                                 <div className="hidden md:flex items-center gap-2">
-                                    {/* <ThemeToggle className="text-white/70 hover:text-white" /> */}
+                                    {/* <ThemeToggle className="text-white/70 hover:text-white hover:bg-white/10" /> */}
                                     <Link
                                         href="/login"
                                         className="px-4 py-2 text-sm font-semibold text-white border border-white/40 rounded-lg hover:bg-white/10 transition-colors"
