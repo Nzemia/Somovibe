@@ -58,6 +58,7 @@ const GRADE_GROUPS = [
     { label: "Grades 1-3", values: ["Grade 1", "Grade 2", "Grade 3"] },
     { label: "Grades 4-6", values: ["Grade 4", "Grade 5", "Grade 6"] },
     { label: "Grades 7-9", values: ["Grade 7", "Grade 8", "Grade 9"] },
+    { label: "Forms 1-4", values: ["Form 1", "Form 2", "Form 3", "Form 4"] },
 ];
 
 const ITEMS_PER_PAGE = 16;

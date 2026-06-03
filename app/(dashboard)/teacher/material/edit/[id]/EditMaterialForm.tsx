@@ -30,6 +30,10 @@ const GRADES = [
     "Grade 8",
     "Grade 9",
     "Grade 10",
+    "Form 1",
+    "Form 2",
+    "Form 3",
+    "Form 4",
 ];
 
 const PRICE_PRESETS = [50, 100, 200, 500, 1000];

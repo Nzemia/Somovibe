@@ -12,32 +12,118 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import TeacherActions from "./TeacherActions";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
+import TeachersFilter from "./TeachersFilter";
 
-export default async function ManageTeachersPage() {
+const ITEMS_PER_PAGE = 10;
+
+export default async function ManageTeachersPage({
+    searchParams,
+}: {
+    searchParams: Promise<{
+        page?: string;
+        status?: string;
+        search?: string;
+    }>;
+}) {
     const user = await getCurrentUser();
+    const params = await searchParams;
 
     if (!user || user.role !== "ADMIN") {
         redirect("/admin/unauthorized");
     }
 
-    const teachers = await prisma.user.findMany({
-        where: { role: "TEACHER" },
-        include: {
-            teacherProfile: true,
-            pdfs: {
-                select: {
-                    id: true,
-                    status: true,
+    const currentPage = Math.max(1, Number(params.page) || 1);
+    const statusFilter = params.status || "all";
+    const searchFilter = params.search || "";
+
+    const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+
+    // Build the query where clause
+    const whereClause: any = {
+        role: "TEACHER",
+    };
+
+    if (statusFilter === "active") {
+        whereClause.teacherProfile = { isActive: true };
+    } else if (statusFilter === "pending") {
+        whereClause.teacherProfile = { isActive: false };
+    }
+
+    if (searchFilter.trim()) {
+        whereClause.OR = [
+            { email: { contains: searchFilter.trim(), mode: "insensitive" } },
+            { name: { contains: searchFilter.trim(), mode: "insensitive" } },
+            { phone: { contains: searchFilter.trim(), mode: "insensitive" } },
+        ];
+    }
+
+    // Fetch stats globally and filtered teachers in parallel
+    const [
+        totalTeachersCount,
+        activeTeachersCount,
+        pendingTeachersCount,
+        totalUploadsCount,
+        teachers,
+        totalFilteredCount,
+    ] = await Promise.all([
+        prisma.user.count({ where: { role: "TEACHER" } }),
+        prisma.user.count({
+            where: {
+                role: "TEACHER",
+                teacherProfile: { isActive: true },
+            },
+        }),
+        prisma.user.count({
+            where: {
+                role: "TEACHER",
+                teacherProfile: { isActive: false },
+            },
+        }),
+        prisma.pdf.count(),
+        prisma.user.findMany({
+            where: whereClause,
+            include: {
+                teacherProfile: true,
+                pdfs: {
+                    select: {
+                        id: true,
+                        status: true,
+                    },
+                },
+                wallets: {
+                    select: {
+                        balance: true,
+                    },
                 },
             },
-            wallets: {
-                select: {
-                    balance: true,
-                },
-            },
-        },
-        orderBy: { createdAt: "desc" },
-    });
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: ITEMS_PER_PAGE,
+        }),
+        prisma.user.count({
+            where: whereClause,
+        }),
+    ]);
+
+    const totalPages = Math.ceil(totalFilteredCount / ITEMS_PER_PAGE);
+
+    // Build URL helper for pagination links
+    const getPageUrl = (pageNumber: number) => {
+        const queryParams = new URLSearchParams();
+        if (pageNumber > 1) queryParams.set("page", pageNumber.toString());
+        if (statusFilter !== "all") queryParams.set("status", statusFilter);
+        if (searchFilter) queryParams.set("search", searchFilter);
+        const str = queryParams.toString();
+        return str ? `?${str}` : "?";
+    };
 
     return (
         <div className="min-h-screen bg-background">
@@ -49,37 +135,33 @@ export default async function ManageTeachersPage() {
                             View and manage all teacher accounts
                         </p>
                     </div>
-                    
                 </div>
+
+                {/* Filter and Search controls */}
+                <TeachersFilter currentStatus={params.status} currentSearch={params.search} />
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     <div className="bg-card border border-border rounded-lg p-4">
                         <p className="text-sm text-muted-foreground mb-1">Total Teachers</p>
-                        <p className="text-2xl font-bold text-foreground">{teachers.length}</p>
+                        <p className="text-2xl font-bold text-foreground">{totalTeachersCount}</p>
                     </div>
                     <div className="bg-card border border-border rounded-lg p-4">
                         <p className="text-sm text-muted-foreground mb-1">Active</p>
-                        <p className="text-2xl font-bold text-primary">
-                            {teachers.filter((t) => t.teacherProfile?.isActive).length}
-                        </p>
+                        <p className="text-2xl font-bold text-primary">{activeTeachersCount}</p>
                     </div>
                     <div className="bg-card border border-border rounded-lg p-4">
                         <p className="text-sm text-muted-foreground mb-1">Pending Verification</p>
-                        <p className="text-2xl font-bold text-orange-500">
-                            {teachers.filter((t) => !t.teacherProfile?.isActive).length}
-                        </p>
+                        <p className="text-2xl font-bold text-orange-500">{pendingTeachersCount}</p>
                     </div>
                     <div className="bg-card border border-border rounded-lg p-4">
                         <p className="text-sm text-muted-foreground mb-1">Total Uploads</p>
-                        <p className="text-2xl font-bold text-foreground">
-                            {teachers.reduce((sum, t) => sum + t.pdfs.length, 0)}
-                        </p>
+                        <p className="text-2xl font-bold text-foreground">{totalUploadsCount}</p>
                     </div>
                 </div>
 
                 {/* Teachers Table */}
-                <div className="bg-card border border-border rounded-lg overflow-hidden">
+                <div className="bg-card border border-border rounded-lg overflow-hidden mb-6">
                     {teachers.length === 0 ? (
                         <div className="text-center py-12">
                             <svg
@@ -96,10 +178,10 @@ export default async function ManageTeachersPage() {
                                 />
                             </svg>
                             <h3 className="text-lg font-semibold text-foreground mb-2">
-                                No teachers yet
+                                No teachers found
                             </h3>
                             <p className="text-muted-foreground">
-                                Teachers will appear here once they register
+                                Adjust your filters or check for typos
                             </p>
                         </div>
                     ) : (
@@ -178,6 +260,79 @@ export default async function ManageTeachersPage() {
                         </div>
                     )}
                 </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between border-t border-border bg-card px-4 py-3 sm:px-6 mt-6 rounded-lg shadow-sm">
+                        <div className="flex flex-1 justify-between sm:hidden">
+                            {currentPage > 1 ? (
+                                <Link
+                                    href={getPageUrl(currentPage - 1)}
+                                    className="relative inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                                >
+                                    Previous
+                                </Link>
+                            ) : (
+                                <span className="relative inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground opacity-50 cursor-not-allowed">
+                                    Previous
+                                </span>
+                            )}
+                            {currentPage < totalPages ? (
+                                <Link
+                                    href={getPageUrl(currentPage + 1)}
+                                    className="relative ml-3 inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                                >
+                                    Next
+                                </Link>
+                            ) : (
+                                <span className="relative ml-3 inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground opacity-50 cursor-not-allowed">
+                                    Next
+                                </span>
+                            )}
+                        </div>
+                        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">
+                                    Showing <span className="font-semibold text-foreground">{skip + 1}</span> to{" "}
+                                    <span className="font-semibold text-foreground">
+                                        {Math.min(skip + ITEMS_PER_PAGE, totalFilteredCount)}
+                                    </span>{" "}
+                                    of <span className="font-semibold text-foreground">{totalFilteredCount}</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <Pagination>
+                                    <PaginationContent>
+                                        <PaginationItem>
+                                            <PaginationPrevious
+                                                href={currentPage > 1 ? getPageUrl(currentPage - 1) : "#"}
+                                                className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                                            />
+                                        </PaginationItem>
+
+                                        {Array.from({ length: totalPages }).map((_, i) => (
+                                            <PaginationItem key={i}>
+                                                <PaginationLink
+                                                    href={getPageUrl(i + 1)}
+                                                    isActive={currentPage === i + 1}
+                                                >
+                                                    {i + 1}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        ))}
+
+                                        <PaginationItem>
+                                            <PaginationNext
+                                                href={currentPage < totalPages ? getPageUrl(currentPage + 1) : "#"}
+                                                className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                                            />
+                                        </PaginationItem>
+                                    </PaginationContent>
+                                </Pagination>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
