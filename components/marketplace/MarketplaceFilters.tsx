@@ -24,6 +24,7 @@ const GRADE_GROUPS = [
   { value: "1-3", label: "Grades 1–3" },
   { value: "4-6", label: "Grades 4–6" },
   { value: "7-9", label: "Grades 7–9" },
+  { value: "secondary", label: "Forms 1–4" },
 ];
 
 const SUBJECTS = [

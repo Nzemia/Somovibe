@@ -65,6 +65,7 @@ export function MarketplaceContent({
         if (r === "1-3") return ["Grade 1", "Grade 2", "Grade 3"];
         if (r === "4-6") return ["Grade 4", "Grade 5", "Grade 6"];
         if (r === "7-9") return ["Grade 7", "Grade 8", "Grade 9"];
+        if (r === "secondary") return ["Form 1", "Form 2", "Form 3", "Form 4"];
         return [];
       });
       list = list.filter(p => matches.some(g => p.grade.startsWith(g)));

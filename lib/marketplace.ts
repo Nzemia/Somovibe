@@ -70,6 +70,13 @@ export const getCachedApprovedPdfs = unstable_cache(
             { grade: { startsWith: "Grade 8" } },
             { grade: { startsWith: "Grade 9" } },
           ];
+        } else if (gradeRange === "secondary") {
+          return [
+            { grade: { startsWith: "Form 1" } },
+            { grade: { startsWith: "Form 2" } },
+            { grade: { startsWith: "Form 3" } },
+            { grade: { startsWith: "Form 4" } },
+          ];
         }
         return [];
       });
