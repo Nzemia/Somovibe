@@ -148,6 +148,33 @@ function ContactIcon({ filled }: { filled?: boolean }) {
     )
 }
 
+function BlogIcon({ filled }: { filled?: boolean }) {
+    return filled ? (
+        <svg
+            className="w-5 h-5 sm:w-6 sm:h-6"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+        >
+            <path fillRule="evenodd" d="M4.125 3C3.089 3 2.25 3.84 2.25 4.875V18a3 3 0 0 0 3 3h15a3 3 0 0 1-3-3V4.875C17.25 3.839 16.41 3 15.375 3H4.125ZM12 9.75a.75.75 0 0 0 0-1.5H7.5a.75.75 0 0 0 0 1.5H12Zm-.75 3a.75.75 0 0 1 .75-.75h2.25a.75.75 0 0 1 0 1.5H12a.75.75 0 0 1-.75-.75Zm-.75 3a.75.75 0 0 0 0-1.5H7.5a.75.75 0 0 0 0 1.5H9.75Z" clipRule="evenodd" />
+            <path d="M18.75 18a.75.75 0 0 0-.75.75V21h3v-2.25a.75.75 0 0 0-.75-.75h-1.5Z" />
+        </svg>
+    ) : (
+        <svg
+            className="w-5 h-5 sm:w-6 sm:h-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.8}
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 7.5h1.5m-1.5 3h1.5m-7.5-6h7.5m-7.5 3h7.5m-7.5 3h7.5m3-6H21m-1.5 3H21m-3 3H21m-18 6h18M3 5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25v13.5A2.25 2.25 0 0 1 18.75 21H5.25A2.25 2.25 0 0 1 3 18.75V5.25Z"
+            />
+        </svg>
+    )
+}
+
 /* ── Sell Modal ─────────────────────────────────────────── */
 function SellModal({ onClose }: { onClose: () => void }) {
     const router = useRouter()
@@ -321,6 +348,13 @@ export function QuickNav({
             action: handleSell
         },
         {
+            id: "blog",
+            label: "Blog",
+            href: role === "ADMIN" ? "/admin/blog" : "/blog",
+            activeOn: role === "ADMIN" ? ["/admin/blog", "/blog"] : ["/blog"],
+            icon: filled => <BlogIcon filled={filled} />
+        },
+        {
             id: "contact",
             label: "Contact",
             href: "/contact",
@@ -347,7 +381,9 @@ export function QuickNav({
     ]
 
     /* Dashboard variant shows Dashboard + Buy + Sell (in that order) */
-    const dashboardOrder = ["dashboard", "buy", "sell"]
+    const dashboardOrder = role === "ADMIN"
+        ? ["dashboard", "buy", "sell", "blog"]
+        : ["dashboard", "buy", "sell"]
     const navItems =
         variant === "dashboard"
             ? dashboardOrder
