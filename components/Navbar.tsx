@@ -325,6 +325,10 @@ export function Navbar({
                                                     href: "/teacher-register"
                                                 },
                                                 {
+                                                    label: "Blog",
+                                                    href: "/blog"
+                                                },
+                                                {
                                                     label: "Contact",
                                                     href: "/contact"
                                                 },

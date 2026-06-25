@@ -142,3 +142,146 @@ body {
   from { stroke-dashoffset: 60; }
   to   { stroke-dashoffset: 0; }
 }
+
+/* ── Blog Post & Editor Styling ── */
+.blog-content {
+  line-height: 1.8;
+  font-size: 1.05rem;
+  color: #1f2937 !important; /* Force dark gray body text */
+}
+
+.blog-content p {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  font-weight: 800;
+  color: #111827 !important; /* Force dark charcoal text */
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.blog-content h1 {
+  font-size: 2.25rem;
+  line-height: 1.25;
+}
+
+.blog-content h2 {
+  font-size: 1.75rem;
+  line-height: 1.35;
+}
+
+.blog-content h3 {
+  font-size: 1.4rem;
+  line-height: 1.4;
+}
+
+.blog-content ul,
+.ProseMirror ul {
+  list-style-type: disc !important;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem !important;
+}
+
+.blog-content ol,
+.ProseMirror ol {
+  list-style-type: decimal !important;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem !important;
+}
+
+.blog-content li,
+.ProseMirror li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.blog-content blockquote,
+.ProseMirror blockquote {
+  font-style: italic;
+  border-left: 4px solid #008c43 !important; /* Force brand green */
+  background-color: #f0faf5 !important; /* Force light green background */
+  color: #1f2937 !important; /* Force dark text */
+  padding: 1rem 1.5rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  margin: 1.75rem 0;
+}
+
+.blog-content code,
+.ProseMirror code {
+  color: #16a34a !important;
+  background-color: #f0faf5 !important; /* Force light green background */
+  font-size: 0.9em;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.blog-content pre {
+  background-color: #111827;
+  color: #e5e7eb;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 1.75rem 0;
+  font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.blog-content pre code {
+  color: inherit;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.blog-content a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.blog-content a:hover {
+  opacity: 0.8;
+}
+
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 2rem 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.blog-content hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: 2.5rem 0;
+}
+
+/* Tiptap Editor ProseMirror specific styles */
+.ProseMirror {
+  outline: none;
+  min-height: 400px;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--color-muted-foreground);
+  pointer-events: none;
+  height: 0;
+}
