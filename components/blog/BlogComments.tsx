@@ -261,7 +261,7 @@ export function BlogComments({
           value={content}
           onClick={() => !currentUser && setShowLoginModal(true)}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full px-4 py-3 border border-[#d1e8dc] rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#008c43] bg-white resize-none"
+          className="w-full px-4 py-3 border border-[#d1e8dc] rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#008c43] bg-white resize-none"
         />
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-gray-400 font-medium">
@@ -374,7 +374,7 @@ export function BlogComments({
                         placeholder={`Reply to ${comment.author.name || "user"}...`}
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-xs placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#008c43] resize-none"
+                        className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#008c43] bg-white resize-none"
                       />
                     </div>
                     <div className="flex items-center justify-end gap-2 text-xs">
