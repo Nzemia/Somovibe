@@ -1,6 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { AdminNav } from "@/components/AdminNav";
 import { BlogForm } from "../BlogForm";
 import { Metadata } from "next";
 
@@ -20,7 +19,6 @@ export default async function NewBlogPostPage() {
 
   return (
     <div>
-      <AdminNav />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <BlogForm />
       </div>
