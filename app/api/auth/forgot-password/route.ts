@@ -25,12 +25,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // Check if user has a password (not OAuth-only)
-        if (!user.password) {
-            return NextResponse.json({
-                message: "If an account exists, a reset link has been sent",
-            });
-        }
+       
 
         // Delete any existing tokens for this email
         await prisma.passwordResetToken.deleteMany({
@@ -50,13 +45,11 @@ export async function POST(req: NextRequest) {
         });
 
         // Send email
-        const emailResult = await sendPasswordResetEmail(email, token);
-
-        if (!emailResult) {
-            console.error("❌ Failed to send password reset email");
-            // Still return success to prevent email enumeration
-        } else {
-            console.log(" Password reset email sent successfully");
+        try {
+            await sendPasswordResetEmail(email, token);
+            //console.log("Password reset email sent successfully to:", email);
+        } catch (emailError: any) {
+            console.error("❌ Failed to send password reset email:", emailError.message || emailError);
         }
 
         return NextResponse.json({

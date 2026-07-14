@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 
 export async function POST(req: Request) {
     try {
@@ -12,7 +11,6 @@ export async function POST(req: Request) {
             );
         }
 
-        const resend = new Resend(apiKey);
         const { name, email, subject, message } = await req.json();
 
         if (!name || !email || !subject || !message) {
@@ -22,28 +20,44 @@ export async function POST(req: Request) {
             );
         }
 
-        // Send email using Resend
-        const { data, error } = await resend.emails.send({
-            from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
-            to: "mualukofrank@gmail.com",
-            subject: `Contact Form: ${subject}`,
-            html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>From:</strong> ${name} (${email})</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <hr />
-        <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, "<br>")}</p>
-        <hr />
-        <p><small>Reply to: ${email}</small></p>
-      `,
-            replyTo: email,
+        // Send email using direct fetch
+        const response = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+                to: "mualukofrank@gmail.com",
+                subject: `Contact Form: ${subject}`,
+                html: `
+            <h2>New Contact Form Submission</h2>
+            <p><strong>From:</strong> ${name} (${email})</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+            <hr />
+            <p><strong>Message:</strong></p>
+            <p>${message.replace(/\n/g, "<br>")}</p>
+            <hr />
+            <p><small>Reply to: ${email}</small></p>
+          `,
+                replyTo: email,
+            })
         });
 
-        if (error) {
-            console.error("Resend error:", error);
+        const text = await response.text();
+        let data: any = null;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            throw new Error(`Resend response was not valid JSON: ${text}`);
+        }
+
+        if (!response.ok || data.error) {
+            const errMsg = data.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+            console.error("Resend API error:", data.error || data);
             return NextResponse.json(
-                { error: "Failed to send email" },
+                { error: errMsg },
                 { status: 500 }
             );
         }
