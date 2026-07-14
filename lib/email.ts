@@ -1,36 +1,46 @@
-import { Resend } from "resend"
-
-let resend: Resend | null = null
+const apiKey = process.env.RESEND_API_KEY
 const fromEmail =
     process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev"
 
-function getResend() {
-    if (!resend) {
-        const apiKey = process.env.RESEND_API_KEY
-        if (!apiKey) {
-            throw new Error("RESEND_API_KEY not configured")
-        }
-        resend = new Resend(apiKey)
-    }
-    return resend
-}
-
-// Helper function to safely send emails with better error handling
 async function sendEmail(options: {
     to: string
     subject: string
     html: string
 }) {
-    try {
-        const client = getResend()
-        const result = await client.emails.send({
-            from: fromEmail,
-            to: options.to,
-            subject: options.subject,
-            html: options.html
-        })
+    if (!apiKey) {
+        throw new Error("RESEND_API_KEY not configured")
+    }
 
-        return result
+    try {
+        const response = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                from: fromEmail,
+                to: options.to,
+                subject: options.subject,
+                html: options.html
+            })
+        });
+
+        const text = await response.text();
+        let data: any = null;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            throw new Error(`Resend response was not valid JSON: ${text}`);
+        }
+
+        if (!response.ok || data.error) {
+            const errMsg = data.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+            console.error("Resend API error:", data.error || data);
+            throw new Error(errMsg);
+        }
+
+        return data;
     } catch (error: any) {
         console.error(
             "Email send failed:",
