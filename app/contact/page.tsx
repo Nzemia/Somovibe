@@ -1,6 +1,5 @@
-import { Navbar } from "@/components/Navbar"
+import { Nav } from "@/components/Nav"
 import { Footer } from "@/components/Footer"
-import { QuickNav } from "@/components/QuickNav"
 import { getCurrentUser } from "@/lib/auth"
 import ContactForm from "@/app/contact/ContactForm"
 import { Metadata } from "next"
@@ -27,8 +26,7 @@ export default async function ContactPage() {
 
     return (
         <>
-            <Navbar user={user} />
-            <QuickNav userRole={user?.role} />
+            <Nav user={user} />
             <div className="min-h-screen bg-background">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                     {/* Header */}

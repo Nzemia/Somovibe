@@ -238,7 +238,7 @@ export async function CategoriesSection() {
   ];
 
   return (
-    <section id="categories" className="bg-[#f0faf5] py-14 sm:py-20 scroll-mt-[7.5rem]">
+    <section id="categories" className="bg-[#f0faf5] py-14 sm:py-20 scroll-mt-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-14">

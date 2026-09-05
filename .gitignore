@@ -45,3 +45,7 @@ backups/
 
 # SSL certificates
 certbot/
+
+# Local Cursor rules (not shared)
+cursorrules
+.cursorrules

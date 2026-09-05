@@ -34,6 +34,102 @@
   --brand-light: #e0f2ea;
   --brand-lighter: #f0faf5;
   --brand-bright: #00b856;
+
+  /*
+   * Semantic tokens — redesign foundation.
+   * Shared across marketing, dashboard, and auth.
+   * Additive: do not remove --color-* / --brand-* until those call sites migrate.
+   *
+   * Hover: any hover style in this file or later passes MUST sit inside
+   * @media (hover: hover) { ... }. Touch devices flash :hover on press otherwise.
+   *
+   * Focus: --focus is applied via box-shadow (shadow-focus / ring-focus),
+   * never outline. Outline does not follow border-radius in older Safari.
+   *
+   * --accent (#008c43) is 4.35:1 on --surface. Do not use it behind body-size
+   * white text. White labels sit on --accent-hover (#006832, 6.94:1).
+   *
+   * bg-accent / text-accent remain the shadcn mint wash (#e0f2ea). The action
+   * green is var(--accent), not bg-accent.
+   * text-primary (Tailwind) remains shadcn green. Ink is var(--text-primary)
+   * or text-text-primary — --text-* in @theme is the type-size namespace,
+   * so the ink aliases live in :root below.
+   */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f0faf5;
+  --color-text-primary: #1a1a1a;
+  --color-text-muted: #5a7a68;
+  --color-accent-hover: #006832;
+  --color-focus: #008c43;
+  --color-fold-cash: #14b8a6;
+  --color-fold-heart: #ef4444;
+  --color-fold-folder: #f97316;
+  --color-fold-thumb: #f59e0b;
+
+  --surface: #ffffff;
+  --surface-muted: #f0faf5;
+  --border: #d1e8dc;
+  --accent: #008c43;
+  --accent-hover: #006832;
+  --focus: #008c43;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --spacing-space-1: 4px;
+  --spacing-space-2: 8px;
+  --spacing-space-3: 12px;
+  --spacing-space-4: 16px;
+  --spacing-space-5: 24px;
+  --spacing-space-6: 32px;
+  --spacing-space-7: 48px;
+  --spacing-space-8: 64px;
+
+  --radius-control: 4px;
+  --radius-soft: 8px;
+
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.4;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-lede: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);
+  --text-lede--line-height: 1.5;
+  --text-subhead: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem);
+  --text-subhead--line-height: 1.3;
+  --text-title: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --text-title--line-height: 1.2;
+  --text-display: clamp(2.25rem, 1.4rem + 3.2vw, 3.5rem);
+  --text-display--line-height: 1.12;
+
+  --header-height: 64px;
+  --spacing-header: 64px;
+  --breakpoint-nav: 720px;
+
+  /* Interaction cap: 200ms. Later passes must not invent longer durations. */
+  --duration: 200ms;
+  --duration-enter: 200ms;
+  --duration-exit: 120ms;
+  --ease-enter: ease-out;
+  --ease-exit: ease-in;
+  --press-scale: 0.96;
+}
+
+@theme inline {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --shadow-focus: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus);
+}
+
+/* Ink aliases — not in @theme: --text-* is the font-size namespace. */
+:root {
+  --text-primary: var(--color-text-primary);
+  --text-muted: var(--color-text-muted);
 }
 
 @keyframes slide-in {
@@ -284,4 +380,264 @@ body {
   color: var(--color-muted-foreground);
   pointer-events: none;
   height: 0;
+}
+
+/* ── Redesign globals (additive) ── */
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+html {
+  scroll-padding-top: var(--header-height);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * Gradient text must unset the gradient on ::selection
+ * (background-clip: unset; -webkit-text-fill-color: unset;
+ *  color: var(--text-primary)). No gradient text in this redesign —
+ *  do not add any without this reset on the same element.
+ */
+::selection {
+  background-color: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--text-primary);
+}
+
+button,
+a,
+[type="button"],
+[type="submit"],
+[type="reset"],
+[role="button"] {
+  user-select: none;
+}
+
+.blog-content a,
+.ProseMirror a {
+  user-select: text;
+}
+
+button:active,
+a:active,
+[role="button"]:active,
+[type="button"]:active,
+[type="submit"]:active,
+[type="reset"]:active {
+  scale: var(--press-scale);
+}
+
+.blog-content a:active,
+.ProseMirror a:active {
+  scale: none;
+}
+
+.nav-desk-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  transition: transform var(--duration-enter) var(--ease-enter);
+}
+
+.nav-desk-link-icon {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--space-4);
+  height: var(--space-4);
+  margin-top: calc(var(--space-4) / -2);
+  margin-left: calc((var(--space-4) + var(--space-1)) * -1);
+  opacity: 0;
+  transform: translate(0, var(--space-1));
+  transition:
+    opacity var(--duration-enter) var(--ease-enter),
+    transform var(--duration-enter) var(--ease-enter);
+}
+
+.nav-desk-link:focus-visible {
+  transform: translate(var(--space-1), calc(var(--space-1) * -1));
+}
+
+.nav-desk-link:focus-visible .nav-desk-link-icon {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+@media (hover: hover) {
+  .nav-desk-link:hover {
+    transform: translate(var(--space-1), calc(var(--space-1) * -1));
+  }
+
+  .nav-desk-link:hover .nav-desk-link-icon {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  .nav-login-pill:hover {
+    border-color: var(--accent);
+    background-color: var(--surface-muted);
+    color: var(--accent);
+  }
+
+}
+
+.nav-login-pill {
+  transition:
+    background-color var(--duration-enter) var(--ease-enter),
+    border-color var(--duration-enter) var(--ease-enter),
+    color var(--duration-enter) var(--ease-enter);
+}
+
+.fold-cta-sell,
+.fold-cta-shop {
+  transition:
+    background-color var(--duration-enter) var(--ease-enter),
+    border-color var(--duration-enter) var(--ease-enter),
+    color var(--duration-enter) var(--ease-enter),
+    transform var(--duration-enter) var(--ease-enter);
+}
+
+@media (hover: hover) {
+  .fold-cta-sell:hover {
+    background-color: var(--brand-darker);
+    transform: translateY(calc(var(--space-1) * -1));
+  }
+
+  .fold-cta-shop:hover {
+    background-color: var(--accent-hover);
+    color: var(--surface);
+    transform: translateY(calc(var(--space-1) * -1));
+  }
+}
+
+.nav-burger {
+  position: relative;
+  display: block;
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+.nav-burger span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  transition: transform var(--duration-enter) var(--ease-enter),
+    opacity var(--duration-enter) var(--ease-enter),
+    top var(--duration-enter) var(--ease-enter);
+}
+
+.nav-burger span:nth-child(1) {
+  top: 5px;
+}
+
+.nav-burger span:nth-child(2) {
+  top: 11px;
+}
+
+.nav-burger span:nth-child(3) {
+  top: 17px;
+}
+
+.nav-burger[data-open] span:nth-child(1) {
+  top: 11px;
+  transform: rotate(45deg);
+}
+
+.nav-burger[data-open] span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-burger[data-open] span:nth-child(3) {
+  top: 11px;
+  transform: rotate(-45deg);
+}
+
+@keyframes fold-icon-a {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(calc(var(--space-2) * -1)) rotate(-6deg);
+  }
+}
+
+@keyframes fold-icon-b {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(var(--space-1), calc(var(--space-2) * -1));
+  }
+}
+
+@keyframes fold-icon-c {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(calc(var(--space-1) * -1)) scale(1.06);
+  }
+}
+
+@keyframes fold-icon-d {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(calc(var(--space-1) * -1), calc(var(--space-1) * -1)) rotate(5deg);
+  }
+}
+
+.fold-icon-motion-1 {
+  animation: fold-icon-a 2.8s ease-in-out infinite;
+}
+
+.fold-icon-motion-2 {
+  animation: fold-icon-b 3.4s ease-in-out infinite;
+}
+
+.fold-icon-motion-3 {
+  animation: fold-icon-c 2.1s ease-in-out infinite;
+}
+
+.fold-icon-motion-4 {
+  animation: fold-icon-d 3.9s ease-in-out infinite;
+}
+
+.fold-icon-motion-paused {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

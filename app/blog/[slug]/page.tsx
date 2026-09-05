@@ -1,8 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
-import { QuickNav } from "@/components/QuickNav";
+import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { ShareButtons } from "@/components/blog/ShareButtons";
 import { SanitizedHTML } from "@/components/blog/SanitizedHTML";
@@ -208,8 +207,7 @@ export default async function BlogPostPage({ params, searchParams }: BlogPostPag
       {/* Views count client trigger */}
       {!isPreview && <ViewsCounter slug={slug} />}
 
-      <Navbar user={user ? { email: user.email, role: user.role } : null} />
-      <QuickNav />
+      <Nav user={user ? { email: user.email, role: user.role } : null} />
 
       <main className="min-h-screen bg-[#f5faf7] pb-16">
         {/* Cover Image / Gradient Header */}

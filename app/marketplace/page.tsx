@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
-import { Navbar } from "@/components/Navbar";
+import { Nav } from "@/components/Nav";
 import Link from "next/link";
 import { getCachedApprovedPdfs, getUserPurchasedPdfIds } from "@/lib/marketplace";
 import { MarketplaceHeader } from "@/components/marketplace/MarketplaceHeader";
@@ -103,18 +103,7 @@ export default async function Marketplace({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <Navbar user={userForNavbar} />
-      {user && (
-        <div className="sticky top-14 z-40 border-b border-white/10 backdrop-blur-md"
-          style={{ background: "linear-gradient(135deg, rgba(0,20,10,0.97) 0%, rgba(0,60,30,0.94) 50%, rgba(0,120,58,0.91) 100%)" }}
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center h-11">
-              
-            </div>
-          </div>
-        </div>
-      )}
+      <Nav user={userForNavbar} />
       <main className="min-h-screen bg-[#f5faf7]">
         <MarketplaceHeader userRole={user?.role ?? null} />
         <MarketplaceClientWrapper

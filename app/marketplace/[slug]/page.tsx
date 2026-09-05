@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { Navbar } from "@/components/Navbar";
+import { Nav } from "@/components/Nav";
 import { notFound, redirect } from "next/navigation";
 import MaterialDetailClient from "./MaterialDetailClient";
 import { Metadata } from "next";
@@ -133,7 +133,7 @@ export default async function MaterialDetailPage({
 
   return (
     <>
-      <Navbar user={user ? { email: user.email, role: user.role } : null} />
+      <Nav user={user ? { email: user.email, role: user.role } : null} />
       <MaterialDetailClient
         material={material}
         isPurchased={!!purchase}

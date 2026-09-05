@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Navbar } from "@/components/Navbar";
+import { Nav } from "@/components/Nav";
 import { getCurrentUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -131,7 +131,7 @@ export default async function TeacherProfilePage({
 
     return (
         <>
-            <Navbar user={currentUser ? { email: currentUser.email, role: currentUser.role } : null} />
+            <Nav user={currentUser ? { email: currentUser.email, role: currentUser.role } : null} />
             <div className="min-h-screen bg-background">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {/* Teacher Header */}

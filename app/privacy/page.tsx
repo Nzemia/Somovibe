@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/Navbar";
+import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -7,7 +7,7 @@ export default async function PrivacyPage() {
 
     return (
         <>
-            <Navbar user={user} />
+            <Nav user={user} />
             <div className="min-h-screen bg-background">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                     <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-8">

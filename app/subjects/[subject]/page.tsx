@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { Navbar } from "@/components/Navbar";
+import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { getCurrentUser } from "@/lib/auth";
 import { CBC_SUBJECTS } from "@/lib/search-intelligence";
@@ -76,7 +76,7 @@ export default async function SubjectPage({ params }: Props) {
 
   return (
     <>
-      <Navbar user={user ? { email: user.email, role: user.role } : null} />
+      <Nav user={user ? { email: user.email, role: user.role } : null} />
       <main className="min-h-screen bg-[#f5faf7] pt-32 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block bg-[#f0faf5] text-[#008c43] text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border border-[#d1e8dc] mb-4">

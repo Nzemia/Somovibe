@@ -2,10 +2,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Navbar } from "@/components/Navbar";
-import { QuickNav } from "@/components/QuickNav";
+import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { HeroSection } from "@/components/HeroSection";
+import { Fold } from "@/components/Fold";
 import { FAQSection } from "@/components/FAQSection";
 import { CategoriesSection } from "@/components/CategoriesSection";
 import { ScrollToTopButton } from "@/components/ScrollToTopButton";
@@ -186,17 +185,16 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <Navbar user={user ? { email: user.email, role: user.role } : null} />
-      <QuickNav />
+      <Nav user={user ? { email: user.email, role: user.role } : null} />
 
       {/* ── Hero Sections ── */}
-      <HeroSection />
+      <Fold />
 
       {/* ── Categories ── */}
       <CategoriesSection />
 
       {/* ── How It Works ── */}
-      <section id="how-it-works" className="bg-white py-14 sm:py-20 scroll-mt-[7.5rem]">
+      <section id="how-it-works" className="bg-white py-14 sm:py-20 scroll-mt-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-14">
             <span className="inline-block bg-[#f0faf5] text-[#008c43] text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border border-[#d1e8dc] mb-4">
