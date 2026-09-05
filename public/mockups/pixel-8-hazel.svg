@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1267px" height="2667px" viewBox="126 112 1267 2667" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Android Phone / Pixel 8 - Hazel</title>
+    <defs>
+        <linearGradient x1="50%" y1="-3.72965547e-14%" x2="50%" y2="99.0776944%" id="linearGradient-2">
+            <stop stop-color="#B9B8B6" offset="0%"></stop>
+            <stop stop-color="#7F7C7A" offset="1.47665685%"></stop>
+            <stop stop-color="#6E6D69" offset="2.09989712%"></stop>
+            <stop stop-color="#615F5D" offset="4.08879635%"></stop>
+            <stop stop-color="#6D6968" offset="9.35447416%"></stop>
+            <stop stop-color="#5E5A56" offset="10.7753315%"></stop>
+            <stop stop-color="#565851" offset="97.7631456%"></stop>
+            <stop stop-color="#93938E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="2.27248775e-13%" x2="50%" y2="100%" id="linearGradient-3">
+            <stop stop-color="#E7E4E1" offset="0%"></stop>
+            <stop stop-color="#BCBBB7" offset="1.27889214%"></stop>
+            <stop stop-color="#9D9998" offset="1.45462268%"></stop>
+            <stop stop-color="#83807E" offset="2.56903335%"></stop>
+            <stop stop-color="#7B7877" offset="2.73242641%"></stop>
+            <stop stop-color="#777975" offset="97.1465633%"></stop>
+            <stop stop-color="#81837E" offset="97.2519125%"></stop>
+            <stop stop-color="#A0A29C" offset="98.2059558%"></stop>
+            <stop stop-color="#C7C8C6" offset="98.668944%"></stop>
+            <stop stop-color="#E3E3E3" offset="99.6245379%"></stop>
+            <stop stop-color="#F1F1F1" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="-0.568181818%" x2="50%" y2="99.0776944%" id="linearGradient-4">
+            <stop stop-color="#B5B2B0" offset="0%"></stop>
+            <stop stop-color="#938F8D" offset="1.47665685%"></stop>
+            <stop stop-color="#8E8B84" offset="2.09989712%"></stop>
+            <stop stop-color="#797571" offset="4.08879635%"></stop>
+            <stop stop-color="#504D4B" offset="9.35447416%"></stop>
+            <stop stop-color="#635E5A" offset="10.7753315%"></stop>
+            <stop stop-color="#575855" offset="97.7631456%"></stop>
+            <stop stop-color="#9B9B9B" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="2.27248775e-13%" x2="50%" y2="100%" id="linearGradient-5">
+            <stop stop-color="#E9E6E3" offset="0%"></stop>
+            <stop stop-color="#BBBAB8" offset="1.27889214%"></stop>
+            <stop stop-color="#9D9A99" offset="1.45462268%"></stop>
+            <stop stop-color="#858585" offset="2.56903335%"></stop>
+            <stop stop-color="#848180" offset="2.73242641%"></stop>
+            <stop stop-color="#6F706D" offset="97.1465633%"></stop>
+            <stop stop-color="#6C6D6A" offset="97.2519125%"></stop>
+            <stop stop-color="#91928D" offset="98.2059558%"></stop>
+            <stop stop-color="#D0D0D0" offset="98.668944%"></stop>
+            <stop stop-color="#E1E1E1" offset="99.6245379%"></stop>
+            <stop stop-color="#EEEEEE" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50.6115871%" y1="2.50450702e-15%" x2="50.5245643%" y2="100.496764%" id="linearGradient-6">
+            <stop stop-color="#D4D2D1" offset="0%"></stop>
+            <stop stop-color="#B2B0AE" offset="0.104711363%"></stop>
+            <stop stop-color="#A8A6A4" offset="0.178527827%"></stop>
+            <stop stop-color="#999999" offset="0.314845444%"></stop>
+            <stop stop-color="#949494" offset="0.389418822%"></stop>
+            <stop stop-color="#969794" offset="1.2993868%"></stop>
+            <stop stop-color="#3C3C3A" offset="100%"></stop>
+        </linearGradient>
+        <radialGradient cx="3.96775332%" cy="1.74723776%" fx="3.96775332%" fy="1.74723776%" r="229.219894%" gradientTransform="translate(0.0397, 0.0175), scale(1, 0.4721), rotate(65.2315), scale(1, 1.0637), translate(-0.0397, -0.0175)" id="radialGradient-7">
+            <stop stop-color="#9C9C9A" offset="0.0191215035%"></stop>
+            <stop stop-color="#8E8E8E" offset="0.776610296%"></stop>
+            <stop stop-color="#7B7B7D" offset="2.03223613%"></stop>
+            <stop stop-color="#767578" offset="3.04750845%"></stop>
+            <stop stop-color="#959595" stop-opacity="0" offset="28.5574362%"></stop>
+            <stop stop-color="#706D6C" stop-opacity="0" offset="79.7914859%"></stop>
+            <stop stop-color="#72706E" offset="90.932674%"></stop>
+            <stop stop-color="#727272" offset="92.758669%"></stop>
+            <stop stop-color="#41403F" offset="99.0235984%"></stop>
+            <stop stop-color="#3E3E3C" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" r="50%" id="radialGradient-8">
+            <stop stop-color="#252525" offset="0%"></stop>
+            <stop stop-color="#151414" offset="35.1507867%"></stop>
+            <stop stop-color="#212527" offset="49.065778%"></stop>
+            <stop stop-color="#616360" offset="60.8118444%"></stop>
+            <stop stop-color="#36567B" offset="68.4806916%"></stop>
+            <stop stop-color="#1D2E3B" offset="78.2124126%"></stop>
+            <stop stop-color="#22394F" offset="85.3738548%"></stop>
+            <stop stop-color="#3F5975" offset="92.0017483%"></stop>
+            <stop stop-color="#929FA7" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="Android-Phone-/-Pixel-8---Hazel" stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+        <g transform="translate(183, 169)" id="Pixel-8-Pro-Silver">
+            <g transform="translate(-57, -57)">
+                <g id="Power-button" transform="translate(1259, 712)">
+                    <rect id="Left" fill="url(#linearGradient-2)" x="0" y="0" width="6" height="175"></rect>
+                    <rect id="Right" fill="url(#linearGradient-3)" x="6" y="0" width="2" height="175"></rect>
+                </g>
+                <g id="Volume-rocker" transform="translate(1259, 1028)">
+                    <rect id="Left" fill="url(#linearGradient-4)" x="0" y="0" width="6" height="355"></rect>
+                    <rect id="Right" fill="url(#linearGradient-5)" x="6" y="0" width="2" height="355"></rect>
+                </g>
+                <path d="M1099,0 C1187.36556,-2.84217094e-14 1259,71.63444 1259,160 L1259,2507 C1259,2595.36556 1187.36556,2667 1099,2667 L160,2667 C71.63444,2667 0,2595.36556 0,2507 L0,160 C0,71.63444 71.63444,0 160,0 L1099,0 Z M1095,57 L164,57 C104.905532,57 57,104.905532 57,164 L57,2499 C57,2558.09447 104.905532,2606 164,2606 L1095,2606 C1154.09447,2606 1202,2558.09447 1202,2499 L1202,164 C1202,104.905532 1154.09447,57 1095,57 Z" id="Frame-base" fill="url(#linearGradient-6)"></path>
+                <path d="M1099,0 C1187.36556,-2.84217094e-14 1259,71.63444 1259,160 L1259,2507 C1259,2595.36556 1187.36556,2667 1099,2667 L160,2667 C71.63444,2667 0,2595.36556 0,2507 L0,160 C0,71.63444 71.63444,0 160,0 L1099,0 Z M1095,57 L164,57 C104.905532,57 57,104.905532 57,164 L57,2499 C57,2558.09447 104.905532,2606 164,2606 L1095,2606 C1154.09447,2606 1202,2558.09447 1202,2499 L1202,164 C1202,104.905532 1154.09447,57 1095,57 Z" id="Frame-highlight" fill="url(#radialGradient-7)"></path>
+                <path d="M1095,20 C1174.529,20 1239,84.470996 1239,164 L1239,2503 C1239,2582.529 1174.529,2647 1095,2647 L164,2647 C84.470996,2647 20,2582.529 20,2503 L20,164 C20,84.470996 84.470996,20 164,20 L1095,20 Z M1095,57 L164,57 C104.905532,57 57,104.905532 57,164 L57,2499 C57,2558.09447 104.905532,2606 164,2606 L1095,2606 C1154.09447,2606 1202,2558.09447 1202,2499 L1202,164 C1202,104.905532 1154.09447,57 1095,57 Z" id="Bezel" fill="#100F0D"></path>
+                <g id="Camera" transform="translate(589, 86)">
+                    <circle fill="#100F0D" cx="40" cy="40" r="40"></circle>
+                    <circle id="Peek" fill="url(#radialGradient-8)" cx="40" cy="40" r="30"></circle>
+                </g>
+                <g id="Frame-splits" fill="#61615D">
+                    <rect id="Frame-split---Bottom" x="754" y="2647" width="28" height="20"></rect>
+                    <rect id="Frame-split---Left-3" x="0" y="2406" width="20" height="20"></rect>
+                    <rect id="Frame-split---Left-2" x="0" y="588" width="20" height="20"></rect>
+                    <rect id="Frame-split---Left-1" x="0" y="172" width="20" height="24"></rect>
+                    <rect id="Frame-split---Right-3" x="1239" y="2406" width="20" height="20"></rect>
+                    <rect id="Frame-split---Right-2" x="1239" y="588" width="20" height="20"></rect>
+                    <rect id="Frame-split---Right-1" x="1239" y="172" width="20" height="20"></rect>
+                    <rect id="Frame-split---Top" x="615" y="0" width="28" height="20"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

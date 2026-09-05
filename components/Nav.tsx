@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
@@ -45,6 +45,11 @@ const pillClass =
 export function Nav({ user }: { user: NavUser }) {
     const [open, setOpen] = useState(false)
     const [signingOut, setSigningOut] = useState(false)
+    const [menuReady, setMenuReady] = useState(false)
+
+    useEffect(() => {
+        setMenuReady(true)
+    }, [])
 
     const handleSignOut = async () => {
         setSigningOut(true)
@@ -136,6 +141,20 @@ export function Nav({ user }: { user: NavUser }) {
                     </div>
 
                     <div className="nav:hidden">
+                    {!menuReady ? (
+                        <button
+                            type="button"
+                            className="flex size-space-7 items-center justify-center text-text-primary focus-visible:shadow-focus focus-visible:outline-none"
+                            aria-label="Open menu"
+                            aria-expanded={false}
+                        >
+                            <span className="nav-burger" aria-hidden="true">
+                                <span />
+                                <span />
+                                <span />
+                            </span>
+                        </button>
+                    ) : (
                     <Sheet open={open} onOpenChange={setOpen}>
                         <SheetTrigger asChild>
                             <button
@@ -230,6 +249,7 @@ export function Nav({ user }: { user: NavUser }) {
                             </div>
                         </SheetContent>
                     </Sheet>
+                    )}
                     </div>
                 </div>
             </div>

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { Fold } from "@/components/Fold";
+import { RolesSection } from "@/components/RolesSection";
 import { FAQSection } from "@/components/FAQSection";
 import { CategoriesSection } from "@/components/CategoriesSection";
 import { ScrollToTopButton } from "@/components/ScrollToTopButton";
@@ -189,6 +190,7 @@ export default async function Home() {
 
       {/* ── Hero Sections ── */}
       <Fold />
+      <RolesSection />
 
       {/* ── Categories ── */}
       <CategoriesSection />

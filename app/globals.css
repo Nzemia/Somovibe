@@ -65,6 +65,18 @@
   --color-fold-heart: #ef4444;
   --color-fold-folder: #f97316;
   --color-fold-thumb: #f59e0b;
+  --color-fold-grey: #7c8491;
+  --color-fold-blue: #2f9bff;
+  --color-role-teacher: #004d25;
+  --color-role-parent: #006832;
+  --color-role-student: #e0f2ea;
+  --color-phone-screen: #202124;
+  --color-phone-bar: #303134;
+  --color-phone-ink: #e8eaed;
+  --color-phone-dim: #bdc1c6;
+  --color-phone-line: #5f6368;
+  --color-phone-glow: #8ab4f8;
+  --color-phone-mark: #1a73e8;
 
   --surface: #ffffff;
   --surface-muted: #f0faf5;
@@ -520,6 +532,694 @@ a:active,
     color: var(--surface);
     transform: translateY(calc(var(--space-1) * -1));
   }
+}
+
+.role-extract {
+  box-shadow: 0 var(--space-2) var(--space-5) color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+
+.role-pay-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.role-pay-copy {
+  flex: 1;
+  min-width: 0;
+  animation: role-pay-pop calc(var(--duration-enter) * 2) var(--ease-enter) both;
+}
+
+.role-pay-pill {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+  padding: var(--space-2);
+  border-radius: 9999px;
+  background: var(--color-surface-muted);
+}
+
+.role-pay-slot {
+  display: flex;
+  width: var(--space-5);
+  height: var(--space-5);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-pay-dot {
+  display: flex;
+  width: var(--space-2);
+  height: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  color: var(--surface);
+  transition:
+    width var(--duration-enter) var(--ease-enter),
+    height var(--duration-enter) var(--ease-enter);
+}
+
+.role-pay-dot svg {
+  width: var(--space-3);
+  height: var(--space-3);
+  opacity: 0;
+}
+
+.role-pay-dot-on {
+  width: var(--space-5);
+  height: var(--space-5);
+  animation: role-pay-pop calc(var(--duration-enter) * 2) var(--ease-enter) both;
+}
+
+.role-pay-dot-on svg {
+  opacity: 1;
+}
+
+@keyframes role-pay-pop {
+  0% {
+    transform: scale(0.72);
+  }
+  55% {
+    transform: scale(1.16);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-pay-dot-on,
+  .role-pay-copy {
+    animation: none;
+  }
+}
+
+.role-phone-slot {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.role-phone {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1267 / 2667;
+  flex-shrink: 0;
+  filter: drop-shadow(
+    0 var(--space-2) var(--space-5)
+      color-mix(in srgb, var(--color-text-primary) 12%, transparent)
+  );
+}
+
+.role-phone-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.role-phone-screen {
+  position: absolute;
+  top: calc(57 / 2667 * 100%);
+  left: calc(57 / 1267 * 100%);
+  z-index: 0;
+  display: flex;
+  width: calc(1145 / 1267 * 100%);
+  height: calc(2549 / 2667 * 100%);
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--space-6) var(--space-3) var(--space-3);
+  border-radius: calc(107 / 1145 * 100%);
+  background: var(--color-phone-screen);
+  color: var(--color-phone-ink);
+}
+
+.role-phone-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--space-5);
+  padding-inline: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-phone-ink);
+}
+
+.role-phone-status-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.role-phone-status-meta svg {
+  width: var(--space-3);
+  height: var(--space-3);
+}
+
+.role-phone-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  min-height: var(--space-7);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--color-phone-line);
+  border-radius: 9999px;
+  background: var(--color-phone-bar);
+  color: var(--color-phone-ink);
+}
+
+.role-phone-search-tools {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-phone-dim);
+}
+
+.role-phone-search-go {
+  color: var(--color-phone-glow);
+}
+
+.role-phone-tabs {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  padding-inline: var(--space-2);
+  border-bottom: 1px solid var(--color-phone-line);
+  font-family: var(--font-sans);
+  font-size: calc(var(--text-caption) * 0.9);
+  color: var(--color-phone-dim);
+}
+
+.role-phone-tab {
+  padding-bottom: var(--space-2);
+}
+
+.role-phone-tab-on {
+  border-bottom: 2px solid var(--color-phone-ink);
+  color: var(--color-phone-ink);
+  font-weight: 700;
+}
+
+.role-phone-ai-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-phone-glow);
+}
+
+.role-phone-mark {
+  padding-inline: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-phone-mark);
+  color: var(--color-surface);
+}
+
+.role-phone-more {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  color: var(--color-phone-glow);
+}
+
+.role-phone-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.role-phone-result-title {
+  color: var(--color-phone-glow);
+  font-weight: 700;
+}
+
+.role-phone-caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--color-phone-glow);
+  animation: role-phone-caret 1s step-end infinite;
+}
+
+.role-phone-answer {
+  min-height: 0;
+  flex: 1;
+  margin-top: var(--space-3);
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.role-phone-answer::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes role-phone-caret {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-phone-caret {
+    animation: none;
+  }
+}
+
+.role-progress-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  flex: none;
+}
+
+.role-progress-rail {
+  position: absolute;
+  top: calc(var(--space-5) / 2);
+  bottom: calc(var(--space-5) / 2);
+  left: calc((var(--space-5) - var(--space-2)) / 2);
+  width: var(--space-2);
+  border-radius: 9999px;
+  background: var(--color-fold-grey);
+}
+
+.role-progress-rail-fill {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 0;
+  border-radius: inherit;
+  background: var(--color-fold-blue);
+  transition:
+    height calc(var(--duration-enter) * 2) var(--ease-enter),
+    opacity calc(var(--duration-enter) * 2) var(--ease-enter);
+}
+
+.role-progress-list[data-fill="mid"] .role-progress-rail-fill {
+  height: 50%;
+}
+
+.role-progress-list[data-fill="full"] .role-progress-rail-fill {
+  height: 100%;
+}
+
+.role-progress-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.role-progress-row:last-child {
+  align-items: flex-end;
+  height: var(--space-5);
+  min-height: var(--space-5);
+}
+
+.role-progress-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--space-5);
+}
+
+.role-progress-copy-gap {
+  padding-bottom: var(--space-6);
+}
+
+.role-progress-row:last-child .role-progress-copy {
+  height: var(--space-5);
+  min-height: var(--space-5);
+}
+
+.role-progress-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: var(--space-5);
+  height: var(--space-5);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: var(--surface);
+  background-color: var(--color-fold-grey);
+  transition:
+    color calc(var(--duration-enter) * 2) var(--ease-enter),
+    background-color calc(var(--duration-enter) * 2) var(--ease-enter);
+}
+
+.role-progress-node svg {
+  transition: opacity calc(var(--duration-enter) * 2) var(--ease-enter);
+}
+
+.role-progress-node-on {
+  color: var(--surface);
+  background-color: var(--color-fold-blue);
+}
+
+.role-progress-label {
+  color: var(--color-fold-grey);
+  transition: color calc(var(--duration-enter) * 2) var(--ease-enter);
+}
+
+.role-progress-label-on {
+  color: var(--color-fold-blue);
+}
+
+.role-progress-pulse {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: 9999px;
+  background: var(--surface);
+  animation: role-progress-pulse calc(var(--duration-enter) * 2) ease-in-out infinite;
+}
+
+.role-progress-spin {
+  transform-origin: center left;
+  transform: rotateX(90deg);
+  opacity: 0;
+}
+
+.role-progress-spin-on {
+  animation: role-progress-spin-in calc(var(--duration-enter) * 2) var(--ease-enter) both;
+}
+
+.role-progress-stamp {
+  font-size: calc(var(--text-caption) * 0.8);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  color: var(--color-text-muted);
+  transition: opacity calc(var(--duration-enter) * 2) var(--ease-enter);
+}
+
+.role-progress-stamp-on {
+  opacity: 1;
+}
+
+.role-progress-load {
+  animation: role-progress-load calc(var(--duration-enter) * 4) linear infinite;
+}
+
+.role-progress-ended .role-progress-label,
+.role-progress-ended .role-progress-label-on {
+  color: var(--color-fold-grey);
+}
+
+.role-progress-ended .role-progress-node,
+.role-progress-ended .role-progress-node-on {
+  color: var(--surface);
+  background-color: var(--color-fold-grey);
+}
+
+.role-progress-ended .role-progress-rail-fill {
+  height: 0;
+  opacity: 0;
+}
+
+.role-progress-fade .role-progress-node-on {
+  color: var(--surface);
+  background-color: var(--color-fold-grey);
+}
+
+.role-progress-fade .role-progress-node-on svg {
+  opacity: 0;
+}
+
+.role-progress-fade .role-progress-label-on {
+  color: var(--color-fold-grey);
+}
+
+.role-progress-fade .role-progress-rail-fill {
+  opacity: 0;
+}
+
+.role-progress-fade .role-progress-stamp-on,
+.role-progress-ended .role-progress-stamp-on {
+  opacity: 0;
+}
+
+@keyframes role-progress-pulse {
+  0%,
+  100% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes role-progress-load {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes role-progress-spin-in {
+  from {
+    transform: rotateX(90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-progress-pulse,
+  .role-progress-load,
+  .role-progress-spin-on {
+    animation: none;
+  }
+
+  .role-progress-spin {
+    transform: none;
+    opacity: 1;
+  }
+
+  .role-progress-rail-fill {
+    transition: none;
+  }
+}
+
+.role-step-shell {
+  background: color-mix(in srgb, var(--surface) 2%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  transition:
+    background var(--duration-enter) var(--ease-enter),
+    box-shadow var(--duration-enter) var(--ease-enter),
+    backdrop-filter var(--duration-enter) var(--ease-enter),
+    -webkit-backdrop-filter var(--duration-enter) var(--ease-enter);
+}
+
+.role-step-live {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--surface) 42%, transparent),
+    color-mix(in srgb, var(--surface) 14%, transparent)
+  );
+  backdrop-filter: blur(var(--space-4)) saturate(1.55);
+  -webkit-backdrop-filter: blur(var(--space-4)) saturate(1.55);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--surface) 55%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--surface) 10%, transparent),
+    0 var(--space-1) var(--space-3) color-mix(in srgb, var(--text-primary) 14%, transparent);
+}
+
+.role-step-title,
+.role-step-detail {
+  transition: color var(--duration-enter) var(--ease-enter);
+}
+
+.role-step-title {
+  color: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+.role-step-detail {
+  color: color-mix(in srgb, var(--surface) 45%, transparent);
+}
+
+.role-step-live .role-step-title {
+  color: var(--surface);
+}
+
+.role-step-live .role-step-detail {
+  color: color-mix(in srgb, var(--surface) 75%, transparent);
+}
+
+.role-icon-disc {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--surface) 38%, transparent);
+}
+
+.role-icon-stage {
+  position: relative;
+  display: grid;
+  width: var(--space-4);
+  height: var(--space-4);
+  place-items: center;
+}
+
+.role-icon-stage-lg {
+  width: var(--space-6);
+  height: var(--space-6);
+}
+
+.role-icon-stage svg {
+  grid-area: 1 / 1;
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+.role-icon-stage-lg svg {
+  width: var(--space-6);
+  height: var(--space-6);
+}
+
+.role-icon-stage svg.role-icon-add {
+  width: calc(var(--space-4) * 0.72);
+  height: calc(var(--space-4) * 0.72);
+}
+
+.role-icon-stage-lg svg.role-icon-add {
+  width: calc(var(--space-6) * 0.72);
+  height: calc(var(--space-6) * 0.72);
+}
+
+.role-story-register.role-icon-playing .role-icon-pop {
+  animation: role-icon-pop calc(var(--duration-enter) * 2) var(--ease-enter) both;
+}
+
+.role-story-upload.role-icon-playing .role-icon-drop {
+  animation: role-icon-drop calc(var(--duration-enter) * 2) var(--ease-enter) both;
+}
+
+.role-story-share.role-icon-playing .role-icon-send {
+  animation: role-icon-send calc(var(--duration-enter) * 2) var(--ease-enter) both;
+}
+
+.role-story-earn.role-icon-playing .role-icon-shake {
+  animation: role-icon-shake calc(var(--duration-enter) * 2) var(--ease-enter) both;
+}
+
+@keyframes role-icon-pop {
+  0% {
+    transform: scale(0.72);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.16);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes role-icon-send {
+  from {
+    transform: translateX(calc(var(--space-3) * -1));
+  }
+  to {
+    transform: translateX(var(--space-2));
+  }
+}
+
+@keyframes role-icon-drop {
+  from {
+    transform: translateY(calc(var(--space-3) * -1));
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes role-icon-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(calc(var(--space-1) * -1));
+  }
+  40% {
+    transform: translateX(var(--space-1));
+  }
+  60% {
+    transform: translateX(calc(var(--space-1) * -0.5));
+  }
+  80% {
+    transform: translateX(calc(var(--space-1) * 0.5));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-story-register.role-icon-playing .role-icon-pop,
+  .role-story-upload.role-icon-playing .role-icon-drop,
+  .role-story-share.role-icon-playing .role-icon-send,
+  .role-story-earn.role-icon-playing .role-icon-shake {
+    animation: none;
+  }
+}
+
+.role-icon-wrap {
+  display: inline-flex;
+  width: var(--space-7);
+  height: var(--space-7);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--surface) 18%, transparent);
+  transform: scale(0.88);
+  transition: transform var(--duration-enter) var(--ease-enter);
+}
+
+.role-icon-wrap-light {
+  background: var(--surface);
+  color: var(--accent-hover);
+}
+
+.role-icon-wrap-active {
+  transform: scale(1.12) translateY(calc(var(--space-1) * -1));
 }
 
 .nav-burger {
