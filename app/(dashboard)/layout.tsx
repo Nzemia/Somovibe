@@ -1,6 +1,5 @@
 import { getCurrentUser } from "@/lib/auth"
-import { Navbar } from "@/components/Navbar"
-import { QuickNav } from "@/components/QuickNav"
+import { DashboardChrome } from "@/components/DashboardChrome"
 import { ScrollToTopOnNav } from "@/components/ScrollToTopOnNav"
 
 export const dynamic = "force-dynamic"
@@ -15,7 +14,7 @@ export default async function DashboardLayout({
     return (
         <>
             <ScrollToTopOnNav />
-            <Navbar
+            <DashboardChrome
                 user={
                     user
                         ? {
@@ -24,10 +23,6 @@ export default async function DashboardLayout({
                           }
                         : null
                 }
-            />
-            <QuickNav
-                variant="dashboard"
-                userRole={user?.role}
             />
             <div className="min-h-screen bg-[#f5faf7]">
                 {children}

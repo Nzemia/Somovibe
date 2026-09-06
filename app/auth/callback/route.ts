@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/session";
+import { isSafeReturnPath } from "@/lib/returnTicket";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -51,14 +52,13 @@ export async function GET(request: Request) {
 
   // 4. Handle dynamic callbackUrl redirection if provided, otherwise role-based
   const callbackUrl = requestUrl.searchParams.get("callbackUrl");
-  let dest = callbackUrl || "";
-  
-  // Validate redirect destination safety (relative path only to prevent open redirects)
-  if (!dest || !dest.startsWith("/")) {
+  let dest = isSafeReturnPath(callbackUrl) ? callbackUrl : "";
+
+  if (!dest) {
     dest =
       user.role === "ADMIN" ? "/admin" :
       user.role === "TEACHER" ? "/teacher" :
-      "/student";
+      "/marketplace";
   }
 
   return NextResponse.redirect(new URL(dest, baseUrl));

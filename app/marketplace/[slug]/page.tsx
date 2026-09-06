@@ -75,17 +75,24 @@ export async function generateMetadata({
 
 export default async function MaterialDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ autoBuy?: string; phone?: string }>;
 }) {
   const { slug } = await params;
+  const query = await searchParams;
   const user = await getCurrentUser();
 
   const result = await findMaterial(slug);
 
-  // UUID hit → 301 redirect to the slug URL
+  // UUID hit → 301 redirect to the slug URL, keep the buy ticket
   if (result.isUuidFallback && result.canonicalSlug) {
-    redirect(`/marketplace/${result.canonicalSlug}`);
+    const qs = new URLSearchParams();
+    if (query.autoBuy) qs.set("autoBuy", query.autoBuy);
+    if (query.phone) qs.set("phone", query.phone);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    redirect(`/marketplace/${result.canonicalSlug}${suffix}`);
   }
 
   if (!result.material) notFound();
@@ -133,7 +140,7 @@ export default async function MaterialDetailPage({
 
   return (
     <>
-      <Nav user={user ? { email: user.email, role: user.role } : null} />
+      <Nav user={user ? { email: user.email, role: user.role } : null} wave />
       <MaterialDetailClient
         material={material}
         isPurchased={!!purchase}

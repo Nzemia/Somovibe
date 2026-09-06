@@ -456,6 +456,100 @@ a:active,
   scale: none;
 }
 
+.site-nav {
+  --nav-scroll: 0;
+  --nav-green: calc(1 - var(--nav-scroll));
+  background-color: color-mix(
+    in srgb,
+    var(--accent-hover) calc(var(--nav-green) * 100%),
+    var(--surface)
+  );
+  color: color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 100%),
+    var(--text-primary)
+  );
+}
+
+.site-nav .nav-desk-link {
+  color: inherit;
+}
+
+.site-nav .nav-cta-pill {
+  background-color: color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 100%),
+    var(--accent-hover)
+  );
+  color: color-mix(
+    in srgb,
+    var(--accent-hover) calc(var(--nav-green) * 100%),
+    var(--surface)
+  );
+}
+
+.site-nav .nav-login-pill {
+  border-color: color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 40%),
+    var(--border)
+  );
+  background-color: color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 15%),
+    color-mix(in srgb, var(--surface) 70%, transparent)
+  );
+  color: color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 100%),
+    var(--accent-hover)
+  );
+}
+
+.site-nav-wave {
+  opacity: var(--nav-green);
+}
+
+.site-nav-logo-white {
+  opacity: var(--nav-green);
+}
+
+.site-nav-logo-ink {
+  opacity: var(--nav-scroll);
+}
+
+.site-nav .nav-account-trigger:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 10%),
+    rgb(0 0 0 / 5%)
+  );
+}
+
+.site-nav .nav-account-mail {
+  color: color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 80%),
+    var(--text-primary)
+  );
+}
+
+.site-nav .nav-account-chevron {
+  color: color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 60%),
+    #9ca3af
+  );
+}
+
+.site-nav .nav-account-avatar {
+  box-shadow: 0 0 0 2px color-mix(
+    in srgb,
+    var(--surface) calc(var(--nav-green) * 35%),
+    transparent
+  );
+}
+
 .nav-desk-link {
   position: relative;
   display: inline-flex;
@@ -503,13 +597,22 @@ a:active,
     color: var(--accent);
   }
 
+  .site-nav[data-theme="green"] .nav-login-pill:hover {
+    border-color: var(--surface);
+    background-color: color-mix(in srgb, var(--surface) 28%, transparent);
+    color: var(--surface);
+  }
+
+  .site-nav[data-theme="green"] .nav-cta-pill:hover {
+    background: var(--surface-muted);
+    color: var(--accent-hover);
+  }
+
 }
 
-.nav-login-pill {
-  transition:
-    background-color var(--duration-enter) var(--ease-enter),
-    border-color var(--duration-enter) var(--ease-enter),
-    color var(--duration-enter) var(--ease-enter);
+.nav-login-pill,
+.nav-cta-pill {
+  transition: none;
 }
 
 .fold-cta-sell,

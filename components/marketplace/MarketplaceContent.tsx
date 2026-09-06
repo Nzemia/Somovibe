@@ -168,7 +168,11 @@ export function MarketplaceContent({
 }
 
 function Pagination({ current, total, onChange }: { current: number; total: number; onChange: (p: number) => void }) {
-  const scrollUp = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const scrollUp = () => {
+    const list = document.getElementById("marketplace-results");
+    if (list) list.scrollTo({ top: 0, behavior: "smooth" });
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleChange = (p: number) => {
     onChange(p);

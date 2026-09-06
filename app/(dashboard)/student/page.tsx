@@ -73,7 +73,7 @@ export default async function StudentPage() {
                 <div className="relative px-6 sm:px-8 pt-8 pb-6">
                     <div className="mb-8">
                         <p className="text-white/60 text-sm font-medium mb-1">Welcome back</p>
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Student Dashboard</h1>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Learner Dashboard</h1>
                     </div>
 
                     {/* Stats */}

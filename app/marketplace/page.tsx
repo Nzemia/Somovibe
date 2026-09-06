@@ -98,14 +98,14 @@ export default async function Marketplace({
   };
 
   return (
-    <>
+    <div className="flex h-dvh flex-col overflow-hidden bg-[#f5faf7]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <Nav user={userForNavbar} />
-      <main className="min-h-screen bg-[#f5faf7]">
-        <MarketplaceHeader userRole={user?.role ?? null} />
+      <Nav user={userForNavbar} wave />
+      <main className="flex min-h-0 flex-1 flex-col">
+        <MarketplaceHeader />
         <MarketplaceClientWrapper
           initialPdfs={cachedPdfs.items}
           purchasedPdfIds={purchasedPdfIds}
@@ -119,6 +119,6 @@ export default async function Marketplace({
           initialMaxPrice={maxPrice}
         />
       </main>
-    </>
+    </div>
   );
 }

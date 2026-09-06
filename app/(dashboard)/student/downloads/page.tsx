@@ -54,7 +54,7 @@ export default async function StudentDownloadsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                 <div>
-                    <p className="text-[#008c43] text-sm font-semibold mb-1">Student Dashboard</p>
+                    <p className="text-[#008c43] text-sm font-semibold mb-1">Learner Dashboard</p>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Download History</h1>
                 </div>
                

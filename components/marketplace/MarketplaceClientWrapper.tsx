@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { MarketplaceControls } from "./MarketplaceControls";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { MarketplaceContent } from "./MarketplaceContent";
+import { FilterFab } from "./filterUi";
 
 export type PdfItem = {
   id: string;
@@ -75,34 +76,32 @@ export function MarketplaceClientWrapper({
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-      {/* Search + sort bar */}
-      <MarketplaceControls
-        initialSearch={search}
-        initialSort={sort}
-        onSearchChange={setSearch}
-        onSortChange={setSort}
-        totalCount={initialPdfs.length}
-        mobileTriggerRender={
-          <div className="lg:hidden shrink-0">
-            <button
-              type="button"
-              onClick={() => setFilterSheetOpen(true)}
-              className="flex items-center justify-center p-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-800 shadow-sm hover:border-[#008c43] hover:text-[#008c43] transition-colors active:scale-95"
-              aria-label="Filters and Sort"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-            </button>
-          </div>
-        }
-      />
+    <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col">
+      <div className="relative z-20 shrink-0 bg-[#f5faf7]">
+        <MarketplaceControls
+          initialSearch={search}
+          initialSort={sort}
+          initialMaterialType={materialTypes[0] ?? ""}
+          onSearchChange={setSearch}
+          onSortChange={setSort}
+          onMaterialTypeChange={setMaterialTypes}
+          mobileTriggerRender={
+            <div className="lg:hidden shrink-0 self-center">
+              <FilterFab
+                onClick={() => setFilterSheetOpen(true)}
+                activeCount={
+                  grades.length + subjects.length + materialTypes.length
+                  + (minPrice !== undefined ? 1 : 0)
+                  + (maxPrice !== undefined ? 1 : 0)
+                }
+              />
+            </div>
+          }
+        />
+      </div>
 
-      {/* Sidebar + grid */}
-      <div className="flex flex-col lg:flex-row gap-6 pt-4 pb-12 items-start">
-        <div className="w-full lg:w-60 lg:shrink-0 lg:sticky lg:top-24">
+      <div className="flex min-h-0 flex-1 flex-col gap-6 pt-4 lg:flex-row lg:items-stretch">
+        <div className="hidden min-h-0 w-64 shrink-0 overflow-y-auto lg:block">
           <MarketplaceFilters
             initialGrades={grades}
             initialSubjects={subjects}
@@ -120,8 +119,11 @@ export function MarketplaceClientWrapper({
             onExternalForceClose={() => setFilterSheetOpen(false)}
           />
         </div>
-        
-        <div className="flex-1 min-w-0">
+
+        <div
+          id="marketplace-results"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto pb-12"
+        >
           <MarketplaceContent
             initialPdfs={initialPdfs}
             purchasedPdfIds={purchasedPdfIds}

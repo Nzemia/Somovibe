@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 type PurchaseButtonProps = {
   pdfId: string;
+  slug?: string | null;
   title: string;
   price: number;
   isPurchased: boolean;
@@ -16,6 +17,7 @@ type PurchaseButtonProps = {
 
 export default function PurchaseButton({
   pdfId,
+  slug,
   title,
   price,
   isPurchased,
@@ -39,7 +41,8 @@ export default function PurchaseButton({
     if (!user) {
       toast.error("Please login to purchase materials");
       // preserve autoBuy flag so flow continues after login
-      router.push(`/login?callbackUrl=${encodeURIComponent(`/marketplace/${pdfId}?autoBuy=1`)}`);
+      const path = `/marketplace/${slug ?? pdfId}?autoBuy=1`;
+      router.push(`/login?callbackUrl=${encodeURIComponent(path)}`);
       return;
     }
 
@@ -119,7 +122,7 @@ export default function PurchaseButton({
     }
 
     setShowModal(false);
-    router.push(`/marketplace/${pdfId}?autoBuy=1&phone=${encodeURIComponent(phone)}`);
+    router.push(`/marketplace/${slug ?? pdfId}?autoBuy=1&phone=${encodeURIComponent(phone)}`);
   };
 
   const handleDownload = async () => {

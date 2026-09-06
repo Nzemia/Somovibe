@@ -110,7 +110,7 @@ const slides: Slide[] = [
             href: "/marketplace"
         },
         secondaryCta: {
-            label: "Create Free Account",
+            label: "Create account",
             href: "/register"
         },
         bgGradient:

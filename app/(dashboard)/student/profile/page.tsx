@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import ProfileForm from "./ProfileForm"
 import PasswordChangeForm from "@/components/PasswordChangeForm"
+import { BackToPrevious } from "@/components/BackToPrevious"
 
 export default async function StudentProfilePage() {
     const user = await getCurrentUser()
@@ -54,7 +55,7 @@ export default async function StudentProfilePage() {
                             Manage your account information
                         </p>
                     </div>
-                    
+                    <BackToPrevious fallback="/marketplace" />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

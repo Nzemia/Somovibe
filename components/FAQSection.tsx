@@ -11,7 +11,7 @@ const faqs: FAQItem[] = [
   {
     question: "How do I become a teacher on Somovibe?",
     answer:
-      "Simply click 'Become a Teacher', complete the registration form, and pay the one-time KES 100 verification fee via M-Pesa. Once verified, you can start uploading and selling your CBC teaching materials immediately.",
+      "Click Sell materials, complete the registration form, and pay the one-time KES 100 verification fee via M-Pesa. Once verified, you can start uploading and selling your CBC teaching materials immediately.",
   },
   {
     question: "How much can I earn as a teacher?",
@@ -31,7 +31,7 @@ const faqs: FAQItem[] = [
   {
     question: "How do I access materials I've purchased?",
     answer:
-      "After a successful M-Pesa payment, your materials are instantly available for download from your student dashboard under 'My Downloads'. You can download them at any time — there are no expiry limits.",
+      "After a successful M-Pesa payment, your materials are instantly available for download from your Learner Dashboard under 'My Downloads'. You can download them at any time — there are no expiry limits.",
   },
   {
     question: "Can I sell materials for any grade level?",

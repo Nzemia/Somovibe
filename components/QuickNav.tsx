@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { NavWave } from "@/components/NavWave"
 
 /* ── Icons ─────────────────────────────────────────────── */
 function HomeIcon({ filled }: { filled?: boolean }) {
@@ -335,7 +336,7 @@ export function QuickNav({
         },
         {
             id: "buy",
-            label: "Buy",
+            label: "Marketplace",
             href: "/marketplace",
             activeOn: ["/marketplace"],
             icon: filled => <BuyIcon filled={filled} />
@@ -365,7 +366,7 @@ export function QuickNav({
             ? [
                   {
                       id: "dashboard",
-                      label: "Dashboard",
+                      label: role === "STUDENT" ? "Learner" : "Dashboard",
                       href: dashboardHref,
                       activeOn: [
                           "/teacher",
@@ -382,7 +383,7 @@ export function QuickNav({
 
     /* Dashboard variant shows Dashboard + Buy + Sell (in that order) */
     const dashboardOrder = role === "ADMIN"
-        ? ["dashboard", "buy", "sell", "blog"]
+        ? ["dashboard", "buy", "blog"]
         : ["dashboard", "buy", "sell"]
     const navItems =
         variant === "dashboard"
@@ -404,7 +405,7 @@ export function QuickNav({
 
             {/* Icon strip — sticky directly below the h-14 navbar, same gradient = one unified header */}
             <div
-                className="sticky top-14 z-40 backdrop-blur-md border-b border-white/10"
+                className="relative sticky top-14 z-40 overflow-visible backdrop-blur-md"
                 style={{
                     background:
                         "linear-gradient(135deg, rgba(0,20,10,0.97) 0%, rgba(0,60,30,0.94) 50%, rgba(0,120,58,0.91) 100%)"
@@ -490,6 +491,7 @@ export function QuickNav({
                         })}
                     </div>
                 </div>
+                <NavWave className="text-[#006832]" />
             </div>
         </>
     )

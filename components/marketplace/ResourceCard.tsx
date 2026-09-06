@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PurchaseButton from "@/app/marketplace/PurchaseButton";
+import { FALLBACK_CARD, TYPE_CARD, TYPE_LABELS } from "./filterUi";
 
 type PdfItem = {
   id: string;
@@ -31,30 +32,6 @@ type ResourceCardProps = {
   user: { id: string; email: string; phone: string | null } | null;
 };
 
-const SUBJECT_GRADIENT: Record<string, { from: string; to: string }> = {
-  Mathematics:           { from: "#6d28d9", to: "#4c1d95" },
-  English:               { from: "#2563eb", to: "#1e40af" },
-  Kiswahili:             { from: "#0d9488", to: "#0f766e" },
-  Science:               { from: "#0284c7", to: "#075985" },
-  "Social Studies":      { from: "#d97706", to: "#b45309" },
-  Agriculture:           { from: "#65a30d", to: "#4d7c0f" },
-  "Home Science":        { from: "#db2777", to: "#9d174d" },
-  "Creative Arts":       { from: "#c026d3", to: "#86198f" },
-  ICT:                   { from: "#0ea5e9", to: "#0369a1" },
-  "Physical Education":  { from: "#ea580c", to: "#9a3412" },
-  Music:                 { from: "#7c3aed", to: "#5b21b6" },
-  "Religious Education": { from: "#b45309", to: "#78350f" },
-  "Business Studies":    { from: "#059669", to: "#065f46" },
-  Geography:             { from: "#16a34a", to: "#14532d" },
-  History:               { from: "#d97706", to: "#92400e" },
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  PDF: "PDF Notes", PDF_SLIDES: "Slides", POWERPOINT: "PowerPoint",
-  CLASS_INSTRUCTIONS: "Instructions", SCHEME_OF_WORK: "Scheme of Work",
-  LESSON_PLAN: "Lesson Plan", EXAM_QUIZ: "Exam / Quiz",
-};
-
 function computeAvgRating(reviews: { rating: number }[]): number | null {
   if (!reviews.length) return null;
   return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
@@ -65,7 +42,7 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
   const [expanded, setExpanded] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
 
-  const grad = SUBJECT_GRADIENT[resource.subject] ?? { from: "#006832", to: "#003318" };
+  const typeCard = TYPE_CARD[resource.materialType] ?? FALLBACK_CARD;
   const teacherHandle = resource.teacher.name || resource.teacher.email.split("@")[0];
   const isVerified = resource.teacher.teacherProfile?.isActive === true;
   const avgRating = computeAvgRating(resource.reviews);
@@ -78,64 +55,79 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
         ${expanded ? "border-[#008c43] shadow-lg shadow-[#008c43]/10 z-10 relative" : "border-gray-100 hover:shadow-md hover:-translate-y-0.5"}`}
     >
 
-      {/* ── Cover — click navigates to full detail page ── */}
+      {/* ── Cover — tilted type card ── */}
       <Link
         className="relative overflow-hidden shrink-0 cursor-pointer block"
-        style={{ height: "clamp(130px, 38vw, 172px)" }}
+        style={{ height: "clamp(148px, 40vw, 188px)" }}
         href={`/marketplace/${resource.slug ?? resource.id}`}
         prefetch={true}
       >
-        {/* Background */}
-        {resource.thumbnailUrl && !imgFailed ? (
-          <img
-            src={resource.thumbnailUrl}
-            alt={resource.title}
-            className="absolute inset-0 w-full h-full object-cover"
-            onError={() => setImgFailed(true)}
-          />
-        ) : (
-          <div className="absolute inset-0"
-            style={{ background: `linear-gradient(135deg, ${grad.from} 0%, ${grad.to} 100%)` }}>
-            <div className="absolute inset-0 opacity-[0.07]"
-              style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-            {/* Subject initials watermark */}
-            <span className="absolute bottom-2 left-3 text-white/10 text-6xl font-black leading-none select-none pointer-events-none">
-              {resource.subject.split(" ").map(w => w[0]).join("").slice(0, 3)}
-            </span>
-          </div>
-        )}
+        <div className="absolute inset-0" style={{ background: typeCard.stage }} />
+        <div
+          className="absolute -right-6 -top-8 h-24 w-24 rounded-full opacity-40"
+          style={{ background: typeCard.accent }}
+        />
+        <div
+          className="absolute -left-8 -bottom-10 h-28 w-28 rounded-full opacity-25"
+          style={{ background: typeCard.accent }}
+        />
 
-        {/* Scrim */}
-        <div className="absolute inset-0"
-          style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.80) 100%)" }} />
-
-        {/* Type badge */}
-        <span className="absolute top-2 left-2 bg-black/30 border border-white/20 text-white text-[9px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm uppercase tracking-wide">
-          {typeLabel}
-        </span>
-
-        {/* Owned badge */}
         {isPurchased && (
-          <span className="absolute top-2 right-2 bg-[#008c43] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+          <span className="absolute top-2 right-2 z-10 bg-[#008c43] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
             ✓ Owned
           </span>
         )}
 
-        {/* Navigate hint — arrow in corner */}
-        <span className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-black/30 border border-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
-
-        {/* Title overlay — big Oswald */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pt-5">
-          <h3
-            className="text-white uppercase text-center leading-tight line-clamp-3 text-xl sm:text-2xl font-bold tracking-wide drop-shadow-lg"
-            style={{ fontFamily: "var(--font-oswald), sans-serif", fontWeight: 700 }}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="absolute h-[78%] w-[58%] rounded-md bg-white/70 shadow-sm rotate-[10deg] translate-x-2.5"
+            aria-hidden
+          />
+          <div
+            className={`relative h-[80%] w-[60%] overflow-hidden rounded-md shadow-xl transition-transform duration-300 ease-out group-hover:scale-[1.04] ${typeCard.tilt}`}
+            style={{ boxShadow: `0 16px 32px -12px ${typeCard.accent}66, 0 4px 12px rgba(15,23,42,0.14)` }}
           >
-            {resource.title}
-          </h3>
+            {resource.thumbnailUrl && !imgFailed ? (
+              <img
+                src={resource.thumbnailUrl}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+                onError={() => setImgFailed(true)}
+              />
+            ) : (
+              <div className="absolute inset-0" style={{ background: typeCard.paper }} />
+            )}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: resource.thumbnailUrl && !imgFailed
+                  ? "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.72) 55%, rgba(255,255,255,0.94) 100%)"
+                  : undefined,
+              }}
+            />
+            <div className="absolute inset-0 flex flex-col">
+              <div className="h-1.5 w-full shrink-0" style={{ background: typeCard.accent }} />
+              <div className="flex min-h-0 flex-1 flex-col px-2.5 pb-2 pt-1.5">
+                <span
+                  className="mb-1 w-fit rounded-[3px] px-1.5 py-px text-[8px] font-extrabold uppercase tracking-wider"
+                  style={{ background: `${typeCard.accent}18`, color: typeCard.accent }}
+                >
+                  {typeLabel}
+                </span>
+                <h3
+                  className="line-clamp-4 text-sm font-black uppercase leading-snug tracking-wide sm:text-base"
+                  style={{ fontFamily: "var(--font-oswald), sans-serif", fontWeight: 800, color: typeCard.ink }}
+                >
+                  {resource.title}
+                </h3>
+                <div className="mt-auto space-y-1 pt-2" aria-hidden>
+                  <div className="h-px w-full" style={{ background: typeCard.line }} />
+                  <div className="h-px w-4/5" style={{ background: typeCard.line }} />
+                  <div className="h-px w-3/5" style={{ background: typeCard.line }} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </Link>
 
@@ -157,7 +149,7 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
 
         {/* Title in body (smaller, descriptive) with expand indicator */}
         <div className="flex items-start justify-between gap-1 mb-1">
-          <p className="text-xs font-bold text-gray-800 leading-snug line-clamp-2 flex-1">
+          <p className="text-sm font-extrabold text-gray-900 leading-snug line-clamp-2 flex-1">
             {resource.title}
           </p>
           <svg className={`w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
@@ -180,6 +172,7 @@ export function ResourceCard({ resource, isPurchased, user }: ResourceCardProps)
           </span>
           <PurchaseButton
             pdfId={resource.id}
+            slug={resource.slug}
             title={resource.title}
             price={resource.price}
             isPurchased={isPurchased}

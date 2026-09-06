@@ -1,0 +1,10 @@
+[33md1be398[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mredesign-the-style[m[33m, [m[1;31morigin/redesign-the-style[m[33m)[m animations second page
+[33m2313ed1[m Give marketing pages a white, family-inspired redesign.
+[33m6ab7a0e[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mUXchanges[m[33m)[m Merge pull request #14 from Nzemia/feat-others
+[33m533eca1[m fixed issue where users were not getting emails after reset password
+[33m16b858c[m Merge pull request #13 from Nzemia/blog
+[33m75a73fa[m fixed blog comment input to make sure they are clear
+[33mee1ad8d[m Merge pull request #12 from Nzemia/blog
+[33m7f8f756[m removed redundant navbar
+[33m512c41f[m created blog section
+[33m23daaf5[m[33m ([m[1;32mmaster[m[33m)[m Merge pull request #11 from Nzemia/feat-others
